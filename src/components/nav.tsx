@@ -10,12 +10,9 @@ export function TopNav({
   badgeCount?: number;
 }) {
   return (
-    <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-5 sm:px-6">
-      <Logo />
+    <header className="mx-auto flex w-full max-w-7xl items-center justify-end px-4 py-5 sm:px-6">
       <nav className="flex items-center gap-3 text-sm font-medium text-[#1f1f1f]">
-        <Link className="hidden rounded-full px-3 py-2 hover:bg-white sm:inline-flex" href="/">
-          Home
-        </Link>
+
         {variant === "dashboard" && (
           <Link className="rounded-full px-3 py-2 hover:bg-white" href="/dashboard">
             Dashboard

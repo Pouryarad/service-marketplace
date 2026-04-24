@@ -23,7 +23,7 @@ export function SearchBox({ categories }: { categories: Category[] }) {
       <Search className="ml-3 text-[#9ca3af]" size={21} />
       <input
         name="query"
-        placeholder="Search for cleaning, plumbing, beauty..."
+        placeholder="Search for Therapist, Lawyer, Real Estate..."
         className="h-12 min-w-0 flex-1 bg-transparent text-base text-[#1f1f1f] placeholder:text-[#9ca3af]"
       />
       <button className="rounded-full bg-[#2563eb] px-5 py-3 text-sm font-bold text-white">

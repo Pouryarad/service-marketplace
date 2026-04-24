@@ -10,43 +10,47 @@ export default async function Home() {
   const categories = await getCategories();
 
   return (
-    <main className="min-h-screen bg-[#f3f5f9] text-[#1f1f1f]">
+    <main className="min-h-screen flex flex-col bg-[#f3f5f9] text-[#1f1f1f]">
       <TopNav />
-      <section className="mx-auto flex w-full max-w-7xl flex-col items-center px-4 pb-12 pt-8 text-center sm:px-6 sm:pt-16">
+      <section className="flex-1 mx-auto flex w-full max-w-7xl flex-col items-center justify-center px-4 pb-10 pt-6 text-center sm:px-6 sm:pt-10">
         <Logo centered />
-        <h1 className="mt-8 max-w-3xl font-display text-4xl font-bold leading-tight tracking-normal sm:text-6xl">
+        <h1 className="mt-6 max-w-3xl font-display text-3xl font-bold leading-tight tracking-normal sm:text-5xl">
           Find the right service in your area in seconds
         </h1>
-        <div className="mt-8 w-full">
+        <div className="mt-10 w-full max-w-xl mx-auto">
           <SearchBox categories={categories} />
         </div>
-        <p className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#4b5563]">
-          <ShieldCheck size={18} className="text-[#22c55e]" />
-          Verified providers
-        </p>
+        
       </section>
-
+                <div className="mt-16 mb-8 flex justify-center">
+            <p className="inline-flex items-center gap-2 text-sm font-semibold text-[#4b5563]">
+              <ShieldCheck size={18} className="text-[#22c55e]" />
+              Verified providers
+            </p>
+          </div>
       <section className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-4 px-4 pb-16 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
         {categories.map((category) => (
           <Link
-            key={category.id}
-            href={`/categories/${category.slug}`}
-            className="group relative min-h-48 overflow-hidden rounded-[8px] bg-[#1f1f1f]"
-          >
-            <Image
-              src={category.imageUrl}
-              alt=""
-              fill
-              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-              className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-black/50" />
-            <div className="absolute inset-x-0 bottom-0 p-5 text-left">
-              <h2 className="font-display text-2xl font-bold text-white">
+              key={category.id}
+              href={`/categories/${category.slug}`}
+              className="group relative flex items-center justify-center min-h-36 overflow-hidden rounded-2xl border border-black/10 bg-[#1f1f1f]"
+            >
+              <Image
+                  src={category.imageUrl && !category.imageUrl.includes("1600518464441")
+                      ? category.imageUrl
+                      : "https://images.unsplash.com/photo-1522202176988-66273c2fd55f"}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                  className="absolute inset-0 h-full w-full object-cover opacity-10 group-hover:opacity-40 transition duration-300"
+                />
+
+              <div className="absolute inset-0 bg-gray/50 group-hover:bg-gray/20 transition duration-300" />
+
+              <h2 className="relative z-10 font-display text-xl font-bold text-white text-center">
                 {category.name}
               </h2>
-            </div>
-          </Link>
+            </Link>
         ))}
       </section>
 
