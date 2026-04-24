@@ -32,7 +32,7 @@ export default async function CategoryPage({
             {category?.name ?? "Services"}
           </h1>
           <p className="mt-3 max-w-2xl text-[#6b7280]">
-            {category?.subtitle ?? "Find verified providers near you."}
+            {"Find verified providers near you."}
           </p>
         </div>
 
