@@ -1,70 +1,55 @@
 import type { Category, ContactRequest, Provider } from "./types";
 
-export const categories: Category[] = [
+export const categories = [
   {
-    id: "home-cleaning",
-    slug: "home-cleaning",
-    name: "Home Cleaning",
-    subtitle: "Reliable cleaners for homes, rentals, and offices.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=900&q=80",
+    id: "1",
+    name: "Lawyer",
+    slug: "lawyer",
+    image_url: "https://images.unsplash.com/photo-1607748851687-ba9a10438621"
+    
   },
   {
-    id: "plumbing",
-    slug: "plumbing",
-    name: "Plumbing",
-    subtitle: "Leak repairs, installs, inspections, and urgent help.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?auto=format&fit=crop&w=900&q=80",
+    id: "2",
+    name: "Immigration Consultant",
+    slug: "immigration",
+    image_url: "https://images.unsplash.com/photo-1521791055366-0d553872125f"
   },
   {
-    id: "beauty",
-    slug: "beauty",
-    name: "Beauty",
-    subtitle: "Stylists, makeup artists, nails, and personal care.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&w=900&q=80",
+    id: "3",
+    name: "Therapist",
+    slug: "therapist",
+    image_url: "https://images.unsplash.com/photo-1582750433449-648ed127bb54"
   },
   {
-    id: "tutoring",
-    slug: "tutoring",
-    name: "Tutoring",
-    subtitle: "Academic support, test prep, and language lessons.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=900&q=80",
+    id: "4",
+    name: "Real Estate Agent",
+    slug: "real-estate",
+    image_url: "https://images.unsplash.com/photo-1568605114967-8130f3a36994"
   },
   {
-    id: "fitness",
-    slug: "fitness",
-    name: "Fitness",
-    subtitle: "Personal training, yoga, pilates, and wellness coaching.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=900&q=80",
+    id: "5",
+    name: "Mortgage Broker",
+    slug: "mortgage",
+    image_url: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c"
   },
   {
-    id: "photography",
-    slug: "photography",
-    name: "Photography",
-    subtitle: "Portraits, events, products, and family sessions.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=900&q=80",
+    id: "6",
+    name: "Accountant",
+    slug: "accountant",
+    image_url: "https://images.unsplash.com/photo-1554224154-22dec7ec8818"
   },
   {
-    id: "moving",
-    slug: "moving",
-    name: "Moving",
-    subtitle: "Local moves, packing, deliveries, and lifting help.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1600518464441-9306b00c4b2c?auto=format&fit=crop&w=900&q=80",
+    id: "7",
+    name: "Insurance Broker",
+    slug: "insurance",
+    image_url: "https://images.unsplash.com/photo-1507679799987-c73779587ccf"
   },
   {
-    id: "landscaping",
-    slug: "landscaping",
-    name: "Landscaping",
-    subtitle: "Lawn care, garden design, cleanups, and seasonal work.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1558904541-efa843a96f01?auto=format&fit=crop&w=900&q=80",
-  },
+    id: "8",
+    name: "Car Dealer",
+    slug: "car-dealer",
+    image_url: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8"
+  }
 ];
 
 export const providers: Provider[] = [

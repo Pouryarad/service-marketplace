@@ -1,5 +1,4 @@
 import { unstable_noStore as noStore } from "next/cache";
-import { categories as demoCategories, providers as demoProviders, requests as demoRequests } from "./demo-data";
 import { createSupabaseServerClient } from "./supabase/server";
 import type { Category, ContactRequest, Provider } from "./types";
 
@@ -66,20 +65,24 @@ export async function getCurrentUser() {
 export async function getCategories(): Promise<Category[]> {
   noStore();
   const supabase = await createSupabaseServerClient();
-  if (!supabase) return demoCategories;
+  if (!supabase) return [];
 
   const { data, error } = await supabase
     .from("categories")
-    .select("id, slug, name, subtitle, image_url")
+    .select("id, slug, name, image_url")
     .order("name");
+    console.log("DATA:", data);
+console.log("ERROR:", error);
 
-  if (error || !data?.length) return demoCategories;
+  if (error) {
+  console.log(error);
+  return [];
+}
 
   return data.map((category) => ({
     id: category.id,
     slug: category.slug,
     name: category.name,
-    subtitle: category.subtitle,
     imageUrl: category.image_url,
   }));
 }
@@ -98,10 +101,9 @@ export async function getProviders(options?: {
 }): Promise<Provider[]> {
   noStore();
   const supabase = await createSupabaseServerClient();
-
   if (!supabase) {
-    return filterProviders(demoProviders, options);
-  }
+  return [];
+}
 
   let query = supabase
     .from("provider_profiles")
@@ -119,7 +121,7 @@ export async function getProviders(options?: {
     nullsFirst: false,
   });
 
-  if (error || !data) return filterProviders(demoProviders, options);
+  if (error) return [];
 
   return filterProviders((data as ProviderRow[]).map(mapProvider), options);
 }
@@ -132,14 +134,14 @@ export async function getProvider(id: string) {
 export async function getContactRequests(): Promise<ContactRequest[]> {
   noStore();
   const supabase = await createSupabaseServerClient();
-  if (!supabase) return demoRequests;
+  if (!supabase) return [];
 
   const { data, error } = await supabase
     .from("contact_requests")
     .select("id, provider_id, provider_name, client_name, client_email, phone, message, status, created_at")
     .order("created_at", { ascending: false });
 
-  if (error || !data) return demoRequests;
+  if (error) return [];
 
   return data.map((request) => ({
     id: request.id,

@@ -15,7 +15,6 @@ export type Category = {
   id: string;
   slug: string;
   name: string;
-  subtitle: string;
   imageUrl: string;
 };
 
