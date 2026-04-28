@@ -70,7 +70,13 @@ export default async function ProviderProfilePage({
                 <p className="text-sm font-bold text-[#2563eb]">{provider.categoryName}</p>
                 <h1 className="mt-2 font-display text-4xl font-bold">{provider.fullName}</h1>
                 <p className="mt-2 text-[#6b7280]">
-                  {provider.location} · {provider.language}
+                  <span className="text-[#6b7280]">
+                    {provider.location}
+                  </span>
+                  <span className="mx-2 text-gray-300">•</span>
+                  <span className="text-sm text-[#2563eb] font-medium">
+                    {provider.language}
+                  </span>
                 </p>
               </div>
               <button className="grid size-11 place-items-center rounded-full border border-black/10 text-[#ff8a00]" aria-label="Favorite">
@@ -80,7 +86,12 @@ export default async function ProviderProfilePage({
             {provider.businessName && (
               <p className="mt-4 font-semibold text-[#1f1f1f]">{provider.businessName}</p>
             )}
-            <p className="mt-4 leading-7 text-[#4b5563]">{provider.bio}</p>
+            <p className="mt-3 text-sm text-[#6b7280]">
+              Helping clients with {provider.categoryName.toLowerCase()} services.
+            </p>
+            <p className="mt-3 text-sm text-[#4b5563] leading-relaxed">
+              {provider.bio}
+            </p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {user ? (
                 <>
@@ -94,10 +105,10 @@ export default async function ProviderProfilePage({
               ) : (
                 <>
                   <Link className="inline-flex items-center justify-center gap-2 rounded-full bg-[#e5e7eb] px-5 py-3 font-bold text-[#6b7280]" href={`/auth/sign-in?next=/providers/${provider.id}`}>
-                    <Mail size={18} /> Email locked
+                    <Mail size={18} /> Contact (Sign in)
                   </Link>
                   <Link className="inline-flex items-center justify-center gap-2 rounded-full bg-[#e5e7eb] px-5 py-3 font-bold text-[#6b7280]" href={`/auth/sign-in?next=/providers/${provider.id}`}>
-                    <Phone size={18} /> Phone locked
+                    <Phone size={18} /> Contact (Sign in)
                   </Link>
                 </>
               )}

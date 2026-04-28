@@ -1,7 +1,9 @@
 import { SlidersHorizontal } from "lucide-react";
 import { TopNav } from "@/components/nav";
 import { ProviderCard } from "@/components/provider-card";
-import { getCategory, getProviders } from "@/lib/data";
+import { getCategory, getProviders, getLanguages } from "@/lib/data";
+import Link from "next/link";
+
 
 export default async function CategoryPage({
   params,
@@ -18,9 +20,12 @@ export default async function CategoryPage({
     language: filters.language,
     location: filters.location,
     sort: filters.sort,
+    
   });
-
+const hasFilters = filters.language || filters.location || filters.sort;
+const languages = await getLanguages();
   return (
+    
     <main className="min-h-screen bg-[#f3f5f9]">
       <TopNav />
       <section className="mx-auto w-full max-w-7xl px-4 pb-12 sm:px-6">
@@ -39,12 +44,24 @@ export default async function CategoryPage({
         <form className="mt-5 grid gap-3 rounded-[8px] bg-white p-4 md:grid-cols-[1fr_1fr_220px_auto]">
           <label className="text-sm font-semibold text-[#4b5563]">
             Language
-            <input
-              name="language"
-              defaultValue={filters.language ?? ""}
-              placeholder="English, Spanish..."
-              className="mt-2 h-12 w-full rounded-[8px] border border-black/10 px-3 text-[#1f1f1f]"
-            />
+            <div className="relative mt-2">
+              <select
+                name="language"
+                defaultValue={filters.language ?? ""}
+                className="h-12 w-full rounded-[8px] border border-black/10 pl-3 pr-10 text-[#1f1f1f] appearance-none bg-white"
+              >
+                <option value="">All</option>
+                {languages.map((lang) => (
+                  <option key={lang} value={lang}>
+                    {lang}
+                  </option>
+                ))}
+              </select>
+
+              <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500">
+                ▼
+              </span>
+            </div>
           </label>
           <label className="text-sm font-semibold text-[#4b5563]">
             Location
@@ -63,12 +80,21 @@ export default async function CategoryPage({
               className="mt-2 h-12 w-full rounded-[8px] border border-black/10 px-3 text-[#1f1f1f]"
             >
               <option value="recommended">Recommended</option>
-              <option value="closest">Closest</option>
+              <option value="az">A → Z</option>
             </select>
           </label>
-          <button className="mt-auto inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#2563eb] px-5 font-bold text-white">
-            <SlidersHorizontal size={18} /> Apply
-          </button>
+          {hasFilters ? (
+              <Link
+                href={`/categories/${slug}`}
+                className="mt-auto inline-flex h-12 items-center justify-center rounded-full bg-red-500 px-5 font-bold text-white hover:bg-red-600"
+              >
+                Clear Filters
+              </Link>
+            ) : (
+              <button className="mt-auto inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#2563eb] px-5 font-bold text-white">
+                <SlidersHorizontal size={18} /> Apply
+              </button>
+            )}
         </form>
 
         <div className="mt-6 space-y-4">

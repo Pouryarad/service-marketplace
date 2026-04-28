@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Bell, LogOut } from "lucide-react";
 import { Logo } from "./logo";
+
 
 export function TopNav({
   variant = "public",
@@ -9,10 +13,14 @@ export function TopNav({
   variant?: "public" | "dashboard" | "provider" | "admin";
   badgeCount?: number;
 }) {
-  return (
-    <header className="mx-auto flex w-full max-w-7xl items-center justify-end px-4 py-5 sm:px-6">
-      <nav className="flex items-center gap-3 text-sm font-medium text-[#1f1f1f]">
 
+  return (
+    <header className="mx-auto flex w-full max-w-7xl items-center px-4 py-5 sm:px-6">
+        <Logo />
+      <nav className="ml-auto flex items-center gap-3 text-sm font-medium text-[#1f1f1f]">
+          <Link href="/" className="rounded-full px-3 py-2 hover:bg-white">
+              Home
+            </Link>
         {variant === "dashboard" && (
           <Link className="rounded-full px-3 py-2 hover:bg-white" href="/dashboard">
             Dashboard

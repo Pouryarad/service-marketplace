@@ -3,53 +3,48 @@ import { createSupabaseServerClient } from "./supabase/server";
 import type { Category, ContactRequest, Provider } from "./types";
 
 type ProviderRow = {
-  id: string;
+  id: number;
   full_name: string;
   business_name: string | null;
-  category_id: string;
+  category_slug: string;
   location: string;
   language: string;
   email: string;
   phone: string;
   bio: string;
-  one_line: string;
   profile_photo_url: string;
-  portfolio_photo_urls: string[] | null;
   approved: boolean;
   suspended: boolean;
-  status: Provider["status"];
-  subscription_status: Provider["subscriptionStatus"];
-  featured_rank: number | null;
-  clicks_day: number | null;
-  clicks_week: number | null;
-  clicks_month: number | null;
-  categories: { slug: string; name: string } | null;
+  subscription_status: string | null;
 };
 
 function mapProvider(row: ProviderRow): Provider {
   return {
-    id: row.id,
+    id: String(row.id),
     fullName: row.full_name,
     businessName: row.business_name,
-    categoryId: row.category_id,
-    categorySlug: row.categories?.slug ?? row.category_id,
-    categoryName: row.categories?.name ?? "Service",
+    categoryId: row.category_slug,
+    categorySlug: row.category_slug,
+      categoryName: row.category_slug
+      .split("-")
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" "),
     location: row.location,
     language: row.language,
     email: row.email,
     phone: row.phone,
     bio: row.bio,
-    oneLine: row.one_line,
+    oneLine: row.bio?.slice(0, 80) || "",
     profilePhotoUrl: row.profile_photo_url,
-    portfolioPhotoUrls: row.portfolio_photo_urls ?? [],
+    portfolioPhotoUrls: [],
     approved: row.approved,
     suspended: row.suspended,
-    status: row.status,
-    subscriptionStatus: row.subscription_status,
-    featuredRank: row.featured_rank,
-    clicksDay: row.clicks_day ?? 0,
-    clicksWeek: row.clicks_week ?? 0,
-    clicksMonth: row.clicks_month ?? 0,
+    status: "active",
+    subscriptionStatus: (row.subscription_status as Provider["subscriptionStatus"]) ?? "active",
+    featuredRank: null,
+    clicksDay: 0,
+    clicksWeek: 0,
+    clicksMonth: 0,
   };
 }
 
@@ -71,8 +66,6 @@ export async function getCategories(): Promise<Category[]> {
     .from("categories")
     .select("id, slug, name, image_url")
     .order("name");
-    console.log("DATA:", data);
-console.log("ERROR:", error);
 
   if (error) {
   console.log(error);
@@ -85,6 +78,23 @@ console.log("ERROR:", error);
     name: category.name,
     imageUrl: category.image_url,
   }));
+}
+
+export async function getLanguages(): Promise<string[]> {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return [];
+
+  const { data } = await supabase
+    .from("providers")
+    .select("language");
+
+  if (!data) return [];
+
+  const all = data
+    .flatMap((p) => p.language.split(","))
+    .map((l) => l.trim());
+
+  return Array.from(new Set(all));
 }
 
 export async function getCategory(slug: string) {
@@ -105,9 +115,26 @@ export async function getProviders(options?: {
   return [];
 }
 
+
   let query = supabase
-    .from("provider_profiles")
-    .select("*, categories(slug, name)");
+    .from("providers")
+    .select("*");
+    
+    if (options?.categorySlug) {
+    query = query.eq("category_slug", options.categorySlug);
+  }
+
+    if (options?.language) {
+    query = query.ilike("language", `%${options.language}%`);
+  }
+
+    if (options?.location) {
+      query = query.ilike("location", `%${options.location}%`);
+    }
+
+  if (options?.sort === "az") {
+  query = query.order("name", { ascending: true });
+}
 
   if (!options?.includeHidden) {
     query = query
@@ -116,19 +143,16 @@ export async function getProviders(options?: {
       .eq("subscription_status", "active");
   }
 
-  const { data, error } = await query.order("featured_rank", {
-    ascending: true,
-    nullsFirst: false,
-  });
+  const { data, error } = await query;
 
   if (error) return [];
 
-  return filterProviders((data as ProviderRow[]).map(mapProvider), options);
+  return (data || []).map(mapProvider);
 }
 
 export async function getProvider(id: string) {
   const providers = await getProviders({ includeHidden: true });
-  return providers.find((provider) => provider.id === id) ?? null;
+  return providers.find((provider) => String(provider.id) === String(id)) ?? null;
 }
 
 export async function getContactRequests(): Promise<ContactRequest[]> {
