@@ -6,6 +6,7 @@ import { createContactRequest } from "@/lib/actions";
 import { getCurrentUser, getProvider } from "@/lib/data";
 import FavButton from "@/components/FavButton";
 import AuthModal from "@/components/AuthModal";
+import ContactButton from "@/components/ContactButton";
 
 export default async function ProviderProfilePage({
   params,
@@ -21,7 +22,7 @@ export default async function ProviderProfilePage({
   if (!provider) {
     return (
       <main className="min-h-screen bg-[#f3f5f9]">
-        <TopNav />
+        
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
           <h1 className="font-display text-3xl font-bold">Provider not found</h1>
           <Link className="mt-5 inline-flex rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white" href="/">
@@ -38,7 +39,7 @@ export default async function ProviderProfilePage({
 
   return (
     <main className="min-h-screen bg-[#f3f5f9]">
-      <TopNav />
+      
       <section className="mx-auto grid w-full max-w-7xl gap-6 px-4 pb-14 sm:px-6 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-3">
           <div className="overflow-hidden rounded-[8px] bg-white">
@@ -93,20 +94,10 @@ export default async function ProviderProfilePage({
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {user ? (
                 <>
-                  <a
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white"
-                    href={`mailto:${provider.email}`}
-                  >
-                    <Mail size={18} /> Email
-                  </a>
-                  <a
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-5 py-3 font-bold text-[#1f1f1f]"
-                    href={`tel:${provider.phone}`}
-                  >
-                    <Phone size={18} /> Phone
-                  </a>
-                </>
-              ) : (
+                    <ContactButton type="email" value={provider.email} />
+                    <ContactButton type="phone" value={provider.phone} />
+                  </>
+                ) : (
                 <>
                   <AuthModal
                   trigger={

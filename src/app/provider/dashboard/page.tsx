@@ -4,6 +4,7 @@ import { TopNav } from "@/components/nav";
 import { markRequestContacted, subscribeProvider } from "@/lib/actions";
 import { getContactRequests, getProviders } from "@/lib/data";
 
+
 export default async function ProviderDashboardPage() {
   const [providers, requests] = await Promise.all([
     getProviders({ includeHidden: true }),
@@ -14,7 +15,6 @@ export default async function ProviderDashboardPage() {
 
   return (
     <main className="min-h-screen bg-[#f3f5f9]">
-      <TopNav variant="provider" badgeCount={openRequests.length} />
       <section className="mx-auto w-full max-w-7xl px-4 pb-14 sm:px-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

@@ -27,7 +27,6 @@ const languages = await getLanguages();
   return (
     
     <main className="min-h-screen bg-[#f3f5f9]">
-      <TopNav />
       <section className="mx-auto w-full max-w-7xl px-4 pb-12 sm:px-6">
         <div className="rounded-[8px] bg-white px-6 py-10 sm:px-10">
           <p className="text-sm font-bold uppercase tracking-[0.12em] text-[#2563eb]">

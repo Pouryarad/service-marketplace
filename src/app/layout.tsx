@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import { TopNav } from "@/components/nav";
+import { getCurrentUser } from "@/lib/data";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -17,17 +19,21 @@ export const metadata: Metadata = {
   description: "A modern service marketplace powered by Next.js and Supabase.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getCurrentUser();
   return (
     <html
       lang="en"
       className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-[#f3f5f9]">
+  <TopNav variant={user ? "provider" : "public"} />
+  {children}
+</body>
     </html>
   );
 }
