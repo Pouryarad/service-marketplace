@@ -16,8 +16,7 @@ export default function AuthModal({ trigger }: { trigger: React.ReactNode }) {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/provider/dashboard`,
-      },
+        redirectTo: `${window.location.origin}/auth/callback?next=/provider/dashboard`,      },
     });
   };
 
