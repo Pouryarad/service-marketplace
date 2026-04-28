@@ -4,6 +4,8 @@ import { Mail, Phone, Star } from "lucide-react";
 import { TopNav } from "@/components/nav";
 import { createContactRequest } from "@/lib/actions";
 import { getCurrentUser, getProvider } from "@/lib/data";
+import FavButton from "@/components/FavButton";
+import AuthModal from "@/components/AuthModal";
 
 export default async function ProviderProfilePage({
   params,
@@ -79,37 +81,48 @@ export default async function ProviderProfilePage({
                   </span>
                 </p>
               </div>
-              <button className="grid size-11 place-items-center rounded-full border border-black/10 text-[#ff8a00]" aria-label="Favorite">
-                <Star size={21} />
-              </button>
+              <FavButton />
             </div>
             {provider.businessName && (
               <p className="mt-4 font-semibold text-[#1f1f1f]">{provider.businessName}</p>
             )}
-            <p className="mt-3 text-sm text-[#6b7280]">
-              Helping clients with {provider.categoryName.toLowerCase()} services.
-            </p>
+
             <p className="mt-3 text-sm text-[#4b5563] leading-relaxed">
               {provider.bio}
             </p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {user ? (
                 <>
-                  <a className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white" href={`mailto:${provider.email}`}>
+                  <a
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white"
+                    href={`mailto:${provider.email}`}
+                  >
                     <Mail size={18} /> Email
                   </a>
-                  <a className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-5 py-3 font-bold text-[#1f1f1f]" href={`tel:${provider.phone}`}>
+                  <a
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-5 py-3 font-bold text-[#1f1f1f]"
+                    href={`tel:${provider.phone}`}
+                  >
                     <Phone size={18} /> Phone
                   </a>
                 </>
               ) : (
                 <>
-                  <Link className="inline-flex items-center justify-center gap-2 rounded-full bg-[#e5e7eb] px-5 py-3 font-bold text-[#6b7280]" href={`/auth/sign-in?next=/providers/${provider.id}`}>
-                    <Mail size={18} /> Contact (Sign in)
-                  </Link>
-                  <Link className="inline-flex items-center justify-center gap-2 rounded-full bg-[#e5e7eb] px-5 py-3 font-bold text-[#6b7280]" href={`/auth/sign-in?next=/providers/${provider.id}`}>
-                    <Phone size={18} /> Contact (Sign in)
-                  </Link>
+                  <AuthModal
+                  trigger={
+                    <div className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white cursor-pointer">
+                      <Mail size={18} /> Email (Sign in)
+                    </div>
+                  }
+                />
+
+                <AuthModal
+                  trigger={
+                    <div className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white cursor-pointer">
+                      <Phone size={18} /> Phone (Sign in)
+                    </div>
+                  }
+/>
                 </>
               )}
             </div>
@@ -119,7 +132,7 @@ export default async function ProviderProfilePage({
             <h2 className="font-display text-2xl font-bold">Request Contact</h2>
             {!user && (
               <div className="mt-4 rounded-[8px] border border-[#2563eb]/20 bg-[#2563eb]/5 p-4 text-sm text-[#1f1f1f]">
-                Please sign in with Google or Apple to contact this provider. You will return to this profile after login.
+                Sign in to contact this provider. You’ll be redirected back to this profile after login.
               </div>
             )}
             {query.request === "success" && (
@@ -134,9 +147,18 @@ export default async function ProviderProfilePage({
               <input name="email" defaultValue={email} placeholder="Email" className="h-12 w-full rounded-[8px] border border-black/10 px-3" />
               <input name="phone" placeholder="Phone (optional)" className="h-12 w-full rounded-[8px] border border-black/10 px-3" />
               <textarea name="message" required placeholder="Message" className="min-h-32 w-full rounded-[8px] border border-black/10 p-3" />
+              {user ? (
               <button className="w-full rounded-full bg-[#ff8a00] px-5 py-3 font-bold text-white">
                 Request Contact
               </button>
+            ) : (
+              <Link
+                href={`/auth/sign-in?next=/providers/${provider.id}`}
+                className="block w-full text-center rounded-full bg-[#ff8a00] px-5 py-3 font-bold text-white"
+              >
+                Sign in to Contact
+              </Link>
+            )}
             </form>
           </section>
         </div>
