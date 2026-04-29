@@ -4,10 +4,14 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const next = url.searchParams.get("next") ?? "/onboarding";
-  const supabase = await createSupabaseServerClient();
+  const next = url.searchParams.get("next") ?? "/";
 
-  if (code && supabase) {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (code) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
