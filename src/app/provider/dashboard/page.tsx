@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { BarChart3, CheckCircle2, Inbox, Timer } from "lucide-react";
-import { TopNav } from "@/components/nav";
 import { markRequestContacted, subscribeProvider } from "@/lib/actions";
 import { getContactRequests, getProviders } from "@/lib/data";
 

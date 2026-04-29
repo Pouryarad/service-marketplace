@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Mail, Phone, Star } from "lucide-react";
-import { TopNav } from "@/components/nav";
 import { createContactRequest } from "@/lib/actions";
 import { getCurrentUser, getProvider } from "@/lib/data";
 import FavButton from "@/components/FavButton";

@@ -1,5 +1,4 @@
 import { SlidersHorizontal } from "lucide-react";
-import { TopNav } from "@/components/nav";
 import { ProviderCard } from "@/components/provider-card";
 import { getCategory, getProviders, getLanguages } from "@/lib/data";
 import Link from "next/link";

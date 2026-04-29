@@ -224,4 +224,23 @@ function filterProviders(providers: Provider[], options?: {
   }
 
   return result;
+  
+}
+export async function getCurrentUserRole() {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return null;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const { data } = await supabase
+  .from("profiles")
+  .select("role")
+  .eq("id", user.id)
+  .maybeSingle();
+
+  return data?.role ?? "client";
 }

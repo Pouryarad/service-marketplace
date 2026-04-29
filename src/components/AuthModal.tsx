@@ -4,7 +4,13 @@ import { useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { createPortal } from "react-dom";
 
-export default function AuthModal({ trigger }: { trigger: React.ReactNode }) {
+export default function AuthModal({
+  trigger,
+  next = "/",
+}: {
+  trigger: React.ReactNode;
+  next?: string;
+}) {
   const [open, setOpen] = useState(false);
 
   const supabase = createBrowserClient(
@@ -14,10 +20,14 @@ export default function AuthModal({ trigger }: { trigger: React.ReactNode }) {
 
   const handleGoogleLogin = async () => {
     await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/provider/dashboard`,      },
-    });
+  provider: "google",
+  options: {
+    redirectTo: `${window.location.origin}/auth/callback?next=${next}`,
+    queryParams: {
+      prompt: "select_account",
+    },
+  },
+});
   };
 
   return (

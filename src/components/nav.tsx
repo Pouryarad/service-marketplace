@@ -20,14 +20,17 @@ export function TopNav({
   <div className="mx-auto flex w-full max-w-7xl items-center px-4 py-5 sm:px-6">
         <Logo />
       <nav className="ml-auto flex items-center gap-3 text-sm font-medium text-[#1f1f1f]">
-          <Link href="/" className="rounded-full px-3 py-2 hover:bg-white">
-              Home
-            </Link>
-{variant !== "public" && (
+          {variant !== "provider" && (
+  <Link href="/" className="rounded-full px-3 py-2 hover:bg-white">
+    Home
+  </Link>
+)}
+{variant === "dashboard" && (
   <Link className="rounded-full px-3 py-2 hover:bg-white" href="/dashboard">
     Dashboard
   </Link>
 )}
+
         {variant === "admin" && (
           <Link className="rounded-full px-3 py-2 hover:bg-white" href="/admin">
             Admin
@@ -62,21 +65,23 @@ export function TopNav({
 )}
        {variant === "public" ? (
   <AuthModal
+    next="/"
     trigger={
       <span className="text-[#1f1f1f] font-medium cursor-pointer hover:underline">
         Sign in
       </span>
     }
   />
-) : (
+) : variant !== "provider" ? (
   <form action="/auth/logout" method="post">
     <button className="flex items-center gap-2 rounded-full px-3 py-2 hover:bg-white">
       <LogOut size={16} /> Sign out
     </button>
   </form>
-)}
+) : null}
         {variant === "public" && (
           <AuthModal
+  next="/provider/dashboard"
   trigger={
     <div className="rounded-full bg-[#ff8a00] px-4 py-2 font-semibold text-white cursor-pointer hover:bg-[#eb7e00]">
       Get Clients

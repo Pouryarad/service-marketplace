@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { TopNav } from "@/components/nav";
 import { getCurrentUser } from "@/lib/data";
+import { getCurrentUserRole } from "@/lib/data";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -24,16 +25,28 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getCurrentUser();
+  const role = await getCurrentUserRole();
   return (
     <html
       lang="en"
       className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#f3f5f9]">
-  <TopNav variant={user ? "provider" : "public"} />
+  <TopNav
+  variant={
+    role === "provider"
+      ? "provider"
+      : role === "admin"
+      ? "admin"
+      : role
+      ? "dashboard"
+      : "public"
+  }
+/>
   {children}
 </body>
     </html>
   );
+
 }
+

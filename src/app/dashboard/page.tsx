@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Heart, Inbox, Sparkles } from "lucide-react";
-import { TopNav } from "@/components/nav";
 import { getContactRequests } from "@/lib/data";
 
 export default async function UserDashboardPage() {
@@ -8,7 +7,6 @@ export default async function UserDashboardPage() {
 
   return (
     <main className="min-h-screen bg-[#f3f5f9]">
-      <TopNav variant="dashboard" />
       <section className="mx-auto w-full max-w-7xl px-4 pb-14 sm:px-6">
         <h1 className="font-display text-4xl font-bold">Dashboard</h1>
         <div className="mt-6 grid gap-4 md:grid-cols-3">
