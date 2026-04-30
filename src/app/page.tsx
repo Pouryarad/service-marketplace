@@ -5,8 +5,19 @@ import { Logo } from "@/components/logo";
 import { TopNav } from "@/components/nav";
 import { SearchBox } from "@/components/search-box";
 import { getCategories } from "@/lib/data";
+import { redirect } from "next/navigation";
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: { code?: string };
+}) {
+
+  // 👇 PUT IT HERE
+  if (searchParams?.code) {
+    redirect(`/auth/callback?code=${searchParams.code}`);
+  }
+
   const categories = await getCategories();
 
   return (

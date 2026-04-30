@@ -7,6 +7,7 @@ import FavButton from "@/components/FavButton";
 import AuthModal from "@/components/AuthModal";
 import ContactButton from "@/components/ContactButton";
 
+
 export default async function ProviderProfilePage({
   params,
   searchParams,
