@@ -5,13 +5,14 @@ import { Logo } from "@/components/logo";
 import { SearchBox } from "@/components/search-box";
 import { getCategories } from "@/lib/data";
 import { redirect } from "next/navigation";
+import OAuthRedirect from "./oauth-redirect";
 
 export default async function Home({
   searchParams,
 }: {
   searchParams: Record<string, string | string[] | undefined>;
 }) {
-  // 🔴 OAuth fallback fix
+  // OAuth fallback fix
   if (searchParams?.code) {
     const params = new URLSearchParams(
       Object.entries(searchParams).flatMap(([key, value]) =>
@@ -30,6 +31,7 @@ export default async function Home({
 
   return (
     <main className="min-h-screen flex flex-col bg-[#f3f5f9] text-[#1f1f1f]">
+      <OAuthRedirect />
       <section className="flex-1 mx-auto flex w-full max-w-7xl flex-col items-center justify-center px-4 pb-10 pt-6 text-center sm:px-6 sm:pt-10">
         <Logo centered />
         <h1 className="mt-6 max-w-3xl font-display text-3xl font-bold leading-tight tracking-normal sm:text-5xl">
