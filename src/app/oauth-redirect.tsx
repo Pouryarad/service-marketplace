@@ -8,6 +8,8 @@ export default function OAuthRedirect() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    if (!searchParams) return;
+
     const code = searchParams.get("code");
 
     if (code) {

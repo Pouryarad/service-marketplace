@@ -12,20 +12,6 @@ export default async function Home({
 }: {
   searchParams: Record<string, string | string[] | undefined>;
 }) {
-  // OAuth fallback fix
-  if (searchParams?.code) {
-    const params = new URLSearchParams(
-      Object.entries(searchParams).flatMap(([key, value]) =>
-        Array.isArray(value)
-          ? value.map((v) => [key, v])
-          : value
-          ? [[key, value]]
-          : []
-      )
-    );
-
-    redirect(`/auth/callback?${params.toString()}`);
-  }
 
   const categories = await getCategories();
 
