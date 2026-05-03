@@ -1,11 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Mail, Phone, Star } from "lucide-react";
-import { createContactRequest } from "@/lib/actions";
+import { createContactRequest } from "@/app/actions";
 import { getCurrentUser, getProvider } from "@/lib/data";
 import FavButton from "@/components/FavButton";
 import AuthModal from "@/components/AuthModal";
 import ContactButton from "@/components/ContactButton";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+
 
 
 export default async function ProviderProfilePage({
@@ -18,6 +20,14 @@ export default async function ProviderProfilePage({
   const { id } = await params;
   const query = await searchParams;
   const [provider, user] = await Promise.all([getProvider(id), getCurrentUser()]);
+  const supabase = await createSupabaseServerClient();
+
+if (supabase && provider) {
+  await supabase.from("provider_events").insert({
+    provider_id: provider.id,
+    event_type: "view_profile",
+  });
+}
 
   if (!provider) {
     return (
@@ -94,8 +104,17 @@ export default async function ProviderProfilePage({
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {user ? (
                 <>
-                    <ContactButton type="email" value={provider.email} />
-                    <ContactButton type="phone" value={provider.phone} />
+                    <ContactButton
+  type="email"
+  value={provider.email}
+  providerId={Number(provider.id)}
+/>
+
+<ContactButton
+  type="phone"
+  value={provider.phone}
+  providerId={Number(provider.id)}
+/>
                   </>
                 ) : (
                 <>
@@ -135,23 +154,26 @@ export default async function ProviderProfilePage({
             )}
             <form action={createContactRequest} className="mt-4 space-y-3">
               <input type="hidden" name="providerId" value={provider.id} />
-              <input type="hidden" name="providerName" value={provider.businessName ?? provider.fullName} />
+
               <input name="name" defaultValue={name} placeholder="Name" className="h-12 w-full rounded-[8px] border border-black/10 px-3" />
               <input name="email" defaultValue={email} placeholder="Email" className="h-12 w-full rounded-[8px] border border-black/10 px-3" />
               <input name="phone" placeholder="Phone (optional)" className="h-12 w-full rounded-[8px] border border-black/10 px-3" />
               <textarea name="message" required placeholder="Message" className="min-h-32 w-full rounded-[8px] border border-black/10 p-3" />
+
               {user ? (
-              <button className="w-full rounded-full bg-[#ff8a00] px-5 py-3 font-bold text-white">
-                Request Contact
-              </button>
-            ) : (
-              <Link
-                href={`/auth/sign-in?next=/providers/${provider.id}`}
-                className="block w-full text-center rounded-full bg-[#ff8a00] px-5 py-3 font-bold text-white"
-              >
-                Sign in to Contact
-              </Link>
-            )}
+                <button className="w-full rounded-full bg-[#ff8a00] px-5 py-3 font-bold text-white">
+                  Request Contact
+                </button>
+              ) : (
+                <AuthModal
+                  next={`/providers/${provider.id}`}
+                  trigger={
+                    <div className="w-full text-center rounded-full bg-[#ff8a00] px-5 py-3 font-bold text-white cursor-pointer">
+                      Sign in to Contact
+                    </div>
+                  }
+                />
+              )}
             </form>
           </section>
         </div>
