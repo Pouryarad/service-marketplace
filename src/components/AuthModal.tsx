@@ -19,12 +19,15 @@ export default function AuthModal({
   );
 
   const handleGoogleLogin = async () => {
-  await supabase.auth.signOut(); // 👈 force clear session
+  // store where to go after login
+  localStorage.setItem("next", next);
+
+  await supabase.auth.signOut();
 
   await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${window.location.origin}/auth/callback?next=${window.location.pathname}`,
+      redirectTo: `${window.location.origin}/auth/callback`,
       queryParams: {
         prompt: "select_account",
       },

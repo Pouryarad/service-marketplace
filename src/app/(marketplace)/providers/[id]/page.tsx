@@ -100,19 +100,21 @@ export default async function ProviderProfilePage({
                 ) : (
                 <>
                   <AuthModal
-                  trigger={
-                    <div className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white cursor-pointer">
-                      <Mail size={18} /> Email (Sign in)
-                    </div>
-                  }
-                />
+                    next={`/providers/${provider.id}`}
+                    trigger={
+                      <div className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white cursor-pointer">
+                        <Mail size={18} /> Email (Sign in)
+                      </div>
+                    }
+                  />
 
-                <AuthModal
-                  trigger={
-                    <div className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white cursor-pointer">
-                      <Phone size={18} /> Phone (Sign in)
-                    </div>
-                  }
+                  <AuthModal
+                    next={`/providers/${provider.id}`}
+                    trigger={
+                      <div className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white cursor-pointer">
+                        <Phone size={18} /> Phone (Sign in)
+                      </div>
+                    }
 />
                 </>
               )}

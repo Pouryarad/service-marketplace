@@ -4,22 +4,20 @@ import { ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { SearchBox } from "@/components/search-box";
 import { getCategories } from "@/lib/data";
-import { redirect } from "next/navigation";
-import OAuthRedirect from "./oauth-redirect";
+import ClientRedirect from "@/components/ClientRedirect";
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
-}) {
-
+export default async function Home() {
   const categories = await getCategories();
 
   return (
     <main className="min-h-screen flex flex-col bg-[#f3f5f9] text-[#1f1f1f]">
-      <OAuthRedirect />
+
+      {/* client-side redirect handler */}
+      <ClientRedirect />
+
       <section className="flex-1 mx-auto flex w-full max-w-7xl flex-col items-center justify-center px-4 pb-10 pt-6 text-center sm:px-6 sm:pt-10">
         <Logo centered />
+
         <h1 className="mt-6 max-w-3xl font-display text-3xl font-bold leading-tight tracking-normal sm:text-5xl">
           Find the right service in your area in seconds
         </h1>

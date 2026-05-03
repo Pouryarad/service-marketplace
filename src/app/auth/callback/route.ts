@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createSupabaseServerClient();
   if (!supabase) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/", url.origin));
   }
 
   if (code) {
