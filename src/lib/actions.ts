@@ -11,8 +11,12 @@ export async function createContactRequest(formData: FormData) {
     redirect("/auth/sign-in?next=/dashboard&notice=configure-supabase");
   }
 
-  const { data: userData } = await supabase.auth.getUser();
-  console.log("USER IN ACTION:", userData.user);
+ console.log("ACTION STARTED");
+
+const { data: userData } = await supabase.auth.getUser();
+
+console.log("USER IN ACTION:", userData.user);
+
   if (!userData.user) {
     const providerId = String(formData.get("providerId") ?? "");
     redirect(`/auth/sign-in?next=/providers/${providerId}`);
