@@ -22,6 +22,19 @@ export default async function ProviderProfilePage({
   const [provider, user] = await Promise.all([getProvider(id), getCurrentUser()]);
   const supabase = await createSupabaseServerClient();
 
+  let isFav = false;
+
+if (supabase && user && provider) {
+  const { data } = await supabase
+    .from("favorites")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("provider_id", provider.id)
+    .single();
+
+  isFav = !!data;
+}
+
 if (supabase && provider) {
   await supabase.from("provider_events").insert({
     provider_id: provider.id,
@@ -92,7 +105,12 @@ if (supabase && provider) {
                   </span>
                 </p>
               </div>
-              <FavButton />
+              
+              <FavButton
+                providerId={Number(provider.id)}
+                initialIsFav={isFav}
+                user={user}
+              />
             </div>
             {provider.businessName && (
               <p className="mt-4 font-semibold text-[#1f1f1f]">{provider.businessName}</p>

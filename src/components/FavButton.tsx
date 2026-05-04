@@ -1,21 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Star } from "lucide-react";
+import { toggleFavorite } from "@/app/actions";
+import AuthModal from "@/components/AuthModal";
+import { useRouter } from "next/navigation";
 
-export default function FavButton() {
-  const [fav, setFav] = useState(false);
+export default function FavButton({
+  providerId,
+  initialIsFav,
+  user,
+}: {
+  providerId: number;
+  initialIsFav: boolean;
+  user: any;
+}) {
+  const [isFav, setIsFav] = useState(initialIsFav);
+  const [isPending, startTransition] = useTransition();
+
+  if (!user) {
+    return (
+      <AuthModal
+        next={`/providers/${providerId}`}
+        trigger={
+          <button className="rounded-full p-2 hover:bg-gray-100">
+            <Star className="text-[#ff8a00]" />
+          </button>
+        }
+      />
+    );
+  }
+
+  const router = useRouter();
+  const handleClick = () => {
+  startTransition(async () => {
+    await toggleFavorite(providerId);
+    window.location.reload(); // 👈 force refresh
+  });
+};
 
   return (
     <button
-      type="button"
-      onClick={() => setFav(!fav)}
-      className="grid size-11 place-items-center rounded-full border border-black/10 hover:bg-[#fff7ed] active:scale-95 transition"
-      aria-label="Favorite"
+      onClick={handleClick}
+      className="rounded-full p-2 hover:bg-gray-100"
     >
       <Star
-        size={21}
-        className={fav ? "fill-[#ff8a00] text-[#ff8a00]" : "text-[#ff8a00]"}
+        className="text-[#ff8a00]"
+        fill={isFav ? "#ff8a00" : "none"}
       />
     </button>
   );

@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+
 export async function createContactRequest(formData: FormData) {
     console.log("ACTION TRIGGERED");
   const supabase = await createSupabaseServerClient();
@@ -45,5 +46,37 @@ export async function createContactRequest(formData: FormData) {
 
   if (eventError) {
     console.error("Event tracking error:", eventError);
+  }
+}
+
+export async function toggleFavorite(providerId: number) {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return;
+
+  const { data: existing } = await supabase
+    .from("favorites")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("provider_id", providerId)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase
+  .from("favorites")
+  .delete()
+  .eq("user_id", user.id)
+  .eq("provider_id", providerId);
+
+  } else {
+    await supabase.from("favorites").insert({
+      user_id: user.id,
+      provider_id: providerId,
+    });
   }
 }
