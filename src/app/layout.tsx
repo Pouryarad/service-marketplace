@@ -4,6 +4,7 @@ import "./globals.css";
 import { TopNav } from "@/components/nav";
 import { getCurrentUser } from "@/lib/data";
 import { getCurrentUserRole } from "@/lib/data";
+import BottomNav from "@/components/BottomNav";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -32,6 +33,7 @@ export default async function RootLayout({
       className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#f3f5f9]">
+        <BottomNav />
   <TopNav
   variant={
     role === "provider"

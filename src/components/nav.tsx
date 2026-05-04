@@ -16,8 +16,7 @@ export function TopNav({
 }) {
 
   return (
-    <header className="sticky top-0 z-50 bg-[#f3f5f9]/80 backdrop-blur border-b border-black/5">
-  <div className="mx-auto flex w-full max-w-7xl items-center px-4 py-5 sm:px-6">
+<header className="hidden sm:block sticky top-0 z-50 bg-[#f3f5f9]/80 backdrop-blur border-b border-black/5">  <div className="mx-auto flex w-full max-w-7xl items-center px-4 py-5 sm:px-6">
         <Logo />
       <nav className="ml-auto flex items-center gap-3 text-sm font-medium text-[#1f1f1f]">
           {variant !== "provider" && (

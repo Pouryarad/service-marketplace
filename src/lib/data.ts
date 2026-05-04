@@ -155,29 +155,49 @@ export async function getProvider(id: string) {
   return providers.find((provider) => String(provider.id) === String(id)) ?? null;
 }
 
-export async function getContactRequests(): Promise<ContactRequest[]> {
-  noStore();
+export async function getContactRequests() {
   const supabase = await createSupabaseServerClient();
   if (!supabase) return [];
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  console.log("DASHBOARD USER:", user?.id);
+
+  if (!user) return [];
+
   const { data, error } = await supabase
     .from("contact_requests")
-    .select("id, provider_id, provider_name, client_name, client_email, phone, message, status, created_at")
+    .select("id, provider_id, created_at")
+    .eq("client_id", user.id)
     .order("created_at", { ascending: false });
 
-  if (error) return [];
+  if (error) {
+    console.error("REQUEST ERROR:", error);
+    return [];
+  }
 
-  return data.map((request) => ({
-    id: request.id,
-    providerId: request.provider_id,
-    providerName: request.provider_name,
-    clientName: request.client_name,
-    clientEmail: request.client_email,
-    phone: request.phone,
-    message: request.message,
-    status: request.status,
-    createdAt: request.created_at,
-  }));
+  if (!data || data.length === 0) return [];
+
+  const providerIds = data.map((r) => r.provider_id);
+
+  const { data: providers } = await supabase
+    .from("providers")
+    .select("*")
+    .in("id", providerIds);
+
+  return data.map((req) => {
+    const provider = providers?.find(
+      (p) => String(p.id) === String(req.provider_id)
+    );
+
+    return {
+      id: req.id,
+      created_at: req.created_at,
+      provider,
+    };
+  });
 }
 
 function filterProviders(providers: Provider[], options?: {
