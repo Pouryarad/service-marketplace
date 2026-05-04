@@ -33,15 +33,19 @@ export async function createContactRequest(formData: FormData) {
     redirect(`/providers/${providerId}?error=message-required`);
   }
 
-  await supabase.from("contact_requests").insert({
-    provider_id: providerId,
-    provider_name: providerName,
-    client_id: userData.user.id,
-    client_name: clientName,
-    client_email: clientEmail,
-    phone: phone || null,
-    message,
-  });
+  const { error } = await supabase.from("contact_requests").insert({
+  provider_id: providerId,
+  provider_name: providerName,
+  client_id: userData.user.id,
+  client_name: clientName,
+  client_email: clientEmail,
+  phone: phone || null,
+  message,
+});
+
+if (error) {
+  console.error("INSERT ERROR:", error);
+}
 
   await supabase.from("notification_events").insert({
     audience: "provider",
