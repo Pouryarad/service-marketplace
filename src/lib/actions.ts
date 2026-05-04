@@ -12,6 +12,7 @@ export async function createContactRequest(formData: FormData) {
   }
 
   const { data: userData } = await supabase.auth.getUser();
+  console.log("USER IN ACTION:", userData.user);
   if (!userData.user) {
     const providerId = String(formData.get("providerId") ?? "");
     redirect(`/auth/sign-in?next=/providers/${providerId}`);
@@ -44,6 +45,7 @@ export async function createContactRequest(formData: FormData) {
 });
 
 if (error) {
+  
   console.error("INSERT ERROR:", error);
 }
 
