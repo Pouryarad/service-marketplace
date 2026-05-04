@@ -25,7 +25,7 @@ function mapProvider(row: ProviderRow): Provider {
     businessName: row.business_name,
     categoryId: row.category_slug,
     categorySlug: row.category_slug,
-      categoryName: row.category_slug
+    categoryName: row.category_slug
       .split("-")
       .map(w => w.charAt(0).toUpperCase() + w.slice(1))
       .join(" "),
@@ -68,9 +68,9 @@ export async function getCategories(): Promise<Category[]> {
     .order("name");
 
   if (error) {
-  console.log(error);
-  return [];
-}
+    console.log(error);
+    return [];
+  }
 
   return data.map((category) => ({
     id: category.id,
@@ -112,29 +112,29 @@ export async function getProviders(options?: {
   noStore();
   const supabase = await createSupabaseServerClient();
   if (!supabase) {
-  return [];
-}
+    return [];
+  }
 
 
   let query = supabase
     .from("providers")
     .select("*");
-    
-    if (options?.categorySlug) {
+
+  if (options?.categorySlug) {
     query = query.eq("category_slug", options.categorySlug);
   }
 
-    if (options?.language) {
+  if (options?.language) {
     query = query.ilike("language", `%${options.language}%`);
   }
 
-    if (options?.location) {
-      query = query.ilike("location", `%${options.location}%`);
-    }
+  if (options?.location) {
+    query = query.ilike("location", `%${options.location}%`);
+  }
 
   if (options?.sort === "az") {
-  query = query.order("name", { ascending: true });
-}
+    query = query.order("name", { ascending: true });
+  }
 
   if (!options?.includeHidden) {
     query = query
@@ -169,7 +169,16 @@ export async function getContactRequests() {
 
   const { data, error } = await supabase
     .from("contact_requests")
-    .select("id, provider_id, created_at")
+    .select(`
+  id,
+  provider_id,
+  created_at,
+  message,
+  status,
+  client_name,
+  client_email,
+  phone
+`)
     .eq("client_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -193,10 +202,15 @@ export async function getContactRequests() {
     );
 
     return {
-      id: req.id,
-      created_at: req.created_at,
-      provider,
-    };
+  id: req.id,
+  created_at: req.created_at,
+  message: req.message,
+  status: req.status,
+  clientName: req.client_name,
+  clientEmail: req.client_email,
+  phone: req.phone,
+  provider,
+};
   });
 }
 
@@ -244,7 +258,7 @@ function filterProviders(providers: Provider[], options?: {
   }
 
   return result;
-  
+
 }
 export async function getCurrentUserRole() {
   const supabase = await createSupabaseServerClient();
@@ -257,10 +271,10 @@ export async function getCurrentUserRole() {
   if (!user) return null;
 
   const { data } = await supabase
-  .from("profiles")
-  .select("role")
-  .eq("id", user.id)
-  .maybeSingle();
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
 
   return data?.role ?? "client";
 }
