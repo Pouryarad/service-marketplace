@@ -3,6 +3,7 @@ import { Heart, Inbox, Sparkles } from "lucide-react";
 import { getContactRequests } from "@/lib/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Image from "next/image";
+import { Settings } from "lucide-react";
 
 export default async function UserDashboardPage() {
   const requests = await getContactRequests();
@@ -69,10 +70,20 @@ export default async function UserDashboardPage() {
       <section className="mx-auto w-full max-w-7xl px-4 pb-20 sm:px-6">
 
         {/* Title */}
-        <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">
-          Dashboard
-        </h1>
+        <div className="flex justify-between items-center mb-6">
+  <h1 className="text-2xl font-bold">
+    Dashboard
+  </h1>
 
+  <Link
+    href="/dashboard/settings"
+    className="flex items-center gap-2 text-sm font-semibold text-[#2563eb]"
+  >
+    <Settings size={18} />
+    Settings
+  </Link>
+</div>
+    
         <div className="mt-6 space-y-6">
 
           {/* Favorites */}

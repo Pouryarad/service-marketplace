@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { sendEmailNotification } from "./email";
-import { createSupabaseServerClient } from "./supabase/server";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+
 
 export async function createContactRequest(formData: FormData) {
   const supabase = await createSupabaseServerClient();
@@ -11,11 +12,11 @@ export async function createContactRequest(formData: FormData) {
     redirect("/auth/sign-in?next=/dashboard&notice=configure-supabase");
   }
 
- console.log("ACTION STARTED");
+  console.log("ACTION STARTED");
 
-const { data: userData } = await supabase.auth.getUser();
+  const { data: userData } = await supabase.auth.getUser();
 
-console.log("USER IN ACTION:", userData.user);
+  console.log("USER IN ACTION:", userData.user);
 
   if (!userData.user) {
     const providerId = String(formData.get("providerId") ?? "");
@@ -39,19 +40,19 @@ console.log("USER IN ACTION:", userData.user);
   }
 
   const { error } = await supabase.from("contact_requests").insert({
-  provider_id: providerId,
-  provider_name: providerName,
-  client_id: userData.user.id,
-  client_name: clientName,
-  client_email: clientEmail,
-  phone: phone || null,
-  message,
-});
+    provider_id: providerId,
+    provider_name: providerName,
+    client_id: userData.user.id,
+    client_name: clientName,
+    client_email: clientEmail,
+    phone: phone || null,
+    message,
+  });
 
-if (error) {
-  
-  console.error("INSERT ERROR:", error);
-}
+  if (error) {
+
+    console.error("INSERT ERROR:", error);
+  }
 
   await supabase.from("notification_events").insert({
     audience: "provider",
@@ -78,12 +79,14 @@ export async function saveAudienceChoice(formData: FormData) {
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect("/auth/sign-in?next=/onboarding");
 
-  await supabase.from("profiles").upsert({
-    id: data.user.id,
-    email: data.user.email,
-    full_name: data.user.user_metadata?.full_name ?? data.user.email,
-    role: choice === "provider" ? "provider" : "client",
-  });
+  await supabase.from("profiles").upsert(
+    {
+      id: data.user.id,
+      full_name: data.user.user_metadata?.full_name ?? data.user.email,
+      role: choice === "provider" ? "provider" : "client",
+    },
+    { onConflict: "id" }
+  );
 
   redirect(choice === "provider" ? "/provider/setup" : "/dashboard");
 }
@@ -202,6 +205,7 @@ export async function markRequestContacted(formData: FormData) {
   revalidatePath("/provider/dashboard");
 }
 
+
 export async function subscribeProvider() {
   const supabase = await createSupabaseServerClient();
   if (!supabase) redirect("/auth/sign-in?next=/provider/dashboard");
@@ -228,4 +232,71 @@ export async function subscribeProvider() {
   });
 
   revalidatePath("/provider/dashboard");
+}
+
+export async function updateUserName(formData: FormData) {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return;
+
+  const name = String(formData.get("name") ?? "");
+
+  await supabase.auth.updateUser({
+    data: { full_name: name },
+  });
+}
+
+export async function updateProfile(formData: FormData) {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return;
+
+  const full_name = String(formData.get("full_name") ?? "");
+  const phone = String(formData.get("phone") ?? "");
+  const city = String(formData.get("city") ?? "");
+
+  await supabase.from("profiles").upsert(
+    {
+      id: user.id,
+      full_name,
+      phone,
+      city,
+    },
+    { onConflict: "id" }
+  );
+
+  revalidatePath("/dashboard/settings");
+}
+
+export async function requestAccountDelete() {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return;
+
+  await sendEmailNotification({
+    to: "info@profinly.com",
+    subject: "Account Deletion Request",
+    html: `
+      <p>User requested account deletion:</p>
+      <p>Email: ${user.email}</p>
+      <p>User ID: ${user.id}</p>
+    `,
+  });
+
+  redirect("/dashboard/settings?delete=requested");
 }
