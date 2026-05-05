@@ -1,14 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Mail, Phone, Star } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import { createContactRequest } from "@/app/actions";
 import { getCurrentUser, getProvider } from "@/lib/data";
 import FavButton from "@/components/FavButton";
 import AuthModal from "@/components/AuthModal";
 import ContactButton from "@/components/ContactButton";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-
-
+import SubmitRequestButton from "@/components/SubmitRequestButton";
+import Script from "next/script";
+import Turnstile from "@/components/Turnstile";
 
 export default async function ProviderProfilePage({
   params,
@@ -19,36 +20,44 @@ export default async function ProviderProfilePage({
 }) {
   const { id } = await params;
   const query = await searchParams;
-  const [provider, user] = await Promise.all([getProvider(id), getCurrentUser()]);
+  const isSuccess = query.request === "success";
+
+  const [provider, user] = await Promise.all([
+    getProvider(id),
+    getCurrentUser(),
+  ]);
+
   const supabase = await createSupabaseServerClient();
 
   let isFav = false;
 
-if (supabase && user && provider) {
-  const { data } = await supabase
-    .from("favorites")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("provider_id", provider.id)
-    .single();
+  if (supabase && user && provider) {
+    const { data } = await supabase
+      .from("favorites")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("provider_id", provider.id)
+      .single();
 
-  isFav = !!data;
-}
+    isFav = !!data;
+  }
 
-if (supabase && provider) {
-  await supabase.from("provider_events").insert({
-    provider_id: provider.id,
-    event_type: "view_profile",
-  });
-}
+  if (supabase && provider) {
+    await supabase.from("provider_events").insert({
+      provider_id: provider.id,
+      event_type: "view_profile",
+    });
+  }
 
   if (!provider) {
     return (
       <main className="min-h-screen bg-[#f3f5f9]">
-        
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
-          <h1 className="font-display text-3xl font-bold">Provider not found</h1>
-          <Link className="mt-5 inline-flex rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white" href="/">
+          <h1 className="text-3xl font-bold">Provider not found</h1>
+          <Link
+            className="mt-5 inline-flex rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white"
+            href="/"
+          >
             Back home
           </Link>
         </div>
@@ -56,91 +65,76 @@ if (supabase && provider) {
     );
   }
 
-  const photos = [provider.profilePhotoUrl, ...provider.portfolioPhotoUrls].filter(Boolean);
   const name = user?.user_metadata?.full_name ?? "";
   const email = user?.email ?? "";
 
   return (
     <main className="min-h-screen bg-[#f3f5f9]">
-      
-      <section className="mx-auto grid w-full max-w-7xl gap-6 px-4 pb-14 sm:px-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="space-y-3">
-          <div className="overflow-hidden rounded-[8px] bg-white">
-            <Image
-              src={photos[0]}
-              alt=""
-              width={900}
-              height={520}
-              className="h-[420px] w-full object-cover"
-              priority
-            />
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            {photos.slice(1, 4).map((photo) => (
-              <Image
-                key={photo}
-                src={photo}
-                alt=""
-                width={300}
-                height={160}
-                className="h-32 w-full rounded-[8px] object-cover"
-              />
-            ))}
-          </div>
-        </div>
+      <section className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:grid lg:grid-cols-[1fr_420px] lg:gap-10">
+<Script
+  src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+  async
+  defer
+/>
+        {/* LEFT SIDE */}
+        <div className="space-y-6">
 
-        <div className="space-y-4">
-          <section className="rounded-[8px] bg-white p-6">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-bold text-[#2563eb]">{provider.categoryName}</p>
-                <h1 className="mt-2 font-display text-4xl font-bold">{provider.fullName}</h1>
-                <p className="mt-2 text-[#6b7280]">
-                  <span className="text-[#6b7280]">
-                    {provider.location}
-                  </span>
-                  <span className="mx-2 text-gray-300">•</span>
-                  <span className="text-sm text-[#2563eb] font-medium">
-                    {provider.language}
-                  </span>
-                </p>
-              </div>
-              
+          {/* PROFILE */}
+          <div className="bg-white rounded-[12px] p-6 flex flex-col items-center text-center shadow-sm">
+            <div className="relative h-36 w-36 sm:h-40 sm:w-40 rounded-full overflow-hidden border-4 border-white ring-2 ring-black/5 shadow-lg">
+
+              <Image
+  src={provider.profilePhotoUrl}
+  alt={provider.fullName}
+  fill
+  sizes="160px"
+  quality={100}
+  priority
+  className="object-cover scale-105"
+/>
+            </div>
+
+            <h1 className="mt-4 text-2xl sm:text-3xl font-bold">
+              {provider.fullName}
+            </h1>
+
+            <p className="text-sm text-gray-500 mt-1">
+              {provider.categoryName} • {provider.location}
+            </p>
+
+            <p className="text-sm text-[#2563eb] mt-1">
+              {provider.language}
+            </p>
+            <div className="mt-4 w-full space-y-3">
+
               <FavButton
                 providerId={Number(provider.id)}
                 initialIsFav={isFav}
                 user={user}
               />
-            </div>
-            {provider.businessName && (
-              <p className="mt-4 font-semibold text-[#1f1f1f]">{provider.businessName}</p>
-            )}
 
-            <p className="mt-3 text-sm text-[#4b5563] leading-relaxed">
-              {provider.bio}
-            </p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              {/* CONTACT ACTION (MAIN BUSINESS CTA) */}
               {user ? (
                 <>
-                    <ContactButton
-  type="email"
-  value={provider.email}
-  providerId={Number(provider.id)}
-/>
+                  <ContactButton
+                    type="email"
+                    value={provider.email}
+                    providerId={Number(provider.id)}
+                  />
 
-<ContactButton
-  type="phone"
-  value={provider.phone}
-  providerId={Number(provider.id)}
-/>
-                  </>
-                ) : (
+                  <ContactButton
+                    type="phone"
+                    value={provider.phone}
+                    providerId={Number(provider.id)}
+                  />
+                </>
+              ) : (
                 <>
                   <AuthModal
                     next={`/providers/${provider.id}`}
                     trigger={
-                      <div className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white cursor-pointer">
-                        <Mail size={18} /> Email (Sign in)
+                      <div className="w-full text-center rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white cursor-pointer">
+                        Reveal Email (Sign in)
                       </div>
                     }
                   />
@@ -148,50 +142,106 @@ if (supabase && provider) {
                   <AuthModal
                     next={`/providers/${provider.id}`}
                     trigger={
-                      <div className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white cursor-pointer">
-                        <Phone size={18} /> Phone (Sign in)
+                      <div className="w-full text-center rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white cursor-pointer">
+                        Reveal Phone (Sign in)
                       </div>
                     }
-/>
+                  />
                 </>
               )}
             </div>
-          </section>
+          </div>
 
-          <section className="rounded-[8px] bg-white p-6">
-            <h2 className="font-display text-2xl font-bold">Request Contact</h2>
+          {/* ABOUT */}
+          <div className="bg-white rounded-[12px] p-6 shadow-sm">
+            <h2 className="text-xl font-bold mb-2">About</h2>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              {provider.bio}
+            </p>
+          </div>
+
+          {/* VIDEO PLACEHOLDER */}
+          <div className="bg-white rounded-[12px] p-6 shadow-sm">
+            <h2 className="text-xl font-bold mb-3">Introduction</h2>
+
+            <div className="aspect-video rounded-[10px] bg-gray-100 flex items-center justify-center text-gray-400">
+              Video coming soon
+            </div>
+          </div>
+
+          {/* CONTACT BUTTONS */}
+        </div>
+
+        {/* RIGHT SIDE */}
+        <div className="mt-6 lg:mt-0 lg:sticky lg:top-24">
+
+          <section className="bg-white rounded-[12px] p-6 shadow-sm">
+            <h2 className="text-xl font-bold">Request Contact</h2>
+
             {!user && (
-              <div className="mt-4 rounded-[8px] border border-[#2563eb]/20 bg-[#2563eb]/5 p-4 text-sm text-[#1f1f1f]">
-                Sign in to contact this provider. You’ll be redirected back to this profile after login.
+              <div className="mt-4 rounded-[8px] bg-[#2563eb]/5 p-3 text-sm">
+                Sign in to contact this provider
               </div>
             )}
-            {query.request === "success" && (
-              <p className="mt-4 rounded-[8px] bg-[#22c55e]/10 p-3 text-sm font-semibold text-[#15803d]">
-                Request sent. The provider has been notified.
+
+            {isSuccess && (
+              <p className="mt-4 rounded-[8px] bg-green-100 p-3 text-sm font-semibold text-green-700">
+                Request sent successfully
               </p>
             )}
-            <form action={createContactRequest} className="mt-4 space-y-3">
-              <input type="hidden" name="providerId" value={provider.id} />
 
-              <input name="name" defaultValue={name} placeholder="Name" className="h-12 w-full rounded-[8px] border border-black/10 px-3" />
-              <input name="email" defaultValue={email} placeholder="Email" className="h-12 w-full rounded-[8px] border border-black/10 px-3" />
-              <input name="phone" placeholder="Phone (optional)" className="h-12 w-full rounded-[8px] border border-black/10 px-3" />
-              <textarea name="message" required placeholder="Message" className="min-h-32 w-full rounded-[8px] border border-black/10 p-3" />
-
-              {user ? (
-                <button className="w-full rounded-full bg-[#ff8a00] px-5 py-3 font-bold text-white">
-                  Request Contact
-                </button>
-              ) : (
-                <AuthModal
-                  next={`/providers/${provider.id}`}
-                  trigger={
-                    <div className="w-full text-center rounded-full bg-[#ff8a00] px-5 py-3 font-bold text-white cursor-pointer">
-                      Sign in to Contact
-                    </div>
-                  }
+            <form action={createContactRequest} className="mt-4">
+              <fieldset
+                disabled={isSuccess}
+                className={`space-y-3 ${isSuccess ? "opacity-60 pointer-events-none" : ""
+                  }`}
+              >
+                <input
+                  type="hidden"
+                  name="providerId"
+                  value={provider.id}
                 />
-              )}
+
+                <input
+                  name="name"
+                  defaultValue={name}
+                  placeholder="Name"
+                  className="h-12 w-full rounded-[10px] border px-3"
+                />
+
+                <input
+                  name="email"
+                  defaultValue={email}
+                  placeholder="Email"
+                  className="h-12 w-full rounded-[10px] border px-3"
+                />
+
+                <input
+                  name="phone"
+                  placeholder="Phone (optional)"
+                  className="h-12 w-full rounded-[10px] border px-3"
+                />
+
+                <textarea
+                  name="message"
+                  required
+                  placeholder="Message"
+                  className="min-h-28 w-full rounded-[10px] border p-3"
+                />
+                <Turnstile />
+                {user ? (
+                  <SubmitRequestButton isSuccess={isSuccess} />
+                ) : (
+                  <AuthModal
+                    next={`/providers/${provider.id}`}
+                    trigger={
+                      <div className="w-full text-center rounded-full bg-[#ff8a00] px-5 py-3 font-bold text-white cursor-pointer">
+                        Sign in to Contact
+                      </div>
+                    }
+                  />
+                )}
+              </fieldset>
             </form>
           </section>
         </div>
