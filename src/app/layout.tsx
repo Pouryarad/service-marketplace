@@ -33,20 +33,29 @@ export default async function RootLayout({
       className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#f3f5f9]">
-        <BottomNav />
-  <TopNav
-  variant={
-    role === "provider"
-      ? "provider"
-      : role === "admin"
-      ? "admin"
-      : role
-      ? "dashboard"
-      : "public"
-  }
-/>
-  {children}
-</body>
+
+        <BottomNav
+          variant={
+            !role
+              ? "public"
+              : role === "provider"
+                ? "provider"
+                : "dashboard"
+          }
+        />
+        <TopNav
+          variant={
+            role === "provider"
+              ? "provider"
+              : role === "admin"
+                ? "admin"
+                : role
+                  ? "dashboard"
+                  : "public"
+          }
+        />
+        {children}
+      </body>
     </html>
   );
 

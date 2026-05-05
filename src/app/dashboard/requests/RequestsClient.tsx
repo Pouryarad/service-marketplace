@@ -57,7 +57,7 @@ export default function RequestsClient({ requests }: any) {
             {filteredRequests.map((req) => (
               <Link
                 key={req.id}
-                href={`/providers/${req.provider?.id}`}
+                href={`/dashboard/requests/${req.id}`}
                 className="rounded-[12px] border border-black/10 bg-white p-4 hover:shadow transition"
               >
                 <div className="flex items-center gap-3">
