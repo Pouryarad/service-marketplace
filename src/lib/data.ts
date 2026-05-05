@@ -175,8 +175,8 @@ export async function getContactRequests() {
   created_at,
   message,
   status,
-  client_name,
-  client_email,
+  name,
+  email,
   phone
 `)
     .eq("client_id", user.id)
@@ -206,8 +206,8 @@ export async function getContactRequests() {
   created_at: req.created_at,
   message: req.message,
   status: req.status,
-  clientName: req.client_name,
-  clientEmail: req.client_email,
+  clientName: req.name,
+  clientEmail: req.email,
   phone: req.phone,
   provider,
 };
