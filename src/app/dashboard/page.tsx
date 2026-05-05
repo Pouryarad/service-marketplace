@@ -67,23 +67,22 @@ export default async function UserDashboardPage() {
 
   return (
     <main className="min-h-screen bg-[#f3f5f9]">
-      <section className="mx-auto w-full max-w-7xl px-4 pb-20 sm:px-6">
-
+      <section className="mx-auto w-full max-w-7xl px-4 pt-6 pb-20 sm:px-6 sm:pt-8">
         {/* Title */}
         <div className="flex justify-between items-center mb-6">
-  <h1 className="text-2xl font-bold">
-    Dashboard
-  </h1>
+          <h1 className="text-2xl font-bold">
+            Dashboard
+          </h1>
 
-  <Link
-    href="/dashboard/settings"
-    className="flex items-center gap-2 text-sm font-semibold text-[#2563eb]"
-  >
-    <Settings size={18} />
-    Settings
-  </Link>
-</div>
-    
+          <Link
+            href="/dashboard/settings"
+            className="flex items-center gap-2 text-sm font-semibold text-[#2563eb]"
+          >
+            <Settings size={18} />
+            Settings
+          </Link>
+        </div>
+
         <div className="mt-6 space-y-6">
 
           {/* Favorites */}
