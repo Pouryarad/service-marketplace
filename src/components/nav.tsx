@@ -124,7 +124,7 @@ export function TopNav({
           )}
           {variant === "public" ? (
             <AuthModal
-              next="/"
+              role="client"
               trigger={
                 <span className="text-[#1f1f1f] font-medium cursor-pointer hover:underline">
                   Sign in
@@ -140,7 +140,7 @@ export function TopNav({
           ) : null}
           {variant === "public" && (
             <AuthModal
-              next="/provider/start"
+              role="provider"
               trigger={
                 <div className="rounded-full bg-[#ff8a00] px-4 py-2 font-semibold text-white cursor-pointer hover:bg-[#eb7e00]">
                   Get Clients

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Inbox, Settings, TrendingUp, UserCircle, BadgeCheck } from "lucide-react";
+import { Inbox, TrendingUp, UserCircle, BadgeCheck } from "lucide-react";
 import { markRequestContacted, subscribeProvider } from "@/lib/actions";
 import { getProviderRequests, getCurrentProviderProfile } from "@/lib/data";
 import { redirect } from "next/navigation";
@@ -127,20 +127,13 @@ export default async function ProviderDashboardPage() {
             {/* Quick actions */}
             <section className="rounded-2xl bg-white p-5 shadow-sm">
               <h2 className="font-bold text-[#1f1f1f]">Quick Actions</h2>
-              <div className="mt-3 space-y-2">
+              <div className="mt-3">
                 <Link
                   href="/provider/setup"
                   className="flex items-center gap-3 rounded-xl p-3 hover:bg-[#f3f5f9] transition"
                 >
                   <UserCircle size={18} className="text-[#2563eb]" />
                   <span className="text-sm font-medium text-[#1f1f1f]">Edit Profile</span>
-                </Link>
-                <Link
-                  href="/provider/settings"
-                  className="flex items-center gap-3 rounded-xl p-3 hover:bg-[#f3f5f9] transition"
-                >
-                  <Settings size={18} className="text-[#6b7280]" />
-                  <span className="text-sm font-medium text-[#1f1f1f]">Settings</span>
                 </Link>
               </div>
             </section>

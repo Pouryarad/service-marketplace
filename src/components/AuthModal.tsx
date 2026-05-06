@@ -1,39 +1,39 @@
 "use client";
 
 import { useState } from "react";
-import { createBrowserClient } from "@supabase/ssr";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { createPortal } from "react-dom";
 
 export default function AuthModal({
   trigger,
-  next = "/",
+  next,
+  role,
 }: {
   trigger: React.ReactNode;
   next?: string;
+  role?: "client" | "provider";
 }) {
   const [open, setOpen] = useState(false);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
   const handleGoogleLogin = async () => {
-  // store where to go after login
-  localStorage.setItem("next", next);
+    const supabase = createSupabaseBrowserClient();
 
-  await supabase.auth.signOut();
+    const redirectNext = role === "provider"
+      ? "/provider/setup"
+      : next ?? window.location.pathname + window.location.search;
 
-  await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: `${window.location.origin}/auth/callback`,
-      queryParams: {
-        prompt: "select_account",
+    const callbackUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectNext)}`;
+
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: callbackUrl,
+        queryParams: {
+          prompt: "select_account",
+        },
       },
-    },
-  });
-};
+    });
+  };
 
   return (
     <>
@@ -43,10 +43,13 @@ export default function AuthModal({
         createPortal(
           <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
             <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-              <h2 className="text-xl font-bold text-[#1f1f1f]">Sign in</h2>
-
+              <h2 className="text-xl font-bold text-[#1f1f1f]">
+                {role === "provider" ? "Join as a Provider" : "Sign in"}
+              </h2>
               <p className="mt-2 text-sm text-gray-500">
-                Continue with Google to contact this provider.
+                {role === "provider"
+                  ? "Create your provider profile and start getting clients."
+                  : "Continue with Google to access your account."}
               </p>
 
               <button

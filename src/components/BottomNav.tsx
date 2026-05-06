@@ -17,8 +17,7 @@ export default function BottomNav({
   const newCount = providerRequests.filter((r) => r.status === "new").length;
 
   const itemClass = (path: string) =>
-    `flex flex-col items-center text-xs ${
-      pathname === path ? "text-black" : "text-gray-400"
+    `flex flex-col items-center text-xs ${pathname === path ? "text-black" : "text-gray-400"
     }`;
 
   return (
@@ -56,9 +55,8 @@ export default function BottomNav({
         {variant === "provider" && (
           <Link
             href="/provider/requests"
-            className={`relative flex flex-col items-center text-xs ${
-              pathname === "/provider/requests" ? "text-black" : "text-gray-400"
-            }`}
+            className={`relative flex flex-col items-center text-xs ${pathname === "/provider/requests" ? "text-black" : "text-gray-400"
+              }`}
           >
             <div className="relative">
               <Bell size={20} />
@@ -75,7 +73,7 @@ export default function BottomNav({
         {variant === "public" ? (
           <>
             <AuthModal
-              next="/"
+              role="client"
               trigger={
                 <div className="flex flex-col items-center text-xs text-gray-400">
                   <User size={20} />
@@ -84,7 +82,7 @@ export default function BottomNav({
               }
             />
             <AuthModal
-              next="/provider/start"
+              role="provider"
               trigger={
                 <div className="flex flex-col items-center text-xs text-[#ff8a00] font-semibold">
                   <LayoutDashboard size={20} />
