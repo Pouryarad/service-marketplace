@@ -44,7 +44,8 @@ export async function createContactRequest(formData: FormData) {
 const token = formData.get("cf-turnstile-response");
 
 if (!token) {
-  throw new Error("Captcha missing");
+  const providerId = String(formData.get("providerId") ?? "");
+  redirect(`/providers/${providerId}?error=captcha-missing`);
 }
 
 const verifyRes = await fetch(

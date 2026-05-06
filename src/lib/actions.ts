@@ -135,11 +135,9 @@ export async function saveProviderProfile(formData: FormData) {
     if (!uploadError) {
       const url = supabase.storage.from("provider-media").getPublicUrl(path).data.publicUrl;
       if (existing?.profile_photo_url) {
-        // Already has approved photo — put new one in pending
         pendingProfilePhotoUrl = url;
       } else {
-        // First time — set directly but still pending admin approval
-        pendingProfilePhotoUrl = url;
+        profilePhotoUrl = url;
       }
     }
   }
@@ -179,42 +177,42 @@ export async function saveProviderProfile(formData: FormData) {
     : categorySlug;
 
   // Video approval
-  const pendingVideoUrl = videoUrl !== existing?.video_url ? videoUrl : null;
-  const finalVideoUrl = existing?.video_url ?? null;
+  const pendingVideoUrl = videoUrl && videoUrl !== existing?.video_url ? videoUrl : null;
+  const finalVideoUrl = existing?.video_url ?? videoUrl ?? null;
 
   const { error: upsertError } = await supabase.from("providers").upsert(
-  {
-    user_id: data.user.id,
-    full_name: fullName,
-    business_name: businessName,
-    category_slug: finalCategorySlug,
-    pending_category_slug: pendingCategorySlug,
-    profile_photo_url: profilePhotoUrl || existing?.profile_photo_url || null,
-    pending_profile_photo_url: pendingProfilePhotoUrl,
-    portfolio_photo_urls: existingPortfolioUrls,
-    pending_portfolio_photo_urls: pendingPortfolioUrls ?? [],
-    video_url: finalVideoUrl,
-    pending_video_url: pendingVideoUrl,
-    email,
-    phone,
-    location,
-    language,
-    bio,
-    one_line: oneLine,
-    approved: false,
-    suspended: false,
-    subscription_status: "pending",
-  },
-  { onConflict: "user_id" }
-);
-  
+    {
+      user_id: data.user.id,
+      full_name: fullName,
+      business_name: businessName,
+      category_slug: finalCategorySlug,
+      pending_category_slug: pendingCategorySlug,
+      profile_photo_url: profilePhotoUrl || existing?.profile_photo_url || null,
+      pending_profile_photo_url: pendingProfilePhotoUrl,
+      portfolio_photo_urls: existingPortfolioUrls,
+      pending_portfolio_photo_urls: pendingPortfolioUrls ?? [],
+      video_url: finalVideoUrl,
+      pending_video_url: pendingVideoUrl,
+      email,
+      phone,
+      location,
+      language,
+      bio,
+      one_line: oneLine,
+      approved: false,
+      suspended: false,
+      subscription_status: "pending",
+    },
+    { onConflict: "user_id" }
+  );
+
 
   await sendEmailNotification({
     to: "admin@findly.example",
     subject: "Provider profile updated — needs review",
     html: `<p>${fullName} updated their profile. Please review pending items.</p>`,
   });
-  
+
 
   return { success: true };
 }

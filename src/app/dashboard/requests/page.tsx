@@ -2,7 +2,8 @@ import { getContactRequests } from "@/lib/data";
 import RequestsClient from "./RequestsClient";
 
 export default async function RequestsPage() {
-  const requests = await getContactRequests();
+  const requests = await getContactRequests("client");
+
 
   return <RequestsClient requests={requests} />;
 }
