@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { createBrowserClient } from "@supabase/ssr";
 import { createPortal } from "react-dom";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function AuthModal({
   trigger,
-  next,
+  next = "/",
   role,
 }: {
   trigger: React.ReactNode;
@@ -15,23 +15,30 @@ export default function AuthModal({
 }) {
   const [open, setOpen] = useState(false);
 
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   const handleGoogleLogin = async () => {
-  const supabase = createSupabaseBrowserClient();
+    const redirectNext = role === "provider"
+      ? "/provider/setup"
+      : window.location.pathname + window.location.search;
 
-  const redirectNext = role === "provider"
-    ? "/provider/setup"
-    : next ?? window.location.pathname + window.location.search;
+    localStorage.setItem("next", redirectNext);
 
-  await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=${encodeURIComponent(redirectNext)}`,
-      queryParams: {
-        prompt: "select_account",
+    await supabase.auth.signOut();
+
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: {
+          prompt: "select_account",
+        },
       },
-    },
-  });
-};
+    });
+  };
 
   return (
     <>
@@ -49,7 +56,6 @@ export default function AuthModal({
                   ? "Create your provider profile and start getting clients."
                   : "Continue with Google to access your account."}
               </p>
-
               <button
                 onClick={handleGoogleLogin}
                 className="mt-5 w-full inline-flex items-center justify-center gap-3 rounded-full border border-black/10 bg-white px-5 py-3 font-semibold text-[#1f1f1f] hover:bg-gray-50 transition"
@@ -61,7 +67,6 @@ export default function AuthModal({
                 />
                 Continue with Google
               </button>
-
               <button
                 onClick={() => setOpen(false)}
                 className="mt-4 w-full text-sm text-gray-400 hover:text-gray-600"

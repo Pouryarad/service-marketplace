@@ -8,7 +8,6 @@ export default function ClientRedirect() {
 
   useEffect(() => {
     const next = localStorage.getItem("next");
-
     if (next) {
       localStorage.removeItem("next");
       router.replace(next);
