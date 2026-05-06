@@ -115,7 +115,7 @@ export function TopNav({
                 )}
               </div>
 
-              <form action="/auth/logout" method="post">
+              <form action="/auth/logout" method="post" onSubmit={() => localStorage.clear()}>
                 <button className="flex items-center gap-2 rounded-full px-3 py-2 hover:bg-white">
                   <LogOut size={16} /> Sign out
                 </button>
@@ -132,7 +132,7 @@ export function TopNav({
               }
             />
           ) : variant !== "provider" ? (
-            <form action="/auth/logout" method="post">
+            <form action="/auth/logout" method="post" onSubmit={() => localStorage.clear()}>
               <button className="flex items-center gap-2 rounded-full px-3 py-2 hover:bg-white">
                 <LogOut size={16} /> Sign out
               </button>
