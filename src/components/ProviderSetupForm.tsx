@@ -322,11 +322,11 @@ export default function ProviderSetupForm({
                     <label className="block text-sm font-semibold text-[#1f1f1f]">
                         Phone <span className="text-red-500">*</span>
                     </label>
-                    <div className="mt-2 flex gap-2">
+                    <div className="mt-2 flex gap-2 w-full overflow-hidden">
                         <select
                             value={countryCode}
                             onChange={(e) => setCountryCode(e.target.value)}
-                            className="h-12 rounded-xl border border-black/10 bg-white px-3 outline-none focus:border-[#2563eb] transition text-sm"
+                            className="h-12 w-32 shrink-0 rounded-xl border border-black/10 bg-white px-3 outline-none focus:border-[#2563eb] transition text-sm"
                         >
                             {COUNTRY_CODES.map((c) => (
                                 <option key={c.code} value={c.code}>{c.label}</option>

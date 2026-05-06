@@ -10,7 +10,7 @@ export default async function ProviderSetupPage() {
   ]);
 
   return (
-    <main className="min-h-screen bg-[#f3f5f9]">
+    <main className="min-h-screen bg-[#f3f5f9] overflow-x-hidden">
       <section className="mx-auto w-full max-w-2xl px-4 pb-20 pt-6 sm:px-6">
 
         {/* Header */}
