@@ -18,10 +18,10 @@ export default async function Home() {
       <section className="flex-1 mx-auto flex w-full max-w-7xl flex-col items-center justify-center px-4 pt-10 pb-12 text-center sm:px-6 sm:pt-14 md:pt-20 lg:pt-24 lg:pb-16">
 
         <div className="scale-90 sm:scale-100">
-          <Logo centered />
+          <Logo centered size="lg" />
         </div>
 
-        <h1 className="mt-6 max-w-[95%] sm:max-w-3xl font-display text-3xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+        <h1 className="mt-6 max-w-[95%] sm:max-w-3xl font-display text-2xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
           Find the right service in your area in seconds
         </h1>
 
@@ -61,7 +61,7 @@ export default async function Home() {
               <Image
                 src={
                   category.imageUrl &&
-                  !category.imageUrl.includes("1600518464441")
+                    !category.imageUrl.includes("1600518464441")
                     ? category.imageUrl
                     : "https://images.unsplash.com/photo-1522202176988-66273c2fd55f"
                 }
@@ -81,7 +81,7 @@ export default async function Home() {
         </div>
 
       </section>
-       {/* FOOTER */}
+      {/* FOOTER */}
       <footer className="border-t border-black/5 bg-white mt-auto">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-6 text-sm text-[#6b7280] sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
 
