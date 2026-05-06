@@ -39,7 +39,6 @@ export default async function ProviderDashboardPage() {
       <section className="mx-auto w-full max-w-7xl px-4 pb-20 pt-6 sm:px-6">
 
         {/* Header */}
-        {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-center gap-4">
             {provider.profilePhotoUrl ? (

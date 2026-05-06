@@ -1,4 +1,3 @@
-import { TopNav } from "@/components/nav";
 import { saveProviderProfile } from "@/lib/actions";
 import { getCategories, getCurrentUser } from "@/lib/data";
 
@@ -7,7 +6,6 @@ export default async function ProviderSetupPage() {
 
   return (
     <main className="min-h-screen bg-[#f3f5f9]">
-      <TopNav variant="provider" />
       <section className="mx-auto w-full max-w-3xl px-4 pb-14 sm:px-6">
         <div className="rounded-[8px] bg-white p-6">
           <h1 className="font-display text-3xl font-bold">Complete provider profile</h1>
