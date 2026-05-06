@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function AuthModal({
   trigger,
@@ -14,13 +15,23 @@ export default function AuthModal({
 }) {
   const [open, setOpen] = useState(false);
 
-  const handleGoogleLogin = () => {
-    const redirectNext = role === "provider"
-      ? "/provider/setup"
-      : next ?? window.location.pathname + window.location.search;
+  const handleGoogleLogin = async () => {
+  const supabase = createSupabaseBrowserClient();
 
-    window.location.href = `/auth/login?next=${encodeURIComponent(redirectNext)}`;
-  };
+  const redirectNext = role === "provider"
+    ? "/provider/setup"
+    : next ?? window.location.pathname + window.location.search;
+
+  await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=${encodeURIComponent(redirectNext)}`,
+      queryParams: {
+        prompt: "select_account",
+      },
+    },
+  });
+};
 
   return (
     <>

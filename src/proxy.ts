@@ -2,6 +2,17 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
+  const url = new URL(request.url);
+  const code = url.searchParams.get("code");
+
+  // Handle PKCE code on any page — forward to callback route
+  if (code && !url.pathname.startsWith("/auth")) {
+    const next = url.searchParams.get("next") ?? "/";
+    return NextResponse.redirect(
+      new URL(`/auth/callback?code=${code}&next=${encodeURIComponent(next)}`, url.origin)
+    );
+  }
+
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -45,5 +56,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)" ],
 };
