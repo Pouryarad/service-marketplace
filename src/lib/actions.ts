@@ -99,9 +99,9 @@ export async function saveProviderProfile(formData: FormData) {
   if (!data.user) redirect("/auth/sign-in?next=/provider/setup");
 
   const fullName = String(formData.get("fullName") ?? "");
-  const categoryId = String(formData.get("categoryId") ?? "");
+  const categorySlug = String(formData.get("categoryId") ?? "");
 
-  if (!fullName.trim() || !categoryId) {
+  if (!fullName.trim() || !categorySlug) {
     redirect("/provider/setup?error=missing-required");
   }
 
@@ -120,8 +120,9 @@ export async function saveProviderProfile(formData: FormData) {
       upsert: true,
       contentType: profilePhotoFile.type,
     });
-    profilePhotoUrl = supabase.storage.from("provider-media").getPublicUrl(path)
-      .data.publicUrl;
+    profilePhotoUrl = supabase.storage
+      .from("provider-media")
+      .getPublicUrl(path).data.publicUrl;
   }
 
   for (const file of portfolioPhotoFiles) {
@@ -137,31 +138,27 @@ export async function saveProviderProfile(formData: FormData) {
     }
   }
 
-  await supabase.from("provider_profiles").upsert({
-    user_id: data.user.id,
-    full_name: fullName,
-    business_name: String(formData.get("businessName") ?? "") || null,
-    category_id: categoryId,
-    profile_photo_url:
-      profilePhotoUrl ||
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=500&q=80",
-    portfolio_photo_urls: portfolioPhotoUrls,
-    email: String(formData.get("email") ?? data.user.email ?? ""),
-    phone: String(formData.get("phone") ?? ""),
-    location: String(formData.get("location") ?? ""),
-    language: String(formData.get("language") ?? "English"),
-    bio: String(formData.get("bio") ?? ""),
-    one_line: String(formData.get("oneLine") ?? ""),
-    status: "pending",
-    subscription_status: "pending",
-  });
-
-  await supabase.from("notification_events").insert({
-    audience: "admin",
-    type: "new_provider_signup",
-    title: "Provider ready for review",
-    body: `${fullName} completed a provider profile.`,
-  });
+  await supabase.from("providers").upsert(
+    {
+      user_id: data.user.id,
+      full_name: fullName,
+      business_name: String(formData.get("businessName") ?? "") || null,
+      category_slug: categorySlug,
+      profile_photo_url:
+        profilePhotoUrl ||
+        "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=500&q=80",
+      email: String(formData.get("email") ?? data.user.email ?? ""),
+      phone: String(formData.get("phone") ?? ""),
+      location: String(formData.get("location") ?? ""),
+      language: String(formData.get("language") ?? "English"),
+      bio: String(formData.get("bio") ?? ""),
+      one_line: String(formData.get("oneLine") ?? ""),
+      approved: false,
+      suspended: false,
+      subscription_status: "pending",
+    },
+    { onConflict: "user_id" }
+  );
 
   await sendEmailNotification({
     to: "admin@findly.example",
@@ -203,6 +200,7 @@ export async function markRequestContacted(formData: FormData) {
     .eq("id", String(formData.get("requestId") ?? ""));
 
   revalidatePath("/provider/dashboard");
+  revalidatePath("/provider/requests");
 }
 
 

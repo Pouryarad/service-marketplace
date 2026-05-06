@@ -45,12 +45,22 @@ export type Provider = {
 
 export type ContactRequest = {
   id: string;
-  providerId: string;
-  providerName: string;
+  providerId?: string;
+  providerName?: string;
   clientName: string;
   clientEmail: string;
   phone?: string | null;
   message: string;
   status: "new" | "contacted";
   createdAt: string;
+};
+
+export type ProviderRequest = {
+  id: string;
+  clientName: string;
+  clientEmail: string;
+  phone?: string | null;
+  message: string;
+  status: "new" | "contacted";
+  created_at: string;
 };

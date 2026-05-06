@@ -12,10 +12,15 @@ type ProviderRow = {
   email: string;
   phone: string;
   bio: string;
+  one_line: string | null;
   profile_photo_url: string;
   approved: boolean;
   suspended: boolean;
+  status: string | null;
   subscription_status: string | null;
+  clicks_day: number | null;
+  clicks_week: number | null;
+  clicks_month: number | null;
 };
 
 function mapProvider(row: ProviderRow): Provider {
@@ -39,12 +44,12 @@ function mapProvider(row: ProviderRow): Provider {
     portfolioPhotoUrls: [],
     approved: row.approved,
     suspended: row.suspended,
-    status: "active",
-    subscriptionStatus: (row.subscription_status as Provider["subscriptionStatus"]) ?? "active",
+    status: (row.status as Provider["status"]) ?? "pending",
+    subscriptionStatus: (row.subscription_status as Provider["subscriptionStatus"]) ?? "pending",
     featuredRank: null,
-    clicksDay: 0,
-    clicksWeek: 0,
-    clicksMonth: 0,
+    clicksDay: row.clicks_day ?? 0,
+    clicksWeek: row.clicks_week ?? 0,
+    clicksMonth: row.clicks_month ?? 0,
   };
 }
 
@@ -155,42 +160,113 @@ export async function getProvider(id: string) {
   return providers.find((provider) => String(provider.id) === String(id)) ?? null;
 }
 
-export async function getContactRequests() {
+export async function getCurrentProviderProfile() {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return null;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from("providers")
+    .select("*")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  return mapProvider(data);
+}
+
+export async function getProviderRequests() {
   const supabase = await createSupabaseServerClient();
   if (!supabase) return [];
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  console.log("DASHBOARD USER:", user?.id);
-
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
+
+  const { data: providerRow } = await supabase
+    .from("providers")
+    .select("id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (!providerRow) return [];
 
   const { data, error } = await supabase
     .from("contact_requests")
-    .select(`
-  id,
-  provider_id,
-  created_at,
-  message,
-  status,
-  name,
-  email,
-  phone
-`)
+    .select("id, created_at, message, status, name, email, phone")
+    .eq("provider_id", providerRow.id)
+    .order("created_at", { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((req) => ({
+    id: req.id,
+    clientName: req.name ?? "Unknown",
+    clientEmail: req.email ?? "",
+    phone: req.phone ?? null,
+    message: req.message ?? "",
+    status: (req.status ?? "new") as "new" | "contacted",
+    created_at: req.created_at,
+  }));
+}
+
+export async function getContactRequests(audience?: "client" | "provider") {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return [];
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  if (audience === "provider") {
+    // Get the provider row that belongs to this user
+    const { data: providerRow } = await supabase
+      .from("providers")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!providerRow) return [];
+
+    const { data, error } = await supabase
+      .from("contact_requests")
+      .select("id, created_at, message, status, name, email, phone, client_id")
+      .eq("provider_id", providerRow.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("PROVIDER REQUEST ERROR:", error);
+      return [];
+    }
+
+    return (data || []).map((req) => ({
+      id: req.id,
+      created_at: req.created_at,
+      message: req.message,
+      status: req.status,
+      clientName: req.name,
+      clientEmail: req.email,
+      phone: req.phone,
+      provider: null,
+    }));
+  }
+
+  // Client: show requests they sent
+  const { data, error } = await supabase
+    .from("contact_requests")
+    .select("id, provider_id, created_at, message, status, name, email, phone")
     .eq("client_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("REQUEST ERROR:", error);
+    console.error("CLIENT REQUEST ERROR:", error);
     return [];
   }
 
   if (!data || data.length === 0) return [];
 
   const providerIds = data.map((r) => r.provider_id);
-
   const { data: providers } = await supabase
     .from("providers")
     .select("*")
@@ -200,17 +276,16 @@ export async function getContactRequests() {
     const provider = providers?.find(
       (p) => String(p.id) === String(req.provider_id)
     );
-
     return {
-  id: req.id,
-  created_at: req.created_at,
-  message: req.message,
-  status: req.status,
-  clientName: req.name,
-  clientEmail: req.email,
-  phone: req.phone,
-  provider,
-};
+      id: req.id,
+      created_at: req.created_at,
+      message: req.message,
+      status: req.status,
+      clientName: req.name,
+      clientEmail: req.email,
+      phone: req.phone,
+      provider,
+    };
   });
 }
 
