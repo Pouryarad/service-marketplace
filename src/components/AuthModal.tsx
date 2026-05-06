@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { createPortal } from "react-dom";
 
 export default function AuthModal({
@@ -15,24 +14,12 @@ export default function AuthModal({
 }) {
   const [open, setOpen] = useState(false);
 
-  const handleGoogleLogin = async () => {
-    const supabase = createSupabaseBrowserClient();
-
+  const handleGoogleLogin = () => {
     const redirectNext = role === "provider"
       ? "/provider/setup"
       : next ?? window.location.pathname + window.location.search;
 
-    const callbackUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectNext)}`;
-
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: callbackUrl,
-        queryParams: {
-          prompt: "select_account",
-        },
-      },
-    });
+    window.location.href = `/auth/login?next=${encodeURIComponent(redirectNext)}`;
   };
 
   return (
