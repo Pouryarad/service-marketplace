@@ -182,39 +182,41 @@ export async function saveProviderProfile(formData: FormData) {
   const pendingVideoUrl = videoUrl !== existing?.video_url ? videoUrl : null;
   const finalVideoUrl = existing?.video_url ?? null;
 
-  await supabase.from("providers").upsert(
-    {
-      user_id: data.user.id,
-      full_name: fullName,
-      business_name: businessName,
-      category_slug: finalCategorySlug,
-      pending_category_slug: pendingCategorySlug,
-      profile_photo_url: profilePhotoUrl || existing?.profile_photo_url || null,
-      pending_profile_photo_url: pendingProfilePhotoUrl,
-      portfolio_photo_urls: existingPortfolioUrls,
-      pending_portfolio_photo_urls: pendingPortfolioUrls ?? [],
-      video_url: finalVideoUrl,
-      pending_video_url: pendingVideoUrl,
-      email,
-      phone,
-      location,
-      language,
-      bio,
-      one_line: oneLine,
-      approved: false,
-      suspended: false,
-      subscription_status: "pending",
-    },
-    { onConflict: "user_id" }
-  );
+  const { error: upsertError } = await supabase.from("providers").upsert(
+  {
+    user_id: data.user.id,
+    full_name: fullName,
+    business_name: businessName,
+    category_slug: finalCategorySlug,
+    pending_category_slug: pendingCategorySlug,
+    profile_photo_url: profilePhotoUrl || existing?.profile_photo_url || null,
+    pending_profile_photo_url: pendingProfilePhotoUrl,
+    portfolio_photo_urls: existingPortfolioUrls,
+    pending_portfolio_photo_urls: pendingPortfolioUrls ?? [],
+    video_url: finalVideoUrl,
+    pending_video_url: pendingVideoUrl,
+    email,
+    phone,
+    location,
+    language,
+    bio,
+    one_line: oneLine,
+    approved: false,
+    suspended: false,
+    subscription_status: "pending",
+  },
+  { onConflict: "user_id" }
+);
+  
 
   await sendEmailNotification({
     to: "admin@findly.example",
     subject: "Provider profile updated — needs review",
     html: `<p>${fullName} updated their profile. Please review pending items.</p>`,
   });
+  
 
-  redirect("/provider/dashboard?profile=saved");
+  return { success: true };
 }
 
 export async function updateProviderStatus(formData: FormData) {

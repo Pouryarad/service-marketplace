@@ -108,7 +108,11 @@ export default function ProviderSetupForm({
     const [categoryValue, setCategoryValue] = useState(provider?.categoryName ?? "");
     const [showCustomCategory, setShowCustomCategory] = useState(false);
     const [customCategory, setCustomCategory] = useState("");
-    const [countryCode, setCountryCode] = useState("+1");
+    const [countryCode, setCountryCode] = useState(() => {
+        if (!provider?.phone) return "+1";
+        const match = provider.phone.match(/^(\+\d+)/);
+        return match ? match[1] : "+1";
+    });
     const [phoneNumber, setPhoneNumber] = useState(
         provider?.phone?.replace(/^\+\d+\s?/, "") ?? ""
     );
@@ -160,7 +164,7 @@ export default function ProviderSetupForm({
             )}
 
             <form
-                action={async (formData) => {
+                action={async (formData: FormData) => {
                     setSaving(true);
                     formData.set("phone", `${countryCode} ${phoneNumber}`);
                     formData.set("language", selectedLanguages.join(", "));
@@ -175,10 +179,11 @@ export default function ProviderSetupForm({
                         )
                     );
                     await saveProviderProfile(formData);
-                    setSaving(false);
+                    window.location.href = "/provider/dashboard?profile=saved";
                 }}
                 className="space-y-6"
             >
+                <input type="hidden" name="existingProfilePhotoUrl" value={provider?.profilePhotoUrl ?? ""} />
                 {/* Profile Photo */}
                 <div>
                     <label className="block text-sm font-semibold text-[#1f1f1f]">
