@@ -41,6 +41,7 @@ export type Provider = {
   clicksDay: number;
   clicksWeek: number;
   clicksMonth: number;
+  videoUrl?: string | null;
 };
 
 export type ContactRequest = {

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { sendEmailNotification } from "./email";
+import { sendEmailNotification } from "@/lib/email";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 
@@ -98,61 +98,109 @@ export async function saveProviderProfile(formData: FormData) {
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect("/auth/sign-in?next=/provider/setup");
 
-  const fullName = String(formData.get("fullName") ?? "");
-  const categorySlug = String(formData.get("categoryId") ?? "");
+  const fullName = String(formData.get("fullName") ?? "").trim();
+  const rawCategory = String(formData.get("categorySlug") ?? "").trim();
+  const categorySlug = rawCategory.toLowerCase().replace(/\s+/g, "-");
+  const email = String(formData.get("email") ?? data.user.email ?? "");
+  const phone = String(formData.get("phone") ?? "");
+  const location = String(formData.get("location") ?? "");
+  const language = String(formData.get("language") ?? "English");
+  const oneLine = String(formData.get("oneLine") ?? "").trim();
+  const bio = String(formData.get("bio") ?? "").trim() || null;
+  const videoUrl = String(formData.get("videoUrl") ?? "").trim() || null;
+  const businessName = String(formData.get("businessName") ?? "").trim() || null;
 
-  if (!fullName.trim() || !categorySlug) {
+  if (!fullName || !categorySlug || !email || !phone || !location || !oneLine) {
     redirect("/provider/setup?error=missing-required");
   }
 
+  // Get existing provider row
+  const { data: existing } = await supabase
+    .from("providers")
+    .select("profile_photo_url, portfolio_photo_urls, video_url, category_slug, category_approved")
+    .eq("user_id", data.user.id)
+    .maybeSingle();
+
+  // Handle profile photo
   const profilePhotoFile = formData.get("profilePhoto");
-  const portfolioPhotoFiles = formData.getAll("portfolioPhotos");
-  const uploadBasePath = `${data.user.id}/${Date.now()}`;
-  let profilePhotoUrl = String(formData.get("profilePhotoUrl") ?? "");
-  const portfolioPhotoUrls = String(formData.get("portfolioPhotoUrls") ?? "")
-    .split("\n")
-    .map((url) => url.trim())
-    .filter(Boolean);
+  let profilePhotoUrl = String(formData.get("existingProfilePhotoUrl") ?? "");
+  let pendingProfilePhotoUrl: string | null = null;
 
   if (profilePhotoFile instanceof File && profilePhotoFile.size > 0) {
-    const path = `${uploadBasePath}/profile-${profilePhotoFile.name}`;
-    await supabase.storage.from("provider-media").upload(path, profilePhotoFile, {
-      upsert: true,
-      contentType: profilePhotoFile.type,
-    });
-    profilePhotoUrl = supabase.storage
+    const path = `${data.user.id}/profile-${Date.now()}-${profilePhotoFile.name}`;
+    const { error: uploadError } = await supabase.storage
       .from("provider-media")
-      .getPublicUrl(path).data.publicUrl;
-  }
+      .upload(path, profilePhotoFile, { upsert: true, contentType: profilePhotoFile.type });
 
-  for (const file of portfolioPhotoFiles) {
-    if (file instanceof File && file.size > 0) {
-      const path = `${uploadBasePath}/portfolio-${file.name}`;
-      await supabase.storage.from("provider-media").upload(path, file, {
-        upsert: true,
-        contentType: file.type,
-      });
-      portfolioPhotoUrls.push(
-        supabase.storage.from("provider-media").getPublicUrl(path).data.publicUrl,
-      );
+    if (!uploadError) {
+      const url = supabase.storage.from("provider-media").getPublicUrl(path).data.publicUrl;
+      if (existing?.profile_photo_url) {
+        // Already has approved photo — put new one in pending
+        pendingProfilePhotoUrl = url;
+      } else {
+        // First time — set directly but still pending admin approval
+        pendingProfilePhotoUrl = url;
+      }
     }
   }
+
+  // Handle portfolio photos
+  const portfolioFiles = formData.getAll("portfolioPhotos");
+  const existingPortfolioUrls: string[] = JSON.parse(
+    String(formData.get("existingPortfolioUrls") ?? "[]")
+  );
+
+  const newPortfolioUrls: string[] = [];
+  for (const file of portfolioFiles) {
+    if (file instanceof File && file.size > 0) {
+      const path = `${data.user.id}/portfolio-${Date.now()}-${file.name}`;
+      const { error } = await supabase.storage
+        .from("provider-media")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (!error) {
+        newPortfolioUrls.push(
+          supabase.storage.from("provider-media").getPublicUrl(path).data.publicUrl
+        );
+      }
+    }
+  }
+
+  const pendingPortfolioUrls = newPortfolioUrls.length > 0 ? newPortfolioUrls : null;
+
+  // Category approval
+  const isNewCategory = !["accountant", "car-dealer", "financial-advisor",
+    "immigration-consultant", "insurance-broker", "lawyer",
+    "mortgage-broker", "notary-public", "realtor", "therapist", "other"
+  ].includes(categorySlug);
+
+  const pendingCategorySlug = isNewCategory ? categorySlug : null;
+  const finalCategorySlug = isNewCategory
+    ? (existing?.category_slug ?? categorySlug)
+    : categorySlug;
+
+  // Video approval
+  const pendingVideoUrl = videoUrl !== existing?.video_url ? videoUrl : null;
+  const finalVideoUrl = existing?.video_url ?? null;
 
   await supabase.from("providers").upsert(
     {
       user_id: data.user.id,
       full_name: fullName,
-      business_name: String(formData.get("businessName") ?? "") || null,
-      category_slug: categorySlug,
-      profile_photo_url:
-        profilePhotoUrl ||
-        "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=500&q=80",
-      email: String(formData.get("email") ?? data.user.email ?? ""),
-      phone: String(formData.get("phone") ?? ""),
-      location: String(formData.get("location") ?? ""),
-      language: String(formData.get("language") ?? "English"),
-      bio: String(formData.get("bio") ?? ""),
-      one_line: String(formData.get("oneLine") ?? ""),
+      business_name: businessName,
+      category_slug: finalCategorySlug,
+      pending_category_slug: pendingCategorySlug,
+      profile_photo_url: profilePhotoUrl || existing?.profile_photo_url || null,
+      pending_profile_photo_url: pendingProfilePhotoUrl,
+      portfolio_photo_urls: existingPortfolioUrls,
+      pending_portfolio_photo_urls: pendingPortfolioUrls ?? [],
+      video_url: finalVideoUrl,
+      pending_video_url: pendingVideoUrl,
+      email,
+      phone,
+      location,
+      language,
+      bio,
+      one_line: oneLine,
       approved: false,
       suspended: false,
       subscription_status: "pending",
@@ -162,11 +210,11 @@ export async function saveProviderProfile(formData: FormData) {
 
   await sendEmailNotification({
     to: "admin@findly.example",
-    subject: "New provider signup",
-    html: `<p>${fullName} completed a provider profile and is ready for review.</p>`,
+    subject: "Provider profile updated — needs review",
+    html: `<p>${fullName} updated their profile. Please review pending items.</p>`,
   });
 
-  redirect("/provider/dashboard?profile=pending");
+  redirect("/provider/dashboard?profile=saved");
 }
 
 export async function updateProviderStatus(formData: FormData) {

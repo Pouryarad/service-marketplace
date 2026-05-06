@@ -21,6 +21,8 @@ type ProviderRow = {
   clicks_day: number | null;
   clicks_week: number | null;
   clicks_month: number | null;
+  video_url: string | null;
+  portfolio_photo_urls: string[] | null;
 };
 
 function mapProvider(row: ProviderRow): Provider {
@@ -41,7 +43,6 @@ function mapProvider(row: ProviderRow): Provider {
     bio: row.bio,
     oneLine: row.bio?.slice(0, 80) || "",
     profilePhotoUrl: row.profile_photo_url,
-    portfolioPhotoUrls: [],
     approved: row.approved,
     suspended: row.suspended,
     status: (row.status as Provider["status"]) ?? "pending",
@@ -50,6 +51,8 @@ function mapProvider(row: ProviderRow): Provider {
     clicksDay: row.clicks_day ?? 0,
     clicksWeek: row.clicks_week ?? 0,
     clicksMonth: row.clicks_month ?? 0,
+    videoUrl: row.video_url ?? null,
+    portfolioPhotoUrls: row.portfolio_photo_urls ?? [],
   };
 }
 
