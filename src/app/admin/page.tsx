@@ -26,7 +26,7 @@ export default async function AdminOverviewPage() {
     .gte("created_at", new Date(new Date().setHours(0, 0, 0, 0)).toISOString());
 
   const activeProviders = providers.filter((p) => p.approved && !p.suspended && p.subscriptionStatus === "active");
-  const pendingProviders = providers.filter((p) => !p.approved);
+  const pendingProviders = providers.filter((p) => !p.approved && !p.suspended);
   const suspendedProviders = providers.filter((p) => p.suspended);
 
   const stats = [

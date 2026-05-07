@@ -133,7 +133,7 @@ export default async function AdminUsersPage({
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {!provider.approved && (
+                  {!provider.approved && !provider.suspended && (
                     <form action={updateProviderStatus}>
                       <input type="hidden" name="providerId" value={provider.id} />
                       <input type="hidden" name="status" value="approved" />

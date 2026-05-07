@@ -14,7 +14,7 @@ export async function createContactRequest(formData: FormData) {
   if (!supabase) {
     redirect("/auth/sign-in?next=/dashboard&notice=configure-supabase");
   }
-  
+
 
   const { data: userData } = await supabase.auth.getUser();
 
@@ -25,7 +25,7 @@ export async function createContactRequest(formData: FormData) {
     redirect(`/auth/sign-in?next=/providers/${providerId}`);
   }
 
-const providerId = String(formData.get("providerId") ?? "");
+  const providerId = String(formData.get("providerId") ?? "");
 
   const { data: providerRow } = await supabase
     .from("providers")
@@ -38,7 +38,7 @@ const providerId = String(formData.get("providerId") ?? "");
   }
 
   const providerName = String(formData.get("providerName") ?? "Provider");
-  
+
   const clientName =
     String(formData.get("name") ?? "") ||
     userData.user.user_metadata?.full_name ||
@@ -63,7 +63,7 @@ const providerId = String(formData.get("providerId") ?? "");
     message,
   });
 
-    await supabase.from("provider_events").insert({
+  await supabase.from("provider_events").insert({
     provider_id: providerId,
     event_type: "contact_request_sent",
   });
@@ -211,8 +211,8 @@ export async function saveProviderProfile(formData: FormData) {
     .maybeSingle();
 
   const slug = existingSlug?.slug ?? `${baseSlug}-${data.user.id.slice(0, 8)}`;
-  
-// Handle ID document upload
+
+  // Handle ID document upload
   const idDocument = formData.get("idDocument") as File | null;
   let idDocumentUrl: string | undefined;
 
@@ -252,7 +252,6 @@ export async function saveProviderProfile(formData: FormData) {
       language,
       bio,
       one_line: oneLine,
-      ...(idDocumentUrl && { id_document_url: idDocumentUrl }),
       approved: false,
       suspended: false,
       subscription_status: "pending",
@@ -275,21 +274,34 @@ export async function updateProviderStatus(formData: FormData) {
   const supabase = await createSupabaseServerClient();
   if (!supabase) redirect("/admin");
 
-  
+
   const providerId = String(formData.get("providerId") ?? "");
   const status = String(formData.get("status") ?? "pending");
 
-  await supabase
-    .from("provider_profiles")
+  console.log("updateProviderStatus called:", { providerId, status });
+
+  const { data, error } = await supabase
+    .from("providers")
     .update({
-      status,
-      approved: status === "approved" || status === "active",
+      approved: status === "approved",
       suspended: status === "suspended",
-      subscription_status: status === "active" ? "active" : undefined,
     })
-    .eq("id", providerId);
+    .eq("id", Number(providerId))
+    .select();
+
+  console.log("update result:", { data, error });
+
+  await supabase
+    .from("providers")
+    .update({
+      approved: status === "approved",
+      suspended: status === "suspended",
+    })
+    .eq("id", Number(providerId));
 
   revalidatePath("/admin");
+  revalidatePath("/admin/approvals");
+  revalidatePath("/admin/users");
   revalidatePath("/provider/dashboard");
 }
 

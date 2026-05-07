@@ -9,7 +9,7 @@ export default async function AdminApprovalsPage() {
   const supabase = await createSupabaseServerClient();
   const providers = await getProviders({ includeHidden: true });
 
-  const pendingProviders = providers.filter((p) => !p.approved);
+  const pendingProviders = providers.filter((p) => !p.approved && !p.suspended);
 
   // Pending media approvals
   const { data: pendingMedia } = await supabase!
@@ -94,6 +94,40 @@ export default async function AdminApprovalsPage() {
                     {provider.bio}
                   </p>
                 )}
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Suspended Providers */}
+      <section>
+        <h2 className="text-base font-bold text-[#1f1f1f] mb-3">
+          Suspended
+          <span className="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">
+            {providers.filter((p) => p.suspended).length}
+          </span>
+        </h2>
+
+        {providers.filter((p) => p.suspended).length === 0 ? (
+          <div className="rounded-2xl bg-white p-8 text-center text-sm text-[#9ca3af] shadow-sm">
+            No suspended providers 🎉
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {providers.filter((p) => p.suspended).map((provider) => (
+              <div key={provider.id} className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm">
+                <div>
+                  <p className="font-bold text-sm text-[#1f1f1f]">{provider.fullName}</p>
+                  <p className="text-xs text-[#6b7280]">{provider.categoryName} · {provider.location}</p>
+                </div>
+                <form action={updateProviderStatus}>
+                  <input type="hidden" name="providerId" value={provider.id} />
+                  <input type="hidden" name="status" value="approved" />
+                  <button className="rounded-full bg-green-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-green-600 transition">
+                    Unsuspend
+                  </button>
+                </form>
               </div>
             ))}
           </div>
