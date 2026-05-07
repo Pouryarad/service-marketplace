@@ -26,8 +26,12 @@ export default function ClientRedirect() {
 
       const role = profile?.role;
 
-      // Prevent client from going to provider routes
-      if (role === "client" && next.startsWith("/provider")) {
+      // Prevent client from going to provider-only routes
+      if (role === "client" && (
+        next.startsWith("/provider/dashboard") ||
+        next.startsWith("/provider/setup") ||
+        next.startsWith("/provider/requests")
+      )) {
         router.replace("/dashboard");
         return;
       }
