@@ -67,7 +67,7 @@ export default function InsightsChart({ profileViews, emailReveals, phoneReveals
     },
   ];
 
-  const data = mode === "simple" ? simpleData : advancedData;
+  const data: Record<string, string | number>[] = mode === "simple" ? simpleData : advancedData;
 
   return (
     <div>
