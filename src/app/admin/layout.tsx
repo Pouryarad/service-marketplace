@@ -58,13 +58,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </nav>
 
         <div className="p-3 border-t border-white/5">
-          <Link
-            href="/auth/logout"
-            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-400/70 hover:text-red-400 hover:bg-red-400/10 transition-all"
-          >
-            <LogOut size={16} />
-            Sign Out
-          </Link>
+          <form action="/auth/logout" method="POST">
+            <button className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-400/70 hover:text-red-400 hover:bg-red-400/10 transition-all w-full">
+              <LogOut size={16} />
+              Sign Out
+            </button>
+          </form>
         </div>
       </aside>
 
@@ -73,6 +72,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         {/* Mobile Top Bar */}
         <header className="lg:hidden sticky top-0 z-30 flex items-center justify-between bg-[#0f1117] px-4 py-3">
           <p className="text-white font-black tracking-tight">ProFindly <span className="text-white/30 font-medium text-xs uppercase tracking-widest">Admin</span></p>
+          <form action="/auth/logout" method="POST">
+            <button className="flex items-center gap-1.5 rounded-full bg-red-500/10 px-3 py-1.5 text-xs font-bold text-red-400">
+              <LogOut size={13} /> Sign Out
+            </button>
+          </form>
         </header>
 
         {/* Mobile Bottom Nav */}
