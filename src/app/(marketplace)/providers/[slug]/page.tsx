@@ -43,10 +43,13 @@ export default async function ProviderProfilePage({
   }
 
   if (supabase && provider) {
-    await supabase.from("provider_events").insert({
-      provider_id: provider.id,
-      event_type: "view_profile",
-    });
+    const isOwnProfile = user && String(user.id) === String(provider.userId);
+    if (!isOwnProfile) {
+      await supabase.from("provider_events").insert({
+        provider_id: provider.id,
+        event_type: "view_profile",
+      });
+    }
   }
 
   if (!provider) {

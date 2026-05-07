@@ -30,6 +30,7 @@ function mapProvider(row: ProviderRow): Provider {
   return {
     id: String(row.id),
     slug: row.slug ?? String(row.id),
+    userId: (row as any).user_id ?? undefined,
     fullName: row.full_name,
     businessName: row.business_name,
     categoryId: row.category_slug,

@@ -6,8 +6,17 @@ import { getProviderRequests, getCurrentProviderProfile, getProviderInsights } f
 import { redirect } from "next/navigation";
 import InsightsChart from "@/components/InsightsChart";
 import DashboardRefresh from "@/components/DashboardRefresh";
+import FadeBanner from "@/components/FadeBanner";
+import DashboardRequests from "@/components/DashboardRequests";
 
-export default async function ProviderDashboardPage() {
+
+
+export default async function ProviderDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ profile?: string; subscribed?: string }>;
+}) {
+  const { profile, subscribed } = await searchParams;
   const [provider, requests] = await Promise.all([
     getCurrentProviderProfile(),
     getProviderRequests(),
@@ -68,6 +77,15 @@ export default async function ProviderDashboardPage() {
             </div>
           </div>
         </div>
+
+        {profile === "saved" && <FadeBanner message="✅ Profile saved successfully." type="green" />}
+        {subscribed === "true" && <FadeBanner message="🎉 Welcome to ProFindly! Your 14-day free trial has started." type="blue" />}
+
+        {subscribed === "true" && (
+          <div className="mt-4 rounded-2xl bg-blue-50 border border-blue-200 px-5 py-3 text-sm font-medium text-blue-700">
+            🎉 Welcome to ProFindly! Your 14-day free trial has started.
+          </div>
+        )}
 
         {/* Stat bar */}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -130,13 +148,20 @@ export default async function ProviderDashboardPage() {
             {/* Quick actions */}
             <section className="rounded-2xl bg-white p-5 shadow-sm">
               <h2 className="font-bold text-[#1f1f1f]">Quick Actions</h2>
-              <div className="mt-3">
+              <div className="mt-3 space-y-1">
                 <Link
                   href="/provider/setup"
                   className="flex items-center gap-3 rounded-xl p-3 hover:bg-[#f3f5f9] transition"
                 >
                   <UserCircle size={18} className="text-[#2563eb]" />
                   <span className="text-sm font-medium text-[#1f1f1f]">Edit Profile</span>
+                </Link>
+                <Link
+                  href={`/providers/${provider.slug}`}
+                  className="flex items-center gap-3 rounded-xl p-3 hover:bg-[#f3f5f9] transition"
+                >
+                  <UserCircle size={18} className="text-[#ff8a00]" />
+                  <span className="text-sm font-medium text-[#1f1f1f]">View Public Profile</span>
                 </Link>
               </div>
             </section>
@@ -157,50 +182,15 @@ export default async function ProviderDashboardPage() {
             )}
           </div>
 
-          <div className="mt-4 space-y-3">
-            {displayRequests.length === 0 ? (
-              <p className="text-sm text-[#9ca3af]">No new requests.</p>
-            ) : (
-              <>
-                {displayRequests.slice(0, 2).map((request) => (
-                  <article
-                    key={request.id}
-                    className="rounded-xl border border-[#2563eb]/15 bg-[#eff6ff] p-4"
-                  >
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-bold text-[#1f1f1f]">{request.clientName}</p>
-                          <span className="rounded-full bg-[#2563eb] px-2 py-0.5 text-[10px] font-bold text-white">
-                            New
-                          </span>
-                        </div>
-                        <p className="mt-0.5 text-xs text-[#6b7280]">
-                          {request.clientEmail}
-                          {request.phone ? ` · ${request.phone}` : ""}
-                        </p>
-                        <p className="mt-2 text-sm text-[#1f1f1f]">{request.message}</p>
-                      </div>
-                      <form action={markRequestContacted}>
-                        <input type="hidden" name="requestId" value={request.id} />
-                        <button className="whitespace-nowrap rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-bold text-[#1f1f1f] transition hover:bg-[#f3f5f9]">
-                          Mark contacted
-                        </button>
-                      </form>
-                    </div>
-                  </article>
-                ))}
-                {requests.length > 0 && (
-                  <Link
-                    href="/provider/requests"
-                    className="block rounded-xl border border-black/10 p-3 text-center text-sm font-bold text-[#2563eb] transition hover:bg-[#f3f5f9]"
-                  >
-                    View all {requests.length} requests →
-                  </Link>
-                )}
-              </>
-            )}
-          </div>
+          <DashboardRequests requests={requests} />
+          {requests.length > 0 && (
+            <Link
+              href="/provider/requests"
+              className="block rounded-xl border border-black/10 p-3 text-center text-sm font-bold text-[#2563eb] transition hover:bg-[#f3f5f9]"
+            >
+              View all {requests.length} requests →
+            </Link>
+          )}
         </section>
 
       </section>
