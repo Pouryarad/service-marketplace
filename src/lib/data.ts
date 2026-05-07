@@ -45,7 +45,7 @@ function mapProvider(row: ProviderRow): Provider {
     phone: row.phone,
     bio: row.bio,
     oneLine: row.one_line || "",
-    profilePhotoUrl: row.profile_photo_url,
+    profilePhotoUrl: row.profile_photo_url || (row as any).pending_profile_photo_url || "",
     approved: row.approved,
     suspended: row.suspended,
     status: row.suspended ? "suspended" : row.approved ? "approved" : "pending",

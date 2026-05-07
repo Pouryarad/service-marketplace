@@ -3,186 +3,162 @@ import { getProviders } from "@/lib/data";
 import { updateProviderStatus } from "@/lib/actions";
 import Image from "next/image";
 import Link from "next/link";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle, ChevronRight } from "lucide-react";
 
 export default async function AdminApprovalsPage() {
   const supabase = await createSupabaseServerClient();
   const providers = await getProviders({ includeHidden: true });
-
   const pendingProviders = providers.filter((p) => !p.approved && !p.suspended);
+  const suspendedProviders = providers.filter((p) => p.suspended);
 
-  // Pending media approvals
   const { data: pendingMedia } = await supabase!
     .from("providers")
     .select("id, full_name, pending_profile_photo_url, pending_portfolio_photo_urls, pending_video_url, pending_category_slug")
     .or("pending_profile_photo_url.not.is.null,pending_video_url.not.is.null,pending_category_slug.not.is.null");
 
+  const totalPending = pendingProviders.length + (pendingMedia?.length ?? 0);
+
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-xl font-bold text-[#1f1f1f] sm:text-2xl">Approvals</h1>
-        <p className="mt-1 text-sm text-[#6b7280]">Review and approve provider accounts and media.</p>
+    <div className="space-y-6 max-w-3xl mx-auto">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-black text-[#0f1117]">Approvals</h1>
+          <p className="text-sm text-[#9ca3af] mt-0.5">Review providers and media changes</p>
+        </div>
+        {totalPending > 0 && (
+          <div className="size-8 rounded-full bg-amber-500 flex items-center justify-center">
+            <span className="text-xs font-black text-white">{totalPending}</span>
+          </div>
+        )}
       </div>
 
       {/* Account Approvals */}
       <section>
-        <h2 className="text-base font-bold text-[#1f1f1f] mb-3">
-          Account Approvals
-          <span className="ml-2 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-bold text-yellow-700">
-            {pendingProviders.length}
-          </span>
-        </h2>
+        <div className="flex items-center gap-2 mb-3">
+          <h2 className="font-black text-[#0f1117]">Account Approvals</h2>
+          {pendingProviders.length > 0 && (
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">{pendingProviders.length}</span>
+          )}
+        </div>
 
         {pendingProviders.length === 0 ? (
-          <div className="rounded-2xl bg-white p-8 text-center text-sm text-[#9ca3af] shadow-sm">
-            No pending account approvals 🎉
+          <div className="bg-white rounded-2xl p-10 text-center border border-black/[0.04]">
+            <p className="text-2xl mb-1">🎉</p>
+            <p className="text-sm text-[#9ca3af] font-medium">All caught up</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {pendingProviders.map((provider) => (
-              <div key={provider.id} className="rounded-2xl bg-white p-4 shadow-sm">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="flex items-center gap-3">
-                    {provider.profilePhotoUrl && (
-                      <Image
-                        src={provider.profilePhotoUrl}
-                        alt={provider.fullName}
-                        width={48}
-                        height={48}
-                        className="size-12 rounded-full object-cover"
-                      />
-                    )}
-                    <div>
-                      <p className="font-bold text-[#1f1f1f]">{provider.fullName}</p>
-                      <p className="text-xs text-[#6b7280]">{provider.categoryName} · {provider.location}</p>
-                      <p className="text-xs text-[#6b7280]">{provider.email} · {provider.phone}</p>
+          <div className="space-y-2">
+            {pendingProviders.map((p) => (
+              <div key={p.id} className="bg-white rounded-2xl p-4 shadow-sm border border-black/[0.04]">
+                <div className="flex items-center gap-3">
+                  {p.profilePhotoUrl ? (
+                    <Image src={p.profilePhotoUrl} alt={p.fullName} width={44} height={44} className="size-11 rounded-full object-cover shrink-0" />
+                  ) : (
+                    <div className="size-11 rounded-full bg-[#f0f2f7] flex items-center justify-center shrink-0">
+                      <span className="font-bold text-[#6b7280]">{p.fullName.charAt(0)}</span>
                     </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-[#0f1117] truncate">{p.fullName}</p>
+                    <p className="text-xs text-[#9ca3af] truncate">{p.categoryName} · {p.location}</p>
+                    <p className="text-xs text-[#9ca3af] truncate">{p.email}</p>
                   </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {/* View ID */}
-                    <Link
-                      href={`/admin/approvals/${provider.id}`}
-                      className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-bold text-[#1f1f1f] hover:bg-[#f3f5f9] transition"
-                    >
-                      View Details
-                    </Link>
-
-                    {/* Approve */}
-                    {!provider.approved && (
-                      <form action={updateProviderStatus}>
-                        <input type="hidden" name="providerId" value={provider.id} />
-                        <input type="hidden" name="status" value="approved" />
-                        <button className="flex items-center gap-1.5 rounded-full bg-green-500 px-4 py-2 text-sm font-bold text-white hover:bg-green-600 transition">
-                          <CheckCircle size={14} /> Approve Account
-                        </button>
-                      </form>
-                    )}
-
-                    {/* Reject */}
-                    <form action={updateProviderStatus}>
-                      <input type="hidden" name="providerId" value={provider.id} />
-                      <input type="hidden" name="status" value="suspended" />
-                      <button className="flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-bold text-red-500 hover:bg-red-50 transition">
-                        <XCircle size={12} /> Reject
-                      </button>
-                    </form>
-                  </div>
+                  <Link href={`/admin/approvals/${p.id}`} className="shrink-0 text-[#9ca3af] hover:text-[#0f1117] transition-colors">
+                    <ChevronRight size={18} />
+                  </Link>
                 </div>
 
-                {/* Bio preview */}
-                {provider.bio && (
-                  <p className="mt-3 text-xs text-[#6b7280] line-clamp-2 border-t border-black/5 pt-3">
-                    {provider.bio}
-                  </p>
+                {p.bio && (
+                  <p className="mt-3 text-xs text-[#9ca3af] line-clamp-2 border-t border-black/[0.04] pt-3">{p.bio}</p>
                 )}
+
+                <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-black/[0.04]">
+                  <Link href={`/admin/approvals/${p.id}`}
+                    className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-bold text-[#6b7280] active:scale-95 transition-all">
+                    View Details
+                  </Link>
+                  <form action={updateProviderStatus}>
+                    <input type="hidden" name="providerId" value={p.id} />
+                    <input type="hidden" name="status" value="approved" />
+                    <button className="flex items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-bold text-white active:scale-95 transition-all">
+                      <CheckCircle size={12} /> Approve
+                    </button>
+                  </form>
+                  <form action={updateProviderStatus}>
+                    <input type="hidden" name="providerId" value={p.id} />
+                    <input type="hidden" name="status" value="suspended" />
+                    <button className="flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-bold text-red-500 active:scale-95 transition-all">
+                      <XCircle size={12} /> Reject
+                    </button>
+                  </form>
+                </div>
               </div>
             ))}
           </div>
         )}
       </section>
 
-      {/* Suspended Providers */}
+      {/* Pending Media */}
       <section>
-        <h2 className="text-base font-bold text-[#1f1f1f] mb-3">
-          Suspended
-          <span className="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">
-            {providers.filter((p) => p.suspended).length}
-          </span>
-        </h2>
+        <div className="flex items-center gap-2 mb-3">
+          <h2 className="font-black text-[#0f1117]">Media & Category Changes</h2>
+          {(pendingMedia?.length ?? 0) > 0 && (
+            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-700">{pendingMedia?.length}</span>
+          )}
+        </div>
 
-        {providers.filter((p) => p.suspended).length === 0 ? (
-          <div className="rounded-2xl bg-white p-8 text-center text-sm text-[#9ca3af] shadow-sm">
-            No suspended providers 🎉
+        {!pendingMedia || pendingMedia.length === 0 ? (
+          <div className="bg-white rounded-2xl p-10 text-center border border-black/[0.04]">
+            <p className="text-2xl mb-1">✨</p>
+            <p className="text-sm text-[#9ca3af] font-medium">No pending media</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {providers.filter((p) => p.suspended).map((provider) => (
-              <div key={provider.id} className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm">
-                <div>
-                  <p className="font-bold text-sm text-[#1f1f1f]">{provider.fullName}</p>
-                  <p className="text-xs text-[#6b7280]">{provider.categoryName} · {provider.location}</p>
+          <div className="space-y-2">
+            {pendingMedia.map((p) => (
+              <Link key={p.id} href={`/admin/approvals/${p.id}`}
+                className="flex items-center gap-3 bg-white rounded-2xl p-4 shadow-sm border border-black/[0.04] active:scale-[0.99] transition-all">
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-[#0f1117] truncate">{p.full_name}</p>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {p.pending_profile_photo_url && <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-bold text-orange-700">📸 Photo</span>}
+                    {p.pending_video_url && <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-bold text-purple-700">🎥 Video</span>}
+                    {p.pending_category_slug && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-700">🏷 {p.pending_category_slug}</span>}
+                    {p.pending_portfolio_photo_urls?.length > 0 && <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-bold text-green-700">🖼 {p.pending_portfolio_photo_urls.length} photos</span>}
+                  </div>
+                </div>
+                <ChevronRight size={16} className="text-[#9ca3af] shrink-0" />
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Suspended */}
+      {suspendedProviders.length > 0 && (
+        <section>
+          <div className="flex items-center gap-2 mb-3">
+            <h2 className="font-black text-[#0f1117]">Suspended</h2>
+            <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">{suspendedProviders.length}</span>
+          </div>
+          <div className="space-y-2">
+            {suspendedProviders.map((p) => (
+              <div key={p.id} className="flex items-center gap-3 bg-white rounded-2xl px-4 py-3 shadow-sm border border-black/[0.04]">
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-sm text-[#0f1117] truncate">{p.fullName}</p>
+                  <p className="text-xs text-[#9ca3af] truncate">{p.categoryName} · {p.location}</p>
                 </div>
                 <form action={updateProviderStatus}>
-                  <input type="hidden" name="providerId" value={provider.id} />
+                  <input type="hidden" name="providerId" value={p.id} />
                   <input type="hidden" name="status" value="approved" />
-                  <button className="rounded-full bg-green-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-green-600 transition">
+                  <button className="rounded-full bg-green-500 px-3 py-1.5 text-xs font-bold text-white active:scale-95 transition-all shrink-0">
                     Unsuspend
                   </button>
                 </form>
               </div>
             ))}
           </div>
-        )}
-      </section>
-
-      {/* Media Approvals */}
-      <section>
-        <h2 className="text-base font-bold text-[#1f1f1f] mb-3">
-          Pending Media / Category Changes
-          <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-700">
-            {pendingMedia?.length ?? 0}
-          </span>
-        </h2>
-
-        {!pendingMedia || pendingMedia.length === 0 ? (
-          <div className="rounded-2xl bg-white p-8 text-center text-sm text-[#9ca3af] shadow-sm">
-            No pending media changes 🎉
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {pendingMedia.map((provider) => (
-              <div key={provider.id} className="rounded-2xl bg-white p-4 shadow-sm">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="font-bold text-[#1f1f1f]">{provider.full_name}</p>
-                    <div className="mt-1 flex flex-wrap gap-2">
-                      {provider.pending_profile_photo_url && (
-                        <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-bold text-orange-700">📸 Photo</span>
-                      )}
-                      {provider.pending_video_url && (
-                        <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-bold text-purple-700">🎥 Video</span>
-                      )}
-                      {provider.pending_category_slug && (
-                        <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-700">🏷 Category: {provider.pending_category_slug}</span>
-                      )}
-                      {provider.pending_portfolio_photo_urls?.length > 0 && (
-                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-bold text-green-700">🖼 Portfolio ({provider.pending_portfolio_photo_urls.length})</span>
-                      )}
-                    </div>
-                  </div>
-                  <Link
-                    href={`/admin/approvals/${provider.id}`}
-                    className="rounded-full bg-[#2563eb] px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700 transition"
-                  >
-                    Review
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+        </section>
+      )}
     </div>
   );
 }

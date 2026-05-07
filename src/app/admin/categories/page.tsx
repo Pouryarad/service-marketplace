@@ -1,7 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import Image from "next/image";
-import { Trash2 } from "lucide-react";
 import CategoriesClient from "./CategoriesClient";
 
 async function addCategory(formData: FormData) {
@@ -26,42 +24,30 @@ async function deleteCategory(formData: FormData) {
 export default async function AdminCategoriesPage() {
   const supabase = await createSupabaseServerClient();
   const { data: categories } = await supabase!
-    .from("categories")
-    .select("*")
-    .order("name", { ascending: true });
+    .from("categories").select("*").order("name", { ascending: true });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-2xl mx-auto">
       <div>
-        <h1 className="text-xl font-bold text-[#1f1f1f] sm:text-2xl">Categories</h1>
-        <p className="mt-1 text-sm text-[#6b7280]">Manage service categories.</p>
+        <h1 className="text-2xl font-black text-[#0f1117]">Categories</h1>
+        <p className="text-sm text-[#9ca3af] mt-0.5">Manage service categories</p>
       </div>
 
-      {/* Add Category */}
-      <div className="rounded-2xl bg-white p-5 shadow-sm">
-        <h2 className="font-bold text-[#1f1f1f] mb-4">Add New Category</h2>
-        <form action={addCategory} className="flex gap-3">
-          <input
-            name="name"
-            placeholder="e.g. Immigration Consultant"
-            className="h-11 flex-1 rounded-xl border border-black/10 px-4 text-sm outline-none focus:border-[#2563eb] transition"
-            required
-          />
-          <button
-            type="submit"
-            className="rounded-xl bg-[#2563eb] px-5 py-2 text-sm font-bold text-white hover:bg-blue-700 transition"
-          >
+      {/* Add */}
+      <div className="bg-white rounded-2xl p-5 shadow-sm border border-black/[0.04]">
+        <h2 className="font-black text-[#0f1117] mb-4">Add Category</h2>
+        <form action={addCategory} className="flex gap-2">
+          <input name="name" placeholder="e.g. Immigration Consultant" required
+            className="h-11 flex-1 rounded-xl border border-black/10 px-4 text-sm outline-none focus:border-[#0f1117] transition placeholder:text-[#c4c9d4]" />
+          <button type="submit"
+            className="rounded-xl bg-[#0f1117] px-5 py-2 text-sm font-bold text-white active:scale-95 transition-all">
             Add
           </button>
         </form>
       </div>
 
-      {/* Categories List */}
-      {/* Categories List */}
-      <CategoriesClient
-        categories={categories ?? []}
-        deleteCategory={deleteCategory}
-      />
+      {/* List */}
+      <CategoriesClient categories={categories ?? []} deleteCategory={deleteCategory} />
     </div>
   );
 }

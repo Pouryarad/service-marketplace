@@ -30,31 +30,29 @@ export default async function RootLayout({
   const providerRequests: ProviderRequest[] =
     role === "provider" ? await getProviderRequests() : [];
 
+  // Admin layout handles its own nav — root nav not needed
+  if (role === "admin") {
+    return (
+      <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}>
+        <body className="min-h-full flex flex-col bg-[#f0f2f7]">
+          {children}
+        </body>
+      </html>
+    );
+  }
+
   return (
-    <html
-      lang="en"
-      className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-[#f3f5f9]">
         <BottomNav
-          variant={
-            !role
-              ? "public"
-              : role === "provider"
-                ? "provider"
-                : "dashboard"
-          }
+          variant={!role ? "public" : role === "provider" ? "provider" : "dashboard"}
           providerRequests={providerRequests}
         />
         <TopNav
           variant={
-            role === "provider"
-              ? "provider"
-              : role === "admin"
-                ? "admin"
-                : role
-                  ? "dashboard"
-                  : "public"
+            role === "provider" ? "provider" :
+            role === "admin" ? "admin" :
+            role ? "dashboard" : "public"
           }
           providerRequests={providerRequests}
         />

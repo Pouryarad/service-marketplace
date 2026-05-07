@@ -2,7 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { sendEmailNotification } from "@/lib/email";
+import {
+  sendEmailNotification,
+  sendNewContactRequestEmail,
+  sendAccountApprovedEmail,
+  sendAccountRejectedEmail,
+  sendAccountSuspendedEmail,
+} from "@/lib/email";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Stripe from "stripe";
 
@@ -81,11 +87,23 @@ export async function createContactRequest(formData: FormData) {
     metadata: { provider_id: providerId },
   });
 
-  await sendEmailNotification({
-    to: "admin@findly.example",
-    subject: "New contact request",
-    html: `<p>${clientName} requested contact from ${providerName}.</p>`,
-  });
+  // Email the provider directly
+  const { data: providerContact } = await supabase
+    .from("providers")
+    .select("email, full_name")
+    .eq("id", Number(providerId))
+    .maybeSingle();
+
+  if (providerContact?.email) {
+    await sendNewContactRequestEmail({
+      providerEmail: providerContact.email,
+      providerName: providerContact.full_name,
+      clientName,
+      clientEmail,
+      clientPhone: phone || null,
+      message,
+    });
+  }
 
   redirect(`/providers/${providerId}?request=success`);
 }
@@ -278,26 +296,35 @@ export async function updateProviderStatus(formData: FormData) {
   const providerId = String(formData.get("providerId") ?? "");
   const status = String(formData.get("status") ?? "pending");
 
-  console.log("updateProviderStatus called:", { providerId, status });
-
-  const { data, error } = await supabase
+  const { data: provider } = await supabase
     .from("providers")
     .update({
       approved: status === "approved",
       suspended: status === "suspended",
     })
     .eq("id", Number(providerId))
-    .select();
+    .select("email, full_name")
+    .single();
 
-  console.log("update result:", { data, error });
-
-  await supabase
-    .from("providers")
-    .update({
-      approved: status === "approved",
-      suspended: status === "suspended",
-    })
-    .eq("id", Number(providerId));
+  // Send provider notification email
+  if (provider?.email) {
+    if (status === "approved") {
+      await sendAccountApprovedEmail({
+        providerEmail: provider.email,
+        providerName: provider.full_name,
+      });
+    } else if (status === "suspended") {
+      await sendAccountSuspendedEmail({
+        providerEmail: provider.email,
+        providerName: provider.full_name,
+      });
+    } else if (status === "rejected") {
+      await sendAccountRejectedEmail({
+        providerEmail: provider.email,
+        providerName: provider.full_name,
+      });
+    }
+  }
 
   revalidatePath("/admin");
   revalidatePath("/admin/approvals");
