@@ -16,11 +16,11 @@ export async function POST(req: NextRequest) {
 
   const coupon = await stripe.coupons.create(couponData);
 
-  if (code) {
+   if (code) {
     await stripe.promotionCodes.create({
-      coupon: coupon.id,
+      coupon: coupon.id as string,
       code,
-    });
+    } as any);
   }
 
   return NextResponse.json({ success: true, couponId: coupon.id });
