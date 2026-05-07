@@ -454,3 +454,22 @@ export async function createStripeCheckout() {
 
   redirect(session.url!);
 }
+
+export async function grantAdminAccess(formData: FormData) {
+  "use server";
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return;
+
+  const providerId = Number(formData.get("providerId"));
+
+  await supabase
+    .from("providers")
+    .update({
+      admin_granted: true,
+      subscription_status: "active",
+      approved: true,
+    })
+    .eq("id", providerId);
+
+  revalidatePath("/admin/subscriptions");
+}
