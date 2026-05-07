@@ -26,6 +26,7 @@ export default function AuthModal({
       : window.location.pathname + window.location.search;
 
     localStorage.setItem("next", redirectNext);
+    localStorage.setItem("pendingRole", role === "provider" ? "provider" : "client");
 
     await supabase.auth.signOut();
 

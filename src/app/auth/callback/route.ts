@@ -6,18 +6,14 @@ export async function GET(request: NextRequest) {
   const code = url.searchParams.get("code");
 
   const supabase = await createSupabaseServerClient();
-  if (!supabase) {
-    return NextResponse.redirect(new URL("/", url.origin));
-  }
+  if (!supabase) return NextResponse.redirect(new URL("/", url.origin));
 
   if (code) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.redirect(new URL("/", url.origin));
-  }
+  if (!user) return NextResponse.redirect(new URL("/", url.origin));
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -33,5 +29,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/", url.origin));
   }
 
-  return NextResponse.redirect(new URL("/", url.origin));
+  // New user — let client side handle role assignment
+  return NextResponse.redirect(new URL("/auth/setup-role", url.origin));
 }

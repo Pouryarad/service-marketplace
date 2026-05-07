@@ -200,6 +200,26 @@ export async function saveProviderProfile(formData: FormData) {
     .maybeSingle();
 
   const slug = existingSlug?.slug ?? `${baseSlug}-${data.user.id.slice(0, 8)}`;
+  
+// Handle ID document upload
+  const idDocument = formData.get("idDocument") as File | null;
+  let idDocumentUrl: string | undefined;
+
+  if (idDocument && idDocument.size > 0) {
+    const ext = idDocument.name.split(".").pop();
+    const path = `${data.user.id}/id-${Date.now()}.${ext}`;
+    const { error: idUploadError } = await supabase.storage
+      .from("provider-ids")
+      .upload(path, idDocument, { upsert: true });
+
+    if (!idUploadError) {
+      const { data: urlData } = supabase.storage
+        .from("provider-ids")
+        .getPublicUrl(path);
+      idDocumentUrl = urlData.publicUrl;
+    }
+  }
+
   const { error: upsertError } = await supabase.from("providers").upsert(
     {
       user_id: data.user.id,
@@ -220,6 +240,7 @@ export async function saveProviderProfile(formData: FormData) {
       language,
       bio,
       one_line: oneLine,
+      ...(idDocumentUrl && { id_document_url: idDocumentUrl }),
       approved: false,
       suspended: false,
       subscription_status: "pending",

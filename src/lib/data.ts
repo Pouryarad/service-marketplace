@@ -44,7 +44,7 @@ function mapProvider(row: ProviderRow): Provider {
     email: row.email,
     phone: row.phone,
     bio: row.bio,
-    oneLine: row.bio?.slice(0, 80) || "",
+    oneLine: row.one_line || "",
     profilePhotoUrl: row.profile_photo_url,
     approved: row.approved,
     suspended: row.suspended,
