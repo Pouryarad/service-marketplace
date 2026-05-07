@@ -143,8 +143,10 @@ export async function getProviders(options?: {
     query = query.ilike("location", `%${options.location}%`);
   }
 
-  if (options?.sort === "az") {
-    query = query.order("name", { ascending: true });
+if (options?.sort === "az") {
+    query = query.order("full_name", { ascending: true });
+  } else {
+    query = query.order("id", { ascending: false });
   }
 
   if (!options?.includeHidden) {
