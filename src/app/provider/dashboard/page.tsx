@@ -12,9 +12,9 @@ export default async function ProviderDashboardPage() {
     getProviderRequests(),
   ]);
 
-  const insights = provider ? await getProviderInsights(Number(provider.id)) : null;
-
   if (!provider) redirect("/provider/setup");
+
+  const insights = await getProviderInsights(Number(provider.id));
 
   const openRequests = requests.filter((r) => r.status === "new");
   const displayRequests = openRequests;
