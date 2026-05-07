@@ -24,6 +24,7 @@ export default async function ProviderDashboardPage({
   ]);
 
   if (!provider) redirect("/provider/setup");
+  console.log("provider status:", provider.status, "approved:", (provider as any).approved);
 
   const insights = await getProviderInsights(Number(provider.id));
 

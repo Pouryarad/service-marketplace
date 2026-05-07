@@ -292,7 +292,9 @@ if (!isFirstTime) {
                     <input type="file" accept="image/*" className="hidden" onChange={handleProfilePhoto} />
                   </label>
                 </div>
-                {provider?.profilePhotoUrl && <p className="mt-1 text-xs text-yellow-600">⏳ New photos require admin approval.</p>}
+                {provider?.pendingProfilePhotoUrl && (
+              <p className="mt-1 text-xs text-yellow-600">⏳ New photos require admin approval.</p>
+            )}
               </div>
 
               <div>

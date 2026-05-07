@@ -82,7 +82,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // Redirect admin away from provider routes to admin panel
-  if (pathname.startsWith("/provider") && user) {
+    if (pathname.startsWith("/provider/") && user) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")

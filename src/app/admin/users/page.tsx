@@ -160,7 +160,8 @@ export default async function AdminUsersPage({
                     </form>
                   )}
                   <Link
-                    href={`/providers/${provider.slug}`}
+                    href={`/providers/${provider.slug ?? provider.id}`}
+                    target="_blank"
                     className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-bold text-[#1f1f1f] hover:bg-[#f3f5f9] transition"
                   >
                     View Profile

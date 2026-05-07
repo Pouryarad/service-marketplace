@@ -44,6 +44,7 @@ export type Provider = {
   clicksWeek: number;
   clicksMonth: number;
   videoUrl?: string | null;
+  pendingProfilePhotoUrl?: string | null;
 };
 
 export type ContactRequest = {

@@ -69,13 +69,15 @@ export default async function AdminApprovalsPage() {
                     </Link>
 
                     {/* Approve */}
-                    <form action={updateProviderStatus}>
-                      <input type="hidden" name="providerId" value={provider.id} />
-                      <input type="hidden" name="status" value="approved" />
-                      <button className="flex items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-green-600 transition">
-                        <CheckCircle size={12} /> Approve
-                      </button>
-                    </form>
+                    {!provider.approved && (
+                      <form action={updateProviderStatus}>
+                        <input type="hidden" name="providerId" value={provider.id} />
+                        <input type="hidden" name="status" value="approved" />
+                        <button className="flex items-center gap-1.5 rounded-full bg-green-500 px-4 py-2 text-sm font-bold text-white hover:bg-green-600 transition">
+                          <CheckCircle size={14} /> Approve Account
+                        </button>
+                      </form>
+                    )}
 
                     {/* Reject */}
                     <form action={updateProviderStatus}>

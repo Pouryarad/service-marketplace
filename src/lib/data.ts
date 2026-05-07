@@ -48,7 +48,7 @@ function mapProvider(row: ProviderRow): Provider {
     profilePhotoUrl: row.profile_photo_url,
     approved: row.approved,
     suspended: row.suspended,
-    status: (row.status as Provider["status"]) ?? "pending",
+    status: row.suspended ? "suspended" : row.approved ? "approved" : "pending",
     subscriptionStatus: (row.subscription_status as Provider["subscriptionStatus"]) ?? "pending",
     featuredRank: null,
     clicksDay: row.clicks_day ?? 0,
@@ -56,6 +56,7 @@ function mapProvider(row: ProviderRow): Provider {
     clicksMonth: row.clicks_month ?? 0,
     videoUrl: row.video_url ?? null,
     portfolioPhotoUrls: row.portfolio_photo_urls ?? [],
+    pendingProfilePhotoUrl: (row as any).pending_profile_photo_url ?? null,
   };
 }
 

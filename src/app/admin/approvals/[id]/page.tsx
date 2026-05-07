@@ -14,6 +14,7 @@ export default async function ApprovalDetailPage({
   const supabase = await createSupabaseServerClient();
 
   const provider = await getProvider(id);
+  console.log("provider.approved:", provider?.approved);
   if (!provider) return <div>Provider not found</div>;
 
   // Get raw DB data for pending fields and ID document
@@ -151,13 +152,15 @@ export default async function ApprovalDetailPage({
   <div className="rounded-2xl bg-white p-5 shadow-sm">
     <h2 className="font-bold text-[#1f1f1f] mb-3">Account Actions</h2>
     <div className="flex flex-wrap gap-2">
+      {!provider.approved && (
       <form action={updateProviderStatus}>
-        <input type="hidden" name="providerId" value={id} />
+        <input type="hidden" name="providerId" value={provider.id} />
         <input type="hidden" name="status" value="approved" />
         <button className="flex items-center gap-1.5 rounded-full bg-green-500 px-4 py-2 text-sm font-bold text-white hover:bg-green-600 transition">
           <CheckCircle size={14} /> Approve Account
         </button>
       </form>
+      )}
       <form action={updateProviderStatus}>
         <input type="hidden" name="providerId" value={id} />
         <input type="hidden" name="status" value="suspended" />

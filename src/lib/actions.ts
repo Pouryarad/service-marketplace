@@ -252,9 +252,9 @@ export async function saveProviderProfile(formData: FormData) {
       language,
       bio,
       one_line: oneLine,
-      approved: false,
+      ...(existing ? {} : { approved: false }),
       suspended: false,
-      subscription_status: "pending",
+      ...(existing ? {} : { subscription_status: "pending" }),
     },
     { onConflict: "user_id" }
   );
