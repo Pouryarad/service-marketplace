@@ -23,11 +23,13 @@ type ProviderRow = {
   clicks_month: number | null;
   video_url: string | null;
   portfolio_photo_urls: string[] | null;
+  slug: string | null;
 };
 
 function mapProvider(row: ProviderRow): Provider {
   return {
     id: String(row.id),
+    slug: row.slug ?? String(row.id),
     fullName: row.full_name,
     businessName: row.business_name,
     categoryId: row.category_slug,
@@ -158,9 +160,20 @@ export async function getProviders(options?: {
   return (data || []).map(mapProvider);
 }
 
-export async function getProvider(id: string) {
-  const providers = await getProviders({ includeHidden: true });
-  return providers.find((provider) => String(provider.id) === String(id)) ?? null;
+export async function getProvider(slugOrId: string) {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return null;
+
+  const isNumeric = /^\d+$/.test(slugOrId);
+
+  const query = supabase.from("providers").select("*");
+  const { data, error } = await (isNumeric
+    ? query.eq("id", Number(slugOrId))
+    : query.eq("slug", slugOrId)
+  ).maybeSingle();
+
+  if (error || !data) return null;
+  return mapProvider(data);
 }
 
 export async function getCurrentProviderProfile() {

@@ -180,9 +180,22 @@ export async function saveProviderProfile(formData: FormData) {
   const pendingVideoUrl = videoUrl && videoUrl !== existing?.video_url ? videoUrl : null;
   const finalVideoUrl = existing?.video_url ?? videoUrl ?? null;
 
+  const baseSlug = fullName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  const { data: existingSlug } = await supabase
+    .from("providers")
+    .select("slug")
+    .eq("user_id", data.user.id)
+    .maybeSingle();
+
+  const slug = existingSlug?.slug ?? `${baseSlug}-${data.user.id.slice(0, 8)}`;
   const { error: upsertError } = await supabase.from("providers").upsert(
     {
       user_id: data.user.id,
+      slug,
       full_name: fullName,
       business_name: businessName,
       category_slug: finalCategorySlug,

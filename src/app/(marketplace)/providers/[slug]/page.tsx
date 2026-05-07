@@ -15,15 +15,15 @@ export default async function ProviderProfilePage({
   params,
   searchParams,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
   searchParams: Promise<{ request?: string; error?: string }>;
 }) {
-  const { id } = await params;
+  const { slug } = await params;
   const query = await searchParams;
   const isSuccess = query.request === "success";
 
   const [provider, user] = await Promise.all([
-    getProvider(id),
+    getProvider(slug),
     getCurrentUser(),
   ]);
 
@@ -51,14 +51,16 @@ export default async function ProviderProfilePage({
 
   if (!provider) {
     return (
-      <main className="min-h-screen bg-[#f3f5f9]">
-        <div className="mx-auto max-w-3xl px-4 py-16 text-center">
-          <h1 className="text-3xl font-bold">Provider not found</h1>
+      <main className="min-h-screen bg-[#f3f5f9] flex items-center justify-center">
+        <div className="text-center px-4">
+          <p className="text-7xl">🔍</p>
+          <h1 className="mt-4 text-4xl font-bold text-[#1f1f1f]">Whoops!</h1>
+          <p className="mt-2 text-gray-500 text-lg">We couldn't find that provider.</p>
           <Link
-            className="mt-5 inline-flex rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white"
+            className="mt-6 inline-flex rounded-full bg-[#ff8a00] px-6 py-3 font-bold text-white hover:bg-orange-600 transition"
             href="/"
           >
-            Back home
+            Take me home 🏠
           </Link>
         </div>
       </main>
@@ -131,7 +133,7 @@ export default async function ProviderProfilePage({
               ) : (
                 <>
                   <AuthModal
-                    next={`/providers/${provider.id}`}
+                    next={`/providers/${provider.slug}`}
                     trigger={
                       <div className="w-full text-center rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white cursor-pointer">
                         Reveal Email (Sign in)
@@ -140,7 +142,7 @@ export default async function ProviderProfilePage({
                   />
 
                   <AuthModal
-                    next={`/providers/${provider.id}`}
+                    next={`/providers/${provider.slug}`}
                     trigger={
                       <div className="w-full text-center rounded-full bg-[#2563eb] px-5 py-3 font-bold text-white cursor-pointer">
                         Reveal Phone (Sign in)
@@ -261,7 +263,7 @@ export default async function ProviderProfilePage({
                   <SubmitRequestButton isSuccess={isSuccess} />
                 ) : (
                   <AuthModal
-                    next={`/providers/${provider.id}`}
+                    next={`/providers/${provider.slug}`}
                     trigger={
                       <div className="w-full text-center rounded-full bg-[#ff8a00] px-5 py-3 font-bold text-white cursor-pointer">
                         Sign in to Contact

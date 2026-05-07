@@ -20,6 +20,7 @@ export type Category = {
 
 export type Provider = {
   id: string;
+  slug: string;
   fullName: string;
   businessName?: string | null;
   categoryId: string;
