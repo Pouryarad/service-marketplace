@@ -21,6 +21,10 @@ export async function GET(request: NextRequest) {
     .eq("id", user.id)
     .maybeSingle();
 
+  if (profile?.role === "admin") {
+    return NextResponse.redirect(new URL("/admin", url.origin));
+  }
+
   if (profile?.role === "provider") {
     return NextResponse.redirect(new URL("/provider/dashboard", url.origin));
   }

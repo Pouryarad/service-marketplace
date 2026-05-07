@@ -11,6 +11,7 @@ export async function proxy(request: NextRequest) {
     "/provider/dashboard",
     "/provider/setup",
     "/provider/requests",
+    "/admin",
   ];
 
   const isProtected = protectedRoutes.some((route) =>
@@ -67,7 +68,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Redirect authenticated clients away from provider dashboard
+// Redirect authenticated clients away from provider dashboard
   if (pathname.startsWith("/provider") && user) {
     const { data: profile } = await supabase
       .from("profiles")
@@ -77,6 +78,19 @@ export async function proxy(request: NextRequest) {
 
     if (profile?.role === "client") {
       return NextResponse.redirect(new URL("/dashboard", url.origin));
+    }
+  }
+
+  // Redirect admin away from provider routes to admin panel
+  if (pathname.startsWith("/provider") && user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profile?.role === "admin") {
+      return NextResponse.redirect(new URL("/admin", url.origin));
     }
   }
 
