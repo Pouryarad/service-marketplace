@@ -5,6 +5,7 @@ import { markRequestContacted, subscribeProvider } from "@/lib/actions";
 import { getProviderRequests, getCurrentProviderProfile, getProviderInsights } from "@/lib/data";
 import { redirect } from "next/navigation";
 import InsightsChart from "@/components/InsightsChart";
+import DashboardRefresh from "@/components/DashboardRefresh";
 
 export default async function ProviderDashboardPage() {
   const [provider, requests] = await Promise.all([
@@ -39,7 +40,7 @@ export default async function ProviderDashboardPage() {
   return (
     <main className="min-h-screen bg-[#f3f5f9]">
       <section className="mx-auto w-full max-w-7xl px-4 pb-20 pt-6 sm:px-6">
-
+        <DashboardRefresh />
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-center gap-4">
