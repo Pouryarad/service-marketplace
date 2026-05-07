@@ -48,6 +48,11 @@ export async function createContactRequest(formData: FormData) {
     phone: phone || null,
     message,
   });
+  
+    await supabase.from("provider_events").insert({
+    provider_id: providerId,
+    event_type: "contact_request_sent",
+  });
 
   if (error) {
 

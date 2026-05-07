@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Inbox, TrendingUp, UserCircle, BadgeCheck } from "lucide-react";
 import { markRequestContacted, subscribeProvider } from "@/lib/actions";
-import { getProviderRequests, getCurrentProviderProfile } from "@/lib/data";
+import { getProviderRequests, getCurrentProviderProfile, getProviderInsights } from "@/lib/data";
 import { redirect } from "next/navigation";
 import InsightsChart from "@/components/InsightsChart";
 
@@ -11,6 +11,8 @@ export default async function ProviderDashboardPage() {
     getCurrentProviderProfile(),
     getProviderRequests(),
   ]);
+
+  const insights = provider ? await getProviderInsights(Number(provider.id)) : null;
 
   if (!provider) redirect("/provider/setup");
 
@@ -68,9 +70,9 @@ export default async function ProviderDashboardPage() {
 
         {/* Stat bar */}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatCard label="Today's Views" value={provider.clicksDay} />
-          <StatCard label="Week Views" value={provider.clicksWeek} />
-          <StatCard label="Month Views" value={provider.clicksMonth} />
+          <StatCard label="Today's Views" value={insights?.profileViews.count_day ?? 0} />
+          <StatCard label="Week Views" value={insights?.profileViews.count_week ?? 0} />
+          <StatCard label="Month Views" value={insights?.profileViews.count_month ?? 0} />
           <StatCard label="Total Leads" value={totalLeads} highlight />
         </div>
 
@@ -88,10 +90,10 @@ export default async function ProviderDashboardPage() {
             </p>
             <div className="mt-5">
               <InsightsChart
-                clicksDay={provider.clicksDay}
-                clicksWeek={provider.clicksWeek}
-                clicksMonth={provider.clicksMonth}
-                totalLeads={totalLeads}
+                profileViews={insights?.profileViews ?? { count_day: 0, count_week: 0, count_month: 0, count_total: 0 }}
+                emailReveals={insights?.emailReveals ?? { count_day: 0, count_week: 0, count_month: 0, count_total: 0 }}
+                phoneReveals={insights?.phoneReveals ?? { count_day: 0, count_week: 0, count_month: 0, count_total: 0 }}
+                contactRequests={insights?.contactRequests ?? { count_day: 0, count_week: 0, count_month: 0, count_total: 0 }}
               />
             </div>
           </section>

@@ -369,3 +369,30 @@ export async function getCurrentUserRole() {
 
   return data?.role ?? "client";
 }
+
+export async function getProviderInsights(providerId: number) {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("provider_insights")
+    .select("*")
+    .eq("provider_id", providerId);
+
+  if (error || !data) return null;
+
+  const get = (eventType: string) =>
+    data.find((r) => r.event_type === eventType) ?? {
+      count_day: 0,
+      count_week: 0,
+      count_month: 0,
+      count_total: 0,
+    };
+
+  return {
+    profileViews: get("view_profile"),
+    emailReveals: get("reveal_email"),
+    phoneReveals: get("reveal_phone"),
+    contactRequests: get("contact_request_sent"),
+  };
+}
