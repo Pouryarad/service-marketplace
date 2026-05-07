@@ -24,7 +24,7 @@ export default function BottomNav({
         <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-black/10 bg-white sm:hidden">
             <div className="flex justify-around py-2">
 
-                {variant !== "provider" && (
+                {variant !== "provider" && variant !== "admin" && (
                     <Link href="/" className={itemClass("/")}>
                         <Home size={20} />
                         Home
@@ -67,6 +67,27 @@ export default function BottomNav({
                             )}
                         </div>
                         Requests
+                    </Link>
+                )}
+
+                {variant === "admin" && (
+                    <Link href="/admin" className={itemClass("/admin")}>
+                        <LayoutDashboard size={20} />
+                        Overview
+                    </Link>
+                )}
+
+                {variant === "admin" && (
+                    <Link href="/admin/users" className={itemClass("/admin/users")}>
+                        <User size={20} />
+                        Users
+                    </Link>
+                )}
+
+                {variant === "admin" && (
+                    <Link href="/admin/approvals" className={itemClass("/admin/approvals")}>
+                        <Bell size={20} />
+                        Approvals
                     </Link>
                 )}
 

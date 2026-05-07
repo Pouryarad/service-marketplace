@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import Image from "next/image";
+import BottomNav from "@/components/BottomNav";
 import {
   LayoutDashboard,
   Users,
@@ -74,6 +75,7 @@ export default async function AdminLayout({
 
       {/* Main */}
       <div className="flex-1 lg:ml-60 min-h-screen">
+        <BottomNav variant="admin" />
         {/* Mobile header */}
         <header className="lg:hidden flex items-center gap-3 bg-white border-b border-black/5 px-4 py-3">
           <Image src="/logo.png" alt="ProFindly" width={100} height={28} className="h-7 w-auto" />
