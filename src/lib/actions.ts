@@ -14,8 +14,7 @@ export async function createContactRequest(formData: FormData) {
   if (!supabase) {
     redirect("/auth/sign-in?next=/dashboard&notice=configure-supabase");
   }
-
-  console.log("ACTION STARTED");
+  
 
   const { data: userData } = await supabase.auth.getUser();
 
@@ -26,8 +25,20 @@ export async function createContactRequest(formData: FormData) {
     redirect(`/auth/sign-in?next=/providers/${providerId}`);
   }
 
-  const providerId = String(formData.get("providerId") ?? "");
+const providerId = String(formData.get("providerId") ?? "");
+
+  const { data: providerRow } = await supabase
+    .from("providers")
+    .select("user_id")
+    .eq("id", Number(providerId))
+    .maybeSingle();
+
+  if (providerRow?.user_id === userData.user.id) {
+    redirect(`/providers/${providerId}?error=own-profile`);
+  }
+
   const providerName = String(formData.get("providerName") ?? "Provider");
+  
   const clientName =
     String(formData.get("name") ?? "") ||
     userData.user.user_metadata?.full_name ||
@@ -263,6 +274,7 @@ export async function updateProviderStatus(formData: FormData) {
   const supabase = await createSupabaseServerClient();
   if (!supabase) redirect("/admin");
 
+  
   const providerId = String(formData.get("providerId") ?? "");
   const status = String(formData.get("status") ?? "pending");
 

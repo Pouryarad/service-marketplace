@@ -42,6 +42,8 @@ export default async function ProviderProfilePage({
     isFav = !!data;
   }
 
+const isOwnProfile = !!(user && provider && String(user.id) === String(provider.userId));
+
   if (supabase && provider) {
     const isOwnProfile = user && String(user.id) === String(provider.userId);
     if (!isOwnProfile) {
@@ -208,6 +210,11 @@ export default async function ProviderProfilePage({
         {/* RIGHT SIDE */}
         <div className="mt-6 lg:mt-0 lg:sticky lg:top-24">
 
+          {isOwnProfile && (
+            <div className="mb-3 rounded-xl bg-[#fff8e1] border border-yellow-200 px-4 py-3 text-sm text-yellow-700 font-medium">
+              👀 This is how clients see your profile.
+            </div>
+          )}
           <section className="bg-white rounded-[12px] p-6 shadow-sm">
             <h2 className="text-xl font-bold">Request Contact</h2>
 
@@ -225,9 +232,8 @@ export default async function ProviderProfilePage({
 
             <form action={createContactRequest} className="mt-4">
               <fieldset
-                disabled={isSuccess}
-                className={`space-y-3 ${isSuccess ? "opacity-60 pointer-events-none" : ""
-                  }`}
+                disabled={isOwnProfile || isSuccess}
+                className={`space-y-3 ${isOwnProfile || isSuccess ? "opacity-40 pointer-events-none select-none grayscale" : ""}`}
               >
                 <input
                   type="hidden"
