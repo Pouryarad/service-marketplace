@@ -4,6 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { sendEmailNotification } from "@/lib/email";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 
 export async function createContactRequest(formData: FormData) {
@@ -48,7 +51,7 @@ export async function createContactRequest(formData: FormData) {
     phone: phone || null,
     message,
   });
-  
+
     await supabase.from("provider_events").insert({
     provider_id: providerId,
     event_type: "contact_request_sent",
@@ -363,4 +366,58 @@ export async function requestAccountDelete() {
   });
 
   redirect("/dashboard/settings?delete=requested");
+}
+
+export async function createStripeCheckout() {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) redirect("/auth/sign-in");
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/auth/sign-in");
+
+  const { data: provider } = await supabase
+    .from("providers")
+    .select("id, stripe_customer_id, early_bird")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (!provider) redirect("/provider/setup");
+
+  // Check if early bird (first 100 approved providers)
+  const { count } = await supabase
+    .from("providers")
+    .select("*", { count: "exact", head: true })
+    .eq("approved", true);
+
+  const isEarlyBird = (count ?? 0) < 100;
+  const priceId = isEarlyBird
+    ? process.env.STRIPE_EARLY_BIRD_PRICE_ID!
+    : process.env.STRIPE_STANDARD_PRICE_ID!;
+
+  // Create or reuse Stripe customer
+  let customerId = provider.stripe_customer_id;
+  if (!customerId) {
+    const customer = await stripe.customers.create({
+      email: user.email!,
+      metadata: { provider_id: String(provider.id) },
+    });
+    customerId = customer.id;
+    await supabase
+      .from("providers")
+      .update({ stripe_customer_id: customerId, early_bird: isEarlyBird })
+      .eq("id", provider.id);
+  }
+
+  // Create checkout session with 14-day trial
+  const session = await stripe.checkout.sessions.create({
+    customer: customerId,
+    mode: "subscription",
+    line_items: [{ price: priceId, quantity: 1 }],
+    subscription_data: { trial_period_days: 14 },
+    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/provider/dashboard?subscribed=true`,
+    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/provider/setup?tab=payment`,
+    allow_promotion_codes: true,
+  });
+
+  redirect(session.url!);
 }
