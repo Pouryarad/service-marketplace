@@ -235,6 +235,7 @@ export async function saveProviderProfile(formData: FormData) {
     {
       user_id: data.user.id,
       slug,
+      ...(idDocumentUrl && { id_document_url: idDocumentUrl }),
       full_name: fullName,
       business_name: businessName,
       category_slug: finalCategorySlug,
