@@ -44,11 +44,19 @@ export async function POST() {
       .eq("id", provider.id);
   }
 
+  const { data: providerData } = await supabase
+    .from("providers")
+    .select("trial_used")
+    .eq("id", provider.id)
+    .maybeSingle();
+
+  const trialDays = providerData?.trial_used ? 0 : 14;
+
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: "subscription",
     line_items: [{ price: priceId, quantity: 1 }],
-    subscription_data: { trial_period_days: 14 },
+    subscription_data: trialDays > 0 ? { trial_period_days: trialDays } : {},
     success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/provider/dashboard?subscribed=true`,
     cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/provider/setup?tab=payment`,
     allow_promotion_codes: true,

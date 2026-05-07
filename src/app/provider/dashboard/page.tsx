@@ -17,6 +17,7 @@ export default async function ProviderDashboardPage({
   searchParams: Promise<{ profile?: string; subscribed?: string }>;
 }) {
   const { profile, subscribed } = await searchParams;
+
   const [provider, requests] = await Promise.all([
     getCurrentProviderProfile(),
     getProviderRequests(),
@@ -49,6 +50,8 @@ export default async function ProviderDashboardPage({
   return (
     <main className="min-h-screen bg-[#f3f5f9]">
       <section className="mx-auto w-full max-w-7xl px-4 pb-20 pt-6 sm:px-6">
+        {profile === "saved" && <FadeBanner message="✅ Profile saved successfully." type="green" />}
+        {subscribed === "true" && <FadeBanner message="🎉 Welcome to ProFindly! Your 14-day free trial has started." type="blue" />}
         <DashboardRefresh />
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

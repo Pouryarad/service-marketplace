@@ -30,7 +30,13 @@ export async function POST(req: Request) {
   const subscription = event.data.object as Stripe.Subscription;
 
   switch (event.type) {
-    case "customer.subscription.created":
+    case "customer.subscription.created": {
+      await supabase
+        .from("providers")
+        .update({ trial_used: true })
+        .eq("stripe_customer_id", subscription.customer as string);
+      // fall through
+    }
     case "customer.subscription.updated": {
       const status = subscription.status;
       const isActive = status === "active" || status === "trialing";
