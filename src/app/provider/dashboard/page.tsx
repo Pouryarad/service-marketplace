@@ -8,6 +8,7 @@ import InsightsChart from "@/components/InsightsChart";
 import DashboardRefresh from "@/components/DashboardRefresh";
 import FadeBanner from "@/components/FadeBanner";
 import DashboardRequests from "@/components/DashboardRequests";
+import RoleConflictModal from "@/components/RoleConflictModal";
 
 
 
@@ -50,6 +51,7 @@ export default async function ProviderDashboardPage({
 
   return (
     <main className="min-h-screen bg-[#f3f5f9]">
+      <RoleConflictModal actualRole="provider" />
       <section className="mx-auto w-full max-w-7xl px-4 pb-20 pt-6 sm:px-6">
         {profile === "saved" && <FadeBanner message="✅ Profile saved successfully." type="green" />}
         {subscribed === "true" && <FadeBanner message="🎉 Welcome to ProFindly! Your 14-day free trial has started." type="blue" />}

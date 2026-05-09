@@ -4,6 +4,7 @@ import { getContactRequests } from "@/lib/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Image from "next/image";
 import { Settings } from "lucide-react";
+import RoleConflictModal from "@/components/RoleConflictModal";
 
 export default async function UserDashboardPage() {
   const requests = await getContactRequests();
@@ -67,6 +68,7 @@ export default async function UserDashboardPage() {
 
   return (
     <main className="min-h-screen bg-[#f3f5f9]">
+      <RoleConflictModal actualRole="client" />
       <section className="mx-auto w-full max-w-7xl px-4 pt-6 pb-20 sm:px-6 sm:pt-8">
         {/* Title */}
         <div className="flex justify-between items-center mb-6">
