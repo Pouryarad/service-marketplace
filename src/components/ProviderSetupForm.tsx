@@ -16,9 +16,8 @@ const BC_LOCATIONS = [
 ];
 
 const LANGUAGES = [
-  "English", "French", "Mandarin", "Cantonese", "Punjabi", "Hindi",
-  "Farsi", "Persian", "Arabic", "Spanish", "Korean", "Japanese", "Tagalog",
-  "Vietnamese", "Portuguese", "Italian", "German", "Russian",
+  "English", "French", "Mandarin", "Cantonese", "Punjabi", "Hindi", "Persian", "Arabic", "Spanish", "Korean", "Japanese", "Tagalog",
+  "Vietnamese", "Portuguese", "Italian", "German", "Russian", "Other",
 ];
 
 const CATEGORIES = [
@@ -259,10 +258,16 @@ export default function ProviderSetupForm({
     portfolioFiles.forEach((f) => formData.append("portfolioPhotos", f));
     if (idFile) formData.set("idDocument", idFile);
 
-    await saveProviderProfile(formData);
-    window.location.href = isFirstTime
-      ? "/provider/setup?tab=payment"
-      : "/provider/dashboard?profile=saved";
+    try {
+  await saveProviderProfile(formData);
+  window.location.href = isFirstTime
+    ? "/provider/setup?tab=payment"
+    : "/provider/dashboard?profile=saved";
+} catch (err) {
+  console.error("Save failed:", err);
+  setSaving(false);
+  alert("Something went wrong. Please try again.");
+}
   };
 
 if (!isFirstTime) {

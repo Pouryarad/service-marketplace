@@ -146,21 +146,27 @@ export default async function ApprovalDetailPage({ params }: { params: Promise<{
           )}
 
           {raw.pending_portfolio_photo_urls?.length > 0 && (
-            <div className="border-t border-black/[0.04] pt-5">
-              <p className="text-xs font-bold text-[#9ca3af] uppercase tracking-wider mb-2">New Portfolio ({raw.pending_portfolio_photo_urls.length} photos)</p>
-              <div className="grid grid-cols-3 gap-2">
-                {raw.pending_portfolio_photo_urls.map((url: string, i: number) => (
-                  <div key={i} className="aspect-square rounded-xl overflow-hidden bg-[#f0f2f7]">
-                    <Image src={url} alt="" width={150} height={150} className="w-full h-full object-cover" />
-                  </div>
-                ))}
-              </div>
-              <div className="mt-3 flex gap-2">
-                <ApprovePendingButton providerId={id} field="portfolio" label="Approve All" />
-                <RejectPendingButton providerId={id} field="portfolio" label="Reject" />
-              </div>
-            </div>
-          )}
+  <div className="border-t border-black/[0.04] pt-5">
+    <p className="text-xs font-bold text-[#9ca3af] uppercase tracking-wider mb-2">New Portfolio ({raw.pending_portfolio_photo_urls.length} photos)</p>
+    <p className="text-xs text-[#9ca3af] mb-3">Remove photos you don't want to approve, then click Approve All.</p>
+    <div className="grid grid-cols-3 gap-2">
+      {raw.pending_portfolio_photo_urls.map((url: string, i: number) => (
+        <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-[#f0f2f7]">
+          <Image src={url} alt="" width={150} height={150} className="w-full h-full object-cover" />
+          <form action="/api/admin/remove-pending-portfolio-photo" method="POST" className="absolute top-1 right-1">
+            <input type="hidden" name="providerId" value={id} />
+            <input type="hidden" name="photoUrl" value={url} />
+            <button className="size-6 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-500 transition text-xs font-bold">✕</button>
+          </form>
+        </div>
+      ))}
+    </div>
+    <div className="mt-3 flex gap-2">
+      <ApprovePendingButton providerId={id} field="portfolio" label="Approve All" />
+      <RejectPendingButton providerId={id} field="portfolio" label="Reject All" />
+    </div>
+  </div>
+)}
         </div>
       )}
 

@@ -14,7 +14,7 @@ export default async function AdminApprovalsPage() {
   const { data: pendingMedia } = await supabase!
     .from("providers")
     .select("id, full_name, pending_profile_photo_url, pending_portfolio_photo_urls, pending_video_url, pending_category_slug")
-    .or("pending_profile_photo_url.not.is.null,pending_video_url.not.is.null,pending_category_slug.not.is.null");
+    .or("pending_profile_photo_url.not.is.null,pending_video_url.not.is.null,pending_category_slug.not.is.null,pending_portfolio_photo_urls.not.is.null");
 
   const totalPending = pendingProviders.length + (pendingMedia?.length ?? 0);
 
