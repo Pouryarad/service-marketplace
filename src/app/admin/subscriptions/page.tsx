@@ -1,23 +1,23 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getProviders } from "@/lib/data";
+import { grantAdminAccess, revokeAdminAccess } from "@/lib/actions";
 import Stripe from "stripe";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import DiscountCodeForm from "./DiscountCodeForm";
-import { grantAdminAccess, revokeAdminAccess } from "@/lib/actions";
-
+import CouponList from "./CouponList";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export default async function AdminSubscriptionsPage() {
   const supabase = await createSupabaseServerClient();
   const providers = await getProviders({ includeHidden: true });
-  const coupons = await stripe.coupons.list({ limit: 20 });
+  const coupons = await stripe.coupons.list({ limit: 50 });
 
   const activeProviders = providers.filter((p) => p.subscriptionStatus === "active");
   const trialingProviders = providers.filter((p) => (p as any).subscriptionStatus === "trialing");
   const expiredProviders = providers.filter((p) => !p.subscriptionStatus || p.subscriptionStatus === "expired");
-  const adminGranted = providers.filter((p) => p.adminGranted);
+  const adminGranted = providers.filter((p) => (p as any).admin_granted);
 
   const stats = [
     { label: "Active", value: activeProviders.length, cls: "bg-green-100 text-green-700" },
@@ -54,29 +54,11 @@ export default async function AdminSubscriptionsPage() {
         </div>
 
         <DiscountCodeForm />
-
-        {coupons.data.length > 0 && (
-          <div className="mt-5 space-y-2">
-            <p className="text-xs font-bold text-[#9ca3af] uppercase tracking-wider">Existing</p>
-            {coupons.data.map((c) => (
-              <div key={c.id} className="flex items-center justify-between rounded-xl border border-black/[0.06] px-4 py-3">
-                <div>
-                  <p className="font-bold text-sm text-[#0f1117]">{c.name ?? c.id}</p>
-                  <p className="text-xs text-[#9ca3af]">
-                    {c.percent_off ? `${c.percent_off}% off` : `$${(c.amount_off ?? 0) / 100} off`}
-                    {" · "}{c.duration === "repeating" ? `${c.duration_in_months}mo` : c.duration}
-                    {c.max_redemptions ? ` · Max ${c.max_redemptions}` : ""}
-                  </p>
-                </div>
-                <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${c.valid ? "bg-green-100 text-green-700" : "bg-[#f0f2f7] text-[#9ca3af]"}`}>
-                  {c.valid ? "Active" : "Inactive"}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
-
+      <Link href="/admin/subscriptions/coupons"
+        className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-black/10 py-2.5 text-sm font-bold text-[#6b7280] hover:bg-[#f0f2f7] transition">
+        View All Codes →
+      </Link>
       {/* Providers List */}
       <div>
         <h2 className="font-black text-[#0f1117] mb-3">All Providers</h2>
@@ -92,10 +74,10 @@ export default async function AdminSubscriptionsPage() {
                     <p className="font-bold text-sm text-[#0f1117]">{p.fullName}</p>
                     <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${p.subscriptionStatus === "active" ? "bg-green-100 text-green-700" :
                       (p as any).subscriptionStatus === "trialing" ? "bg-blue-100 text-blue-700" :
-                        p.adminGranted ? "bg-purple-100 text-purple-700" :
+                        (p as any).admin_granted ? "bg-purple-100 text-purple-700" :
                           "bg-[#f0f2f7] text-[#9ca3af]"
                       }`}>
-                      {p.adminGranted ? "Free Access" : p.subscriptionStatus ?? "None"}
+                      {(p as any).admin_granted ? "Free Access" : p.subscriptionStatus ?? "None"}
                     </span>
                     {(p as any).early_bird && (
                       <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-bold text-orange-700">🐦 Early Bird</span>
@@ -104,22 +86,9 @@ export default async function AdminSubscriptionsPage() {
                   <p className="text-xs text-[#9ca3af] truncate mt-0.5">{p.email}</p>
                 </div>
 
-                {p.adminGranted ? (
-                  <form action={revokeAdminAccess}>
+                {!(p as any).admin_granted && (
+                  <form action={grantAdminAccess}>
                     <input type="hidden" name="providerId" value={p.id} />
-                    <button className="shrink-0 rounded-full bg-red-500 px-3 py-1.5 text-xs font-bold text-white active:scale-95 transition-all">
-                      Revoke
-                    </button>
-                  </form>
-                ) : (
-                  <form action={grantAdminAccess} className="flex items-center gap-2">
-                    <input type="hidden" name="providerId" value={p.id} />
-                    <input
-                      type="date"
-                      name="expiresAt"
-                      min={new Date().toISOString().split("T")[0]}
-                      className="h-8 rounded-lg border border-black/10 px-2 text-xs text-[#1f1f1f] outline-none focus:border-purple-400"
-                    />
                     <button className="shrink-0 rounded-full bg-purple-500 px-3 py-1.5 text-xs font-bold text-white active:scale-95 transition-all">
                       Grant Free
                     </button>
