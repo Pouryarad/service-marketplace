@@ -84,15 +84,6 @@ export default async function ProviderDashboardPage({
           </div>
         </div>
 
-        {profile === "saved" && <FadeBanner message="✅ Profile saved successfully." type="green" />}
-        {subscribed === "true" && <FadeBanner message="🎉 Welcome to ProFindly! Your 14-day free trial has started." type="blue" />}
-
-        {subscribed === "true" && (
-          <div className="mt-4 rounded-2xl bg-blue-50 border border-blue-200 px-5 py-3 text-sm font-medium text-blue-700">
-            🎉 Welcome to ProFindly! Your 14-day free trial has started.
-          </div>
-        )}
-
         {/* Stat bar */}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <StatCard label="Today's Views" value={insights?.profileViews.count_day ?? 0} />

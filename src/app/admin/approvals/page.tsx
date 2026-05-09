@@ -11,11 +11,17 @@ export default async function AdminApprovalsPage() {
   const pendingProviders = providers.filter((p) => !p.approved && !p.suspended);
   const suspendedProviders = providers.filter((p) => p.suspended);
 
-  const { data: pendingMedia } = await supabase!
-    .from("providers")
-    .select("id, full_name, pending_profile_photo_url, pending_portfolio_photo_urls, pending_video_url, pending_category_slug")
-    .or("pending_profile_photo_url.not.is.null,pending_video_url.not.is.null,pending_category_slug.not.is.null,pending_portfolio_photo_urls.not.is.null");
+  const { data: rawPendingMedia } = await supabase!
+  .from("providers")
+  .select("id, full_name, pending_profile_photo_url, pending_portfolio_photo_urls, pending_video_url, pending_category_slug")
+  .or("pending_profile_photo_url.not.is.null,pending_video_url.not.is.null,pending_category_slug.not.is.null,pending_portfolio_photo_urls.not.is.null");
 
+const pendingMedia = (rawPendingMedia ?? []).filter((p) =>
+  p.pending_profile_photo_url ||
+  p.pending_video_url ||
+  p.pending_category_slug ||
+  (Array.isArray(p.pending_portfolio_photo_urls) && p.pending_portfolio_photo_urls.length > 0)
+);
   const totalPending = pendingProviders.length + (pendingMedia?.length ?? 0);
 
   return (
