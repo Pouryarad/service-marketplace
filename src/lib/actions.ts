@@ -185,19 +185,19 @@ export async function saveProviderProfile(formData: FormData) {
     String(formData.get("existingPortfolioUrls") ?? "[]")
   );
 
-const newPortfolioUrls: string[] = (
-  await Promise.all(
-    portfolioFiles.map(async (file) => {
-      if (!(file instanceof File) || file.size === 0) return null;
-      const path = `${data.user.id}/portfolio-${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
-      const { error } = await supabase.storage
-        .from("provider-media")
-        .upload(path, file, { upsert: true, contentType: file.type });
-      if (error) return null;
-      return supabase.storage.from("provider-media").getPublicUrl(path).data.publicUrl;
-    })
-  )
-).filter(Boolean) as string[];
+  const newPortfolioUrls: string[] = (
+    await Promise.all(
+      portfolioFiles.map(async (file) => {
+        if (!(file instanceof File) || file.size === 0) return null;
+        const path = `${data.user.id}/portfolio-${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
+        const { error } = await supabase.storage
+          .from("provider-media")
+          .upload(path, file, { upsert: true, contentType: file.type });
+        if (error) return null;
+        return supabase.storage.from("provider-media").getPublicUrl(path).data.publicUrl;
+      })
+    )
+  ).filter(Boolean) as string[];
 
   const pendingPortfolioUrls = newPortfolioUrls.length > 0 ? newPortfolioUrls : null;
 
@@ -414,7 +414,7 @@ export async function updateProfile(formData: FormData) {
     { onConflict: "id" }
   );
 
-  revalidatePath("/dashboard/settings");
+  redirect("/dashboard?settings=saved");
 }
 
 export async function requestAccountDelete() {

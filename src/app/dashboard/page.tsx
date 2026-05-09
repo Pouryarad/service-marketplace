@@ -5,8 +5,14 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Image from "next/image";
 import { Settings } from "lucide-react";
 import RoleConflictModal from "@/components/RoleConflictModal";
+import FadeBanner from "@/components/FadeBanner";
 
-export default async function UserDashboardPage() {
+export default async function UserDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ settings?: string }>;
+}) {
+  const { settings } = await searchParams;
   const requests = await getContactRequests();
   const lastCategory = requests?.[0]?.provider?.category_slug;
   const previewRequests = requests.slice(0, 4);
@@ -70,6 +76,9 @@ export default async function UserDashboardPage() {
     <main className="min-h-screen bg-[#f3f5f9]">
       <RoleConflictModal actualRole="client" />
       <section className="mx-auto w-full max-w-7xl px-4 pt-6 pb-20 sm:px-6 sm:pt-8">
+        {settings === "saved" && (
+  <FadeBanner message="✅ Settings saved successfully." type="green" />
+)}
         {/* Title */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">
