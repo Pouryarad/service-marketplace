@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Mail, Phone } from "lucide-react";
 import { createContactRequest } from "@/app/actions";
 import { getCurrentUser, getProvider } from "@/lib/data";
 import FavButton from "@/components/FavButton";
@@ -30,6 +29,16 @@ export default async function ProviderProfilePage({
   const supabase = await createSupabaseServerClient();
 
   let isFav = false;
+  let isAdmin = false;
+
+  if (supabase && user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+    isAdmin = profile?.role === "admin";
+  }
 
   if (supabase && user && provider) {
     const { data } = await supabase
@@ -42,16 +51,13 @@ export default async function ProviderProfilePage({
     isFav = !!data;
   }
 
-const isOwnProfile = !!(user && provider && String(user.id) === String(provider.userId));
+  const isOwnProfile = !!(user && provider && String(user.id) === String(provider.userId));
 
-  if (supabase && provider) {
-    const isOwnProfile = user && String(user.id) === String(provider.userId);
-    if (!isOwnProfile) {
-      await supabase.from("provider_events").insert({
-        provider_id: provider.id,
-        event_type: "view_profile",
-      });
-    }
+  if (supabase && provider && !isOwnProfile && !isAdmin) {
+    await supabase.from("provider_events").insert({
+      provider_id: provider.id,
+      event_type: "view_profile",
+    });
   }
 
   if (!provider) {
@@ -89,7 +95,6 @@ const isOwnProfile = !!(user && provider && String(user.id) === String(provider.
           {/* PROFILE */}
           <div className="bg-white rounded-[12px] p-6 flex flex-col items-center text-center shadow-sm">
             <div className="relative h-36 w-36 sm:h-40 sm:w-40 rounded-full overflow-hidden border-4 border-white ring-2 ring-black/5 shadow-lg">
-
               <Image
                 src={provider.profilePhotoUrl}
                 alt={provider.fullName}
@@ -112,15 +117,14 @@ const isOwnProfile = !!(user && provider && String(user.id) === String(provider.
             <p className="text-sm text-[#2563eb] mt-1">
               {provider.language}
             </p>
-            <div className="mt-4 w-full space-y-3">
 
+            <div className="mt-4 w-full space-y-3">
               <FavButton
                 providerId={Number(provider.id)}
                 initialIsFav={isFav}
                 user={user}
               />
 
-              {/* CONTACT ACTION (MAIN BUSINESS CTA) */}
               {user ? (
                 <>
                   <ContactButton
@@ -128,7 +132,6 @@ const isOwnProfile = !!(user && provider && String(user.id) === String(provider.
                     value={provider.email}
                     providerId={Number(provider.id)}
                   />
-
                   <ContactButton
                     type="phone"
                     value={provider.phone}
@@ -145,7 +148,6 @@ const isOwnProfile = !!(user && provider && String(user.id) === String(provider.
                       </div>
                     }
                   />
-
                   <AuthModal
                     next={`/providers/${provider.slug}`}
                     trigger={
@@ -163,9 +165,7 @@ const isOwnProfile = !!(user && provider && String(user.id) === String(provider.
           {provider.bio && (
             <div className="bg-white rounded-[12px] p-6 shadow-sm">
               <h2 className="text-xl font-bold mb-2">About</h2>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {provider.bio}
-              </p>
+              <p className="text-sm text-gray-600 leading-relaxed">{provider.bio}</p>
             </div>
           )}
 
@@ -203,8 +203,6 @@ const isOwnProfile = !!(user && provider && String(user.id) === String(provider.
               </div>
             </div>
           )}
-
-          {/* CONTACT BUTTONS */}
         </div>
 
         {/* RIGHT SIDE */}
@@ -215,6 +213,14 @@ const isOwnProfile = !!(user && provider && String(user.id) === String(provider.
               👀 This is how clients see your profile.
             </div>
           )}
+
+          {isAdmin && (
+            <div className="mb-3 rounded-xl bg-[#eff6ff] border border-blue-200 px-4 py-3 text-sm text-blue-700 font-medium flex items-center justify-between">
+              🛡 Admin View
+              <a href="/admin/approvals" className="font-bold underline">← Back to Approvals</a>
+            </div>
+          )}
+
           <section className="bg-white rounded-[12px] p-6 shadow-sm">
             <h2 className="text-xl font-bold">Request Contact</h2>
 
@@ -232,41 +238,14 @@ const isOwnProfile = !!(user && provider && String(user.id) === String(provider.
 
             <form action={createContactRequest} className="mt-4">
               <fieldset
-                disabled={isOwnProfile || isSuccess}
-                className={`space-y-3 ${isOwnProfile || isSuccess ? "opacity-40 pointer-events-none select-none grayscale" : ""}`}
+                disabled={isOwnProfile || isSuccess || isAdmin}
+                className={`space-y-3 ${isOwnProfile || isSuccess || isAdmin ? "opacity-40 pointer-events-none select-none grayscale" : ""}`}
               >
-                <input
-                  type="hidden"
-                  name="providerId"
-                  value={provider.id}
-                />
-
-                <input
-                  name="name"
-                  defaultValue={name}
-                  placeholder="Name"
-                  className="h-12 w-full rounded-[10px] border px-3"
-                />
-
-                <input
-                  name="email"
-                  defaultValue={email}
-                  placeholder="Email"
-                  className="h-12 w-full rounded-[10px] border px-3"
-                />
-
-                <input
-                  name="phone"
-                  placeholder="Phone (optional)"
-                  className="h-12 w-full rounded-[10px] border px-3"
-                />
-
-                <textarea
-                  name="message"
-                  required
-                  placeholder="Message"
-                  className="min-h-28 w-full rounded-[10px] border p-3"
-                />
+                <input type="hidden" name="providerId" value={provider.id} />
+                <input name="name" defaultValue={name} placeholder="Name" className="h-12 w-full rounded-[10px] border px-3" />
+                <input name="email" defaultValue={email} placeholder="Email" className="h-12 w-full rounded-[10px] border px-3" />
+                <input name="phone" placeholder="Phone (optional)" className="h-12 w-full rounded-[10px] border px-3" />
+                <textarea name="message" required placeholder="Message" className="min-h-28 w-full rounded-[10px] border p-3" />
                 <Turnstile />
                 {user ? (
                   <SubmitRequestButton isSuccess={isSuccess} />
