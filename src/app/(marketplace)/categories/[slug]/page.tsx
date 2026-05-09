@@ -5,6 +5,7 @@ import {
 import { ProviderCard } from "@/components/provider-card";
 import { getCategory, getProviders, getLanguages } from "@/lib/data";
 import Link from "next/link";
+import FilterForm from "./FilterForm";
 
 export default async function CategoryPage({
   params,
@@ -56,107 +57,13 @@ export default async function CategoryPage({
         </div>
 
         {/* FILTERS */}
-        <details className="mt-5 rounded-[16px] bg-white shadow-sm group lg:open">
-
-  {/* TOGGLE */}
-  <summary className="flex cursor-pointer list-none items-center justify-between p-4 font-semibold text-[#1f1f1f]">
-
-    <div className="flex items-center gap-2">
-      <SlidersHorizontal size={18} />
-      Filters
-    </div>
-
-    <ChevronDown
-      size={18}
-      className="transition group-open:rotate-180"
-    />
-
-  </summary>
-
-  {/* FILTER FORM */}
-  <form className="grid grid-cols-1 gap-3 border-t border-black/5 p-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_220px_auto]">
-
-    {/* LANGUAGE */}
-    <label className="text-sm font-semibold text-[#4b5563]">
-
-      Language
-
-      <div className="relative mt-2">
-
-        <select
-          name="language"
-          defaultValue={filters.language ?? ""}
-          className="h-12 w-full appearance-none rounded-[10px] border border-black/10 bg-white pl-3 pr-10 text-[#1f1f1f] outline-none"
-        >
-          <option value="">All Languages</option>
-
-          {languages.map((lang) => (
-            <option key={lang} value={lang}>
-              {lang}
-            </option>
-          ))}
-        </select>
-
-        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500">
-          ▼
-        </span>
-
-      </div>
-
-    </label>
-
-    {/* LOCATION */}
-    <label className="text-sm font-semibold text-[#4b5563]">
-
-      Location
-
-      <input
-        name="location"
-        defaultValue={filters.location ?? ""}
-        placeholder="Vancouver"
-        className="mt-2 h-12 w-full rounded-[10px] border border-black/10 px-3 text-[#1f1f1f] outline-none"
-      />
-
-    </label>
-
-    {/* SORT */}
-    <label className="text-sm font-semibold text-[#4b5563]">
-
-      Sort
-
-      <select
-        name="sort"
-        defaultValue={filters.sort ?? "recommended"}
-        className="mt-2 h-12 w-full rounded-[10px] border border-black/10 px-3 text-[#1f1f1f] outline-none"
-      >
-        <option value="recommended">Recommended</option>
-        <option value="az">A → Z</option>
-      </select>
-
-    </label>
-
-    {/* ACTION */}
-    <div className="flex items-end">
-
-      {hasFilters ? (
-        <Link
-          href={`/categories/${slug}`}
-          className="inline-flex h-12 w-full items-center justify-center rounded-full bg-red-500 px-5 font-bold text-white transition hover:bg-red-600"
-        >
-          Clear Filters
-        </Link>
-      ) : (
-        <button className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#2563eb] px-5 font-bold text-white transition hover:bg-blue-700">
-          <SlidersHorizontal size={18} />
-          Apply
-        </button>
-      )}
-
-    </div>
-
-  </form>
-
-</details>
+        <FilterForm
+  slug={slug}
+  languages={languages}
+  initialLanguage={filters.language ?? ""}
+  initialLocation={filters.location ?? ""}
+  initialSort={filters.sort ?? "recommended"}
+/>
 
         {/* RESULTS */}
         <div className="mt-6 space-y-4">

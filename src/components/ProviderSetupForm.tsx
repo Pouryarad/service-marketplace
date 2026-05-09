@@ -404,7 +404,7 @@ if (!isFirstTime) {
 
               <div>
                 <label className="block text-sm font-semibold text-[#1f1f1f]">Introduction Video <span className="font-normal text-[#9ca3af]">(optional)</span></label>
-                <p className="mt-0.5 text-xs text-[#9ca3af]">YouTube links only.</p>
+                <p className="mt-0.5 text-xs text-[#9ca3af]">YouTube links only. Set your video to <strong>Unlisted</strong> so it won't appear on your channel.</p>
                 <input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." className="mt-2 h-12 w-full rounded-xl border border-black/10 px-4 outline-none focus:border-[#2563eb] transition" />
                 {videoUrl && isYoutubeUrl(videoUrl) && <p className="mt-1 text-xs text-yellow-600">⏳ Video requires admin approval.</p>}
                 {videoUrl && !isYoutubeUrl(videoUrl) && <p className="mt-1 text-xs text-red-500">Only YouTube links are allowed.</p>}
