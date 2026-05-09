@@ -80,18 +80,22 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </header>
 
         {/* Mobile Bottom Nav */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0f1117] border-t border-white/5 flex">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className="flex-1 flex flex-col items-center gap-1 py-3 text-white/40 hover:text-white transition-colors"
-            >
-              <Icon size={18} />
-              <span className="text-[9px] font-semibold uppercase tracking-wide">{label}</span>
-            </Link>
-          ))}
-        </nav>
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0f1117] border-t border-white/5 flex overflow-x-auto scrollbar-none">
+  {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
+    <Link
+      key={href}
+      href={href}
+      className="flex-shrink-0 flex flex-col items-center gap-1 py-3 px-4 text-white/40 hover:text-white transition-colors min-w-[64px]"
+    >
+      <Icon size={18} />
+      <span className="text-[9px] font-semibold uppercase tracking-wide whitespace-nowrap">
+        {label === "Subscriptions" ? "Subs" : 
+         label === "Approvals" ? "Approve" : 
+         label === "Categories" ? "Cats" : label}
+      </span>
+    </Link>
+  ))}
+</nav>
 
         <main className="flex-1 p-4 pb-24 lg:pb-6 lg:p-8">
           {children}
