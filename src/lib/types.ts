@@ -45,6 +45,8 @@ export type Provider = {
   clicksMonth: number;
   videoUrl?: string | null;
   pendingProfilePhotoUrl?: string | null;
+  adminGranted?: boolean;
+  adminGrantedExpiresAt?: string | null;
 };
 
 export type ContactRequest = {

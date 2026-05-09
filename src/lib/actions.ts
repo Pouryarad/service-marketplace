@@ -500,6 +500,7 @@ export async function grantAdminAccess(formData: FormData) {
   if (!supabase) return;
 
   const providerId = Number(formData.get("providerId"));
+  const expiresAt = formData.get("expiresAt") ? String(formData.get("expiresAt")) : null;
 
   await supabase
     .from("providers")
@@ -507,6 +508,25 @@ export async function grantAdminAccess(formData: FormData) {
       admin_granted: true,
       subscription_status: "active",
       approved: true,
+      admin_granted_expires_at: expiresAt ?? null,
+    })
+    .eq("id", providerId);
+
+  revalidatePath("/admin/subscriptions");
+}
+
+export async function revokeAdminAccess(formData: FormData) {
+  "use server";
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return;
+
+  const providerId = Number(formData.get("providerId"));
+
+  await supabase
+    .from("providers")
+    .update({
+      admin_granted: false,
+      subscription_status: "expired",
     })
     .eq("id", providerId);
 

@@ -60,24 +60,22 @@ export default async function ProviderSetupPage({
         <div className="mt-6 flex gap-1 rounded-full bg-white p-1 shadow-sm w-fit">
           <Link
             href="/provider/setup?tab=profile"
-            className={`px-5 py-2 rounded-full text-sm font-bold transition ${
-              activeTab === "profile"
-                ? "bg-[#2563eb] text-white"
-                : "text-[#6b7280] hover:text-[#1f1f1f]"
-            }`}
+            className={`px-5 py-2 rounded-full text-sm font-bold transition ${activeTab === "profile"
+              ? "bg-[#2563eb] text-white"
+              : "text-[#6b7280] hover:text-[#1f1f1f]"
+              }`}
           >
             Edit Profile
           </Link>
           <div className={`relative ${!profileComplete ? "cursor-not-allowed" : ""}`}>
             <Link
               href={profileComplete ? "/provider/setup?tab=payment" : "#"}
-              className={`px-5 py-2 rounded-full text-sm font-bold transition flex items-center gap-2 ${
-                activeTab === "payment"
-                  ? "bg-[#2563eb] text-white"
-                  : profileComplete
+              className={`px-5 py-2 rounded-full text-sm font-bold transition flex items-center gap-2 ${activeTab === "payment"
+                ? "bg-[#2563eb] text-white"
+                : profileComplete
                   ? "text-[#6b7280] hover:text-[#1f1f1f]"
                   : "text-[#d1d5db] pointer-events-none"
-              }`}
+                }`}
             >
               Payment
               {!profileComplete && (
@@ -106,16 +104,25 @@ export default async function ProviderSetupPage({
   );
 }
 
-function PaymentTab({ provider }: { provider: { subscriptionStatus: string; admin_granted?: boolean } | null }) {
+function PaymentTab({ provider }: { provider: { subscriptionStatus: string; adminGranted?: boolean; adminGrantedExpiresAt?: string | null } | null }) {
   const isSubscribed = provider?.subscriptionStatus === "active";
-  const isAdminGranted = (provider as any)?.admin_granted;
+  const isAdminGranted = provider?.adminGranted;
 
   if (isAdminGranted) {
+    const expiresAt = provider?.adminGrantedExpiresAt;
     return (
       <div className="text-center py-8">
         <p className="text-2xl">🎉</p>
         <h2 className="mt-2 text-lg font-bold text-[#1f1f1f]">Free Access Granted</h2>
-        <p className="mt-1 text-sm text-[#6b7280]">Your account has been activated by an admin.</p>
+        <p className="mt-1 text-sm text-[#6b7280]">
+          Your account has been activated by an admin.
+          {expiresAt && (
+            <span className="block mt-1 font-semibold text-amber-600">
+              Access expires on {new Date(expiresAt).toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" })}
+            </span>
+          )}
+          {!expiresAt && <span className="block mt-1 text-green-600 font-semibold">Permanent access.</span>}
+        </p>
       </div>
     );
   }

@@ -24,6 +24,7 @@ type ProviderRow = {
   video_url: string | null;
   portfolio_photo_urls: string[] | null;
   slug: string | null;
+  admin_granted: boolean | null;
 };
 
 function mapProvider(row: ProviderRow): Provider {
@@ -57,6 +58,8 @@ function mapProvider(row: ProviderRow): Provider {
     videoUrl: row.video_url ?? null,
     portfolioPhotoUrls: row.portfolio_photo_urls ?? [],
     pendingProfilePhotoUrl: (row as any).pending_profile_photo_url ?? null,
+    adminGranted: (row as any).admin_granted ?? false,
+    adminGrantedExpiresAt: (row as any).admin_granted_expires_at ?? null,
   };
 }
 
@@ -150,7 +153,7 @@ export async function getProviders(options?: {
     query = query.ilike("location", `%${options.location}%`);
   }
 
-if (options?.sort === "az") {
+  if (options?.sort === "az") {
     query = query.order("full_name", { ascending: true });
   } else {
     query = query.order("id", { ascending: false });
