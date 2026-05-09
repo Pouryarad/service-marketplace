@@ -69,7 +69,7 @@ export async function getCurrentUser() {
   return data.user;
 }
 
-export async function getCategories(): Promise<Category[]> {
+export async function getCategories(limit?: number): Promise<Category[]> {
   noStore();
   const supabase = await createSupabaseServerClient();
   if (!supabase) return [];
@@ -79,17 +79,23 @@ export async function getCategories(): Promise<Category[]> {
     .select("id, slug, name, image_url")
     .order("name");
 
-  if (error) {
-    console.log(error);
-    return [];
-  }
+  if (error || !data) return [];
 
-  return data.map((category) => ({
-    id: category.id,
-    slug: category.slug,
-    name: category.name,
-    imageUrl: category.image_url,
-  }));
+  // Only show categories that have at least one active provider
+  const { data: activeProviders } = await supabase
+    .from("providers")
+    .select("category_slug")
+    .eq("approved", true)
+    .eq("suspended", false)
+    .eq("subscription_status", "active");
+
+  const activeSlugs = new Set((activeProviders ?? []).map((p) => p.category_slug));
+
+  const filtered = data
+    .filter((c) => activeSlugs.has(c.slug))
+    .map((c) => ({ id: c.id, slug: c.slug, name: c.name, imageUrl: c.image_url }));
+
+  return limit ? filtered.slice(0, limit) : filtered;
 }
 
 export async function getLanguages(): Promise<string[]> {

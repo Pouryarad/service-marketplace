@@ -7,7 +7,7 @@ import { getCategories } from "@/lib/data";
 import ClientRedirect from "@/components/ClientRedirect";
 
 export default async function Home() {
-  const categories = await getCategories();
+  const categories = await getCategories(10);
 
   return (
     <main className="min-h-screen flex flex-col bg-[#f3f5f9] text-[#1f1f1f] overflow-x-hidden">

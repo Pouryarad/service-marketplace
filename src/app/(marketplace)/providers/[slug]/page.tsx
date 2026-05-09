@@ -119,11 +119,13 @@ export default async function ProviderProfilePage({
             </p>
 
             <div className="mt-4 w-full space-y-3">
-              <FavButton
-                providerId={Number(provider.id)}
-                initialIsFav={isFav}
-                user={user}
-              />
+              {!isOwnProfile && !isAdmin && (
+                <FavButton
+                  providerId={Number(provider.id)}
+                  initialIsFav={isFav}
+                  user={user}
+                />
+              )}
 
               {user ? (
                 <>
@@ -175,7 +177,15 @@ export default async function ProviderProfilePage({
               <h2 className="text-xl font-bold mb-3">Introduction</h2>
               <div className="aspect-video rounded-[10px] overflow-hidden">
                 <iframe
-                  src={provider.videoUrl.replace("watch?v=", "embed/").replace("youtu.be/", "www.youtube.com/embed/")}
+                  src={(() => {
+                    const url = provider.videoUrl;
+                    let videoId = "";
+                    const watchMatch = url.match(/[?&]v=([^&]+)/);
+                    const shortMatch = url.match(/youtu\.be\/([^?&]+)/);
+                    if (watchMatch) videoId = watchMatch[1];
+                    else if (shortMatch) videoId = shortMatch[1];
+                    return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+                  })()}
                   className="w-full h-full"
                   allowFullScreen
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
