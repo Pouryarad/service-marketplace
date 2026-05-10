@@ -17,7 +17,7 @@ export default async function AdminSubscriptionsPage() {
   const activeProviders = providers.filter((p) => p.subscriptionStatus === "active");
   const trialingProviders = providers.filter((p) => (p as any).subscriptionStatus === "trialing");
   const expiredProviders = providers.filter((p) => !p.subscriptionStatus || p.subscriptionStatus === "expired");
-  const adminGranted = providers.filter((p) => (p as any).admin_granted);
+  const adminGranted = providers.filter((p) => p.adminGranted);
 
   const stats = [
     { label: "Active", value: activeProviders.length, cls: "bg-green-100 text-green-700" },
@@ -74,10 +74,10 @@ export default async function AdminSubscriptionsPage() {
                     <p className="font-bold text-sm text-[#0f1117]">{p.fullName}</p>
                     <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${p.subscriptionStatus === "active" ? "bg-green-100 text-green-700" :
                       (p as any).subscriptionStatus === "trialing" ? "bg-blue-100 text-blue-700" :
-                        (p as any).admin_granted ? "bg-purple-100 text-purple-700" :
+                        p.adminGranted ? "bg-purple-100 text-purple-700" :
                           "bg-[#f0f2f7] text-[#9ca3af]"
                       }`}>
-                      {(p as any).admin_granted ? "Free Access" : p.subscriptionStatus ?? "None"}
+                      {p.adminGranted ? "Free Access" : p.subscriptionStatus ?? "None"}
                     </span>
                     {(p as any).early_bird && (
                       <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-bold text-orange-700">🐦 Early Bird</span>
@@ -86,7 +86,14 @@ export default async function AdminSubscriptionsPage() {
                   <p className="text-xs text-[#9ca3af] truncate mt-0.5">{p.email}</p>
                 </div>
 
-                {!(p as any).admin_granted && (
+                {p.adminGranted ? (
+                  <form action={revokeAdminAccess}>
+                    <input type="hidden" name="providerId" value={p.id} />
+                    <button className="shrink-0 rounded-full bg-red-500 px-3 py-1.5 text-xs font-bold text-white active:scale-95 transition-all">
+                      Revoke
+                    </button>
+                  </form>
+                ) : (
                   <form action={grantAdminAccess}>
                     <input type="hidden" name="providerId" value={p.id} />
                     <button className="shrink-0 rounded-full bg-purple-500 px-3 py-1.5 text-xs font-bold text-white active:scale-95 transition-all">
