@@ -21,18 +21,16 @@ export async function GET(request: NextRequest) {
     .eq("id", user.id)
     .maybeSingle();
 
-  if (profile?.role === "admin") {
-    return NextResponse.redirect(new URL("/admin", url.origin));
+const res = NextResponse.redirect(new URL(
+    profile?.role === "admin" ? "/admin" :
+    profile?.role ? "/" :
+    "/auth/setup-role",
+    url.origin
+  ));
+
+  if (profile?.role) {
+    res.cookies.set("user-role", profile.role, { path: "/", httpOnly: false, maxAge: 60 * 60 * 24 * 30 });
   }
 
-  if (profile?.role === "provider") {
-    return NextResponse.redirect(new URL("/provider/dashboard", url.origin));
-  }
-
-  if (profile?.role === "client") {
-    return NextResponse.redirect(new URL("/", url.origin));
-  }
-
-  // New user — let client side handle role assignment
-  return NextResponse.redirect(new URL("/auth/setup-role", url.origin));
+  return res;
 }

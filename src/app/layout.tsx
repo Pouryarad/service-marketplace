@@ -6,32 +6,23 @@ import { getCurrentUserRole, getProviderRequests } from "@/lib/data";
 import BottomNav from "@/components/BottomNav";
 import type { ProviderRequest } from "@/lib/types";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-});
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
+const spaceGrotesk = Space_Grotesk({ variable: "--font-space-grotesk", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Findly Services",
   description: "A modern service marketplace powered by Next.js and Supabase.",
 };
 
-export default async function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const { headers } = await import("next/headers");
+  const headerStore = await headers();
+  const pathname = headerStore.get("x-pathname") ?? "";
+  const isProviderRoute = pathname.startsWith("/provider/") && !pathname.startsWith("/providers/");
   const role = await getCurrentUserRole();
-  const providerRequests: ProviderRequest[] =
-    role === "provider" ? await getProviderRequests() : [];
+  const providerRequests: ProviderRequest[] = role === "provider" ? await getProviderRequests() : [];
 
-  // Admin layout handles its own nav — root nav not needed
-  if (role === "admin") {
+  if (role === "admin" && !isProviderRoute) {
     return (
       <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}>
         <body className="min-h-full flex flex-col bg-[#f0f2f7]">
@@ -49,11 +40,7 @@ export default async function RootLayout({
           providerRequests={providerRequests}
         />
         <TopNav
-          variant={
-            role === "provider" ? "provider" :
-            role === "admin" ? "admin" :
-            role ? "dashboard" : "public"
-          }
+          variant={role === "provider" ? "provider" : role === "admin" ? "admin" : role ? "dashboard" : "public"}
           providerRequests={providerRequests}
         />
         {children}

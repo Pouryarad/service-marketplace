@@ -5,7 +5,6 @@ export async function proxy(request: NextRequest) {
   const url = new URL(request.url);
   const pathname = url.pathname;
 
-  // Protected routes
   const protectedRoutes = [
     "/dashboard",
     "/provider/dashboard",
@@ -14,9 +13,7 @@ export async function proxy(request: NextRequest) {
     "/admin",
   ];
 
-  const isProtected = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
+  const isProtected = protectedRoutes.some((route) => pathname.startsWith(route));
 
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
@@ -50,50 +47,37 @@ export async function proxy(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Redirect unauthenticated users away from protected routes
   if (isProtected && !user) {
     return NextResponse.redirect(new URL("/", url.origin));
   }
 
-  // Redirect authenticated providers away from client dashboard
-  if (pathname.startsWith("/dashboard") && user) {
+  if (user) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
       .maybeSingle();
 
-    if (profile?.role === "provider") {
+    const role = profile?.role;
+
+    if (pathname.startsWith("/dashboard") && role === "provider") {
       return NextResponse.redirect(new URL("/provider/dashboard", url.origin));
     }
-  }
 
-  // Redirect authenticated clients away from provider dashboard
-  if (pathname.startsWith("/provider/") && !pathname.startsWith("/providers/") && user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
+    const isProviderRoute = pathname.startsWith("/provider/") && !pathname.startsWith("/providers/");
 
-    if (profile?.role === "client") {
-      return NextResponse.redirect(new URL("/dashboard", url.origin));
+    if (isProviderRoute) {
+      if (role === "client") {
+        return NextResponse.redirect(new URL("/dashboard", url.origin));
+      }
+
+      if (role === "admin" && !request.cookies.get("impersonating_provider_id")) {
+        return NextResponse.redirect(new URL("/admin", url.origin));
+      }
     }
   }
 
-  // Redirect admin away from provider routes to admin panel
-  if (pathname.startsWith("/provider/") && !pathname.startsWith("/providers/") && user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (profile?.role === "admin") {
-      return NextResponse.redirect(new URL("/admin", url.origin));
-    }
-  }
-
+  response.headers.set("x-pathname", pathname);
   return response;
 }
 

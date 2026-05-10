@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import { createSupabaseServiceClient } from "@/lib/supabase/server";
 import {
   sendEmailNotification,
   sendNewContactRequestEmail,
@@ -126,6 +127,8 @@ export async function saveAudienceChoice(formData: FormData) {
     { onConflict: "id" }
   );
 
+  const cookieStore = await cookies();
+  cookieStore.set("user-role", choice === "provider" ? "provider" : "client", { path: "/", httpOnly: false, maxAge: 60 * 60 * 24 * 30 });
   redirect(choice === "provider" ? "/provider/setup" : "/dashboard");
 }
 
@@ -135,6 +138,10 @@ export async function saveProviderProfile(formData: FormData) {
 
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect("/auth/sign-in?next=/provider/setup");
+
+  const cookieStore = await cookies();
+  const impersonatingId = cookieStore.get("impersonating_provider_id")?.value;
+  const isImpersonating = !!impersonatingId;
 
   const fullName = String(formData.get("fullName") ?? "").trim();
   const rawCategory = String(formData.get("categorySlug") ?? "").trim();
@@ -155,9 +162,11 @@ export async function saveProviderProfile(formData: FormData) {
   // Get existing provider row
   const { data: existing } = await supabase
     .from("providers")
-    .select("profile_photo_url, portfolio_photo_urls, video_url, category_slug, category_approved")
-    .eq("user_id", data.user.id)
+    .select("user_id, profile_photo_url, portfolio_photo_urls, video_url, category_slug, category_approved")
+    .eq(isImpersonating ? "id" : "user_id", isImpersonating ? Number(impersonatingId) : data.user.id)
     .maybeSingle();
+
+  const storageClient = isImpersonating ? createSupabaseServiceClient() : supabase;
 
   // Handle profile photo
   const profilePhotoFile = formData.get("profilePhoto");
@@ -165,14 +174,19 @@ export async function saveProviderProfile(formData: FormData) {
   let pendingProfilePhotoUrl: string | null = null;
 
   if (profilePhotoFile instanceof File && profilePhotoFile.size > 0) {
-    const path = `${data.user.id}/profile-${Date.now()}-${profilePhotoFile.name}`;
-    const { error: uploadError } = await supabase.storage
+    const uploadUserId = isImpersonating
+      ? (existing as any)?.user_id ?? impersonatingId
+      : data.user.id;
+    const path = `${uploadUserId}/profile-${Date.now()}-${profilePhotoFile.name}`;
+    const { error: uploadError } = await storageClient.storage
       .from("provider-media")
       .upload(path, profilePhotoFile, { upsert: true, contentType: profilePhotoFile.type });
 
     if (!uploadError) {
-      const url = supabase.storage.from("provider-media").getPublicUrl(path).data.publicUrl;
-      if (existing?.profile_photo_url) {
+      const url = storageClient.storage.from("provider-media").getPublicUrl(path).data.publicUrl;
+      if (isImpersonating) {
+        profilePhotoUrl = url;
+      } else if (existing?.profile_photo_url) {
         pendingProfilePhotoUrl = url;
       } else {
         profilePhotoUrl = url;
@@ -190,12 +204,15 @@ export async function saveProviderProfile(formData: FormData) {
     await Promise.all(
       portfolioFiles.map(async (file) => {
         if (!(file instanceof File) || file.size === 0) return null;
-        const path = `${data.user.id}/portfolio-${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
-        const { error } = await supabase.storage
+        const uploadUserId = isImpersonating
+          ? (existing as any)?.user_id ?? impersonatingId
+          : data.user.id;
+        const path = `${uploadUserId}/portfolio-${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
+        const { error } = await storageClient.storage
           .from("provider-media")
           .upload(path, file, { upsert: true, contentType: file.type });
         if (error) return null;
-        return supabase.storage.from("provider-media").getPublicUrl(path).data.publicUrl;
+        return storageClient.storage.from("provider-media").getPublicUrl(path).data.publicUrl;
       })
     )
   ).filter(Boolean) as string[];
@@ -225,7 +242,7 @@ export async function saveProviderProfile(formData: FormData) {
   const { data: existingSlug } = await supabase
     .from("providers")
     .select("slug")
-    .eq("user_id", data.user.id)
+    .eq(isImpersonating ? "id" : "user_id", isImpersonating ? Number(impersonatingId) : data.user.id)
     .maybeSingle();
 
   const slug = existingSlug?.slug ?? `${baseSlug}-${data.user.id.slice(0, 8)}`;
@@ -249,41 +266,48 @@ export async function saveProviderProfile(formData: FormData) {
     }
   }
 
-  const { error: upsertError } = await supabase.from("providers").upsert(
-    {
-      user_id: data.user.id,
-      slug,
-      ...(idDocumentUrl && { id_document_url: idDocumentUrl }),
-      full_name: fullName,
-      business_name: businessName,
-      category_slug: finalCategorySlug,
-      pending_category_slug: pendingCategorySlug,
-      profile_photo_url: profilePhotoUrl || existing?.profile_photo_url || null,
-      pending_profile_photo_url: pendingProfilePhotoUrl,
-      portfolio_photo_urls: existingPortfolioUrls,
-      pending_portfolio_photo_urls: pendingPortfolioUrls ?? [],
-      video_url: finalVideoUrl,
-      pending_video_url: pendingVideoUrl,
-      email,
-      phone,
-      location,
-      language,
-      bio,
-      one_line: oneLine,
-      ...(existing ? {} : { approved: false }),
-      suspended: false,
-      ...(existing ? {} : { subscription_status: "pending" }),
-    },
-    { onConflict: "user_id" }
-  );
+  const payload = {
+    slug,
+    ...(idDocumentUrl && { id_document_url: idDocumentUrl }),
+    full_name: fullName,
+    business_name: businessName,
+    category_slug: finalCategorySlug,
+    pending_category_slug: isImpersonating ? null : pendingCategorySlug,
+    profile_photo_url: isImpersonating
+      ? (profilePhotoUrl || existing?.profile_photo_url || null)
+      : (profilePhotoUrl || existing?.profile_photo_url || null),
+    pending_profile_photo_url: isImpersonating ? null : pendingProfilePhotoUrl,
+    portfolio_photo_urls: isImpersonating
+      ? [...existingPortfolioUrls, ...(pendingPortfolioUrls ?? [])]
+      : existingPortfolioUrls,
+    pending_portfolio_photo_urls: isImpersonating ? [] : (pendingPortfolioUrls ?? []),
+    video_url: isImpersonating ? (videoUrl ?? finalVideoUrl) : finalVideoUrl,
+    pending_video_url: isImpersonating ? null : pendingVideoUrl,
+    email,
+    phone,
+    location,
+    language,
+    bio,
+    one_line: oneLine,
+    suspended: false,
+  };
 
-
-  await sendEmailNotification({
-    to: "admin@findly.example",
-    subject: "Provider profile updated — needs review",
-    html: `<p>${fullName} updated their profile. Please review pending items.</p>`,
-  });
-
+  if (isImpersonating) {
+    await supabase.from("providers").update(payload).eq("id", Number(impersonatingId));
+    revalidatePath("/provider/setup");
+    revalidatePath("/provider/dashboard");
+    revalidatePath("/providers/");
+  } else {
+    await supabase.from("providers").upsert(
+      { user_id: data.user.id, ...payload, ...(existing ? {} : { approved: false, subscription_status: "pending" }) },
+      { onConflict: "user_id" }
+    );
+    await sendEmailNotification({
+      to: "admin@findly.example",
+      subject: "Provider profile updated — needs review",
+      html: `<p>${fullName} updated their profile. Please review pending items.</p>`,
+    });
+  }
 
   return { success: true };
 }

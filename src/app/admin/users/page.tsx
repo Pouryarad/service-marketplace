@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getProviders } from "@/lib/data";
-import { updateProviderStatus, startImpersonation } from "@/lib/actions";
+import { updateProviderStatus } from "@/lib/actions";
 import Image from "next/image";
 import Link from "next/link";
 import { Search, ExternalLink, CheckCircle, XCircle, UserCheck } from "lucide-react";
@@ -97,8 +97,8 @@ export default async function AdminUsersPage({
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-bold text-[#0f1117] text-sm">{p.fullName}</p>
                       <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${p.suspended ? "bg-red-100 text-red-700" :
-                          p.approved ? "bg-green-100 text-green-700" :
-                            "bg-amber-100 text-amber-700"
+                        p.approved ? "bg-green-100 text-green-700" :
+                          "bg-amber-100 text-amber-700"
                         }`}>
                         {p.suspended ? "Suspended" : p.approved ? "Approved" : "Pending"}
                       </span>
@@ -144,12 +144,9 @@ export default async function AdminUsersPage({
                     className="flex items-center gap-1.5 rounded-full border border-black/10 px-3 py-1.5 text-xs font-bold text-[#6b7280] active:scale-95 transition-all">
                     <ExternalLink size={12} /> Profile
                   </Link>
-                  <form action={startImpersonation}>
-                    <input type="hidden" name="providerId" value={p.id} />
-                    <button className="flex items-center gap-1.5 rounded-full border border-blue-200 px-3 py-1.5 text-xs font-bold text-blue-500 active:scale-95 transition-all">
-                      Impersonate
-                    </button>
-                  </form>
+                  <Link href={`/api/impersonate?id=${p.id}`} className="flex items-center gap-1.5 rounded-full border border-blue-200 px-3 py-1.5 text-xs font-bold text-blue-500 active:scale-95 transition-all">
+                    Impersonate
+                  </Link>
                 </div>
               </div>
             ))
