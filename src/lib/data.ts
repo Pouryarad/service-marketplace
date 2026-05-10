@@ -1,6 +1,7 @@
 import { unstable_noStore as noStore } from "next/cache";
 import { createSupabaseServerClient } from "./supabase/server";
 import type { Category, ContactRequest, Provider } from "./types";
+import { cookies } from "next/headers";
 
 type ProviderRow = {
   id: number;
@@ -192,6 +193,19 @@ export async function getProvider(slugOrId: string) {
 export async function getCurrentProviderProfile() {
   const supabase = await createSupabaseServerClient();
   if (!supabase) return null;
+
+  const cookieStore = await cookies();
+  const impersonatingId = cookieStore.get("impersonating_provider_id")?.value;
+
+  if (impersonatingId) {
+    const { data, error } = await supabase
+      .from("providers")
+      .select("*")
+      .eq("id", Number(impersonatingId))
+      .maybeSingle();
+    if (error || !data) return null;
+    return mapProvider(data);
+  }
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;

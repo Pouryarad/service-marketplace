@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Inbox, TrendingUp, UserCircle, BadgeCheck } from "lucide-react";
-import { markRequestContacted, subscribeProvider } from "@/lib/actions";
+import { markRequestContacted, subscribeProvider, checkAndRevokeExpiredAccess, stopImpersonation } from "@/lib/actions";
 import { getProviderRequests, getCurrentProviderProfile, getProviderInsights } from "@/lib/data";
 import { redirect } from "next/navigation";
 import InsightsChart from "@/components/InsightsChart";
@@ -9,6 +9,8 @@ import DashboardRefresh from "@/components/DashboardRefresh";
 import FadeBanner from "@/components/FadeBanner";
 import DashboardRequests from "@/components/DashboardRequests";
 import RoleConflictModal from "@/components/RoleConflictModal";
+import { cookies } from "next/headers";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 
 
@@ -25,7 +27,15 @@ export default async function ProviderDashboardPage({
   ]);
 
   if (!provider) redirect("/provider/setup");
-  console.log("provider status:", provider.status, "approved:", (provider as any).approved);
+const cookieStore = await cookies();
+const impersonatingId = cookieStore.get("impersonating_provider_id")?.value;
+const supabase = await createSupabaseServerClient();
+const { data: { user: currentUser } } = await supabase!.auth.getUser();
+const { data: currentProfile } = await supabase!.from("profiles").select("role").eq("id", currentUser?.id ?? "").single();
+const isImpersonating = !!impersonatingId && currentProfile?.role === "admin";
+  if (provider.adminGranted && provider.adminGrantedExpiresAt) {
+    await checkAndRevokeExpiredAccess(Number(provider.id));
+  }
 
   const insights = await getProviderInsights(Number(provider.id));
 
@@ -53,6 +63,14 @@ export default async function ProviderDashboardPage({
     <main className="min-h-screen bg-[#f3f5f9]">
       <RoleConflictModal actualRole="provider" />
       <section className="mx-auto w-full max-w-7xl px-4 pb-20 pt-6 sm:px-6">
+        {isImpersonating && (
+          <div className="mb-4 rounded-2xl border border-blue-300 bg-blue-50 px-5 py-3 text-sm font-medium text-blue-700 flex items-center justify-between gap-3">
+            <span>👁 Impersonating <strong>{provider.fullName}</strong> — changes are real</span>
+            <Link href="/api/impersonate/stop" className="shrink-0 rounded-full bg-blue-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-blue-700 transition">
+              Exit
+            </Link>
+          </div>
+        )}
         {profile === "saved" && <FadeBanner message="✅ Profile saved successfully." type="green" />}
         {subscribed === "true" && <FadeBanner message="🎉 Welcome to ProFindly! Your 14-day free trial has started." type="blue" />}
         {provider.approved && !provider.adminGranted && provider.subscriptionStatus !== "active" && provider.subscriptionStatus !== "trialing" && (

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import {
   sendEmailNotification,
   sendNewContactRequestEmail,
@@ -531,4 +532,28 @@ export async function revokeAdminAccess(formData: FormData) {
     .eq("id", providerId);
 
   revalidatePath("/admin/subscriptions");
+}
+
+export async function checkAndRevokeExpiredAccess(providerId: number) {
+  "use server";
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return;
+
+  await supabase
+    .from("providers")
+    .update({ admin_granted: false, subscription_status: "expired" })
+    .eq("id", providerId)
+    .lt("admin_granted_expires_at", new Date().toISOString())
+    .eq("admin_granted", true);
+}
+
+export async function startImpersonation(formData: FormData) {
+  "use server";
+  const providerId = String(formData.get("providerId"));
+  redirect(`/api/impersonate?id=${providerId}`);
+}
+
+export async function stopImpersonation() {
+  "use server";
+  redirect("/api/impersonate/stop");
 }
