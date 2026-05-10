@@ -55,6 +55,14 @@ export default async function ProviderDashboardPage({
       <section className="mx-auto w-full max-w-7xl px-4 pb-20 pt-6 sm:px-6">
         {profile === "saved" && <FadeBanner message="✅ Profile saved successfully." type="green" />}
         {subscribed === "true" && <FadeBanner message="🎉 Welcome to ProFindly! Your 14-day free trial has started." type="blue" />}
+        {provider.approved && !provider.adminGranted && provider.subscriptionStatus !== "active" && provider.subscriptionStatus !== "trialing" && (
+          <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-3 text-sm font-medium text-amber-700 flex items-center justify-between gap-3">
+            <span>✅ Your account is approved! Activate your subscription to go live.</span>
+            <Link href="/provider/setup?tab=payment" className="shrink-0 rounded-full bg-amber-500 px-4 py-1.5 text-xs font-bold text-white hover:bg-amber-600 transition">
+              Go to Payment →
+            </Link>
+          </div>
+        )}
         <DashboardRefresh />
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

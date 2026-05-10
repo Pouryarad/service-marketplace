@@ -141,9 +141,9 @@ export async function sendAccountApprovedEmail({
     html: layout(`
       ${h1("You're approved!")}
       ${p(`Hi ${providerName}, your ${SITE_NAME} provider account has been reviewed and approved.`)}
-      ${p("Your profile is now live and visible to clients. Make sure your profile is complete to get the most inquiries.")}
-      ${badge("Account Approved", "green")}
-      ${btn("Go to Dashboard", `${SITE_URL}/provider/dashboard`)}
+      ${p("To complete your setup and go live, head to your dashboard and activate your subscription under the Payment tab.")}
+${badge("Account Approved", "green")}
+${btn("Activate Subscription →", `${SITE_URL}/provider/setup?tab=payment`)}
     `),
   });
 }

@@ -9,7 +9,7 @@ export type ProviderStatus =
   | "expired"
   | "suspended";
 
-export type SubscriptionStatus = "active" | "expired" | "pending" | "none";
+export type SubscriptionStatus = "active" | "expired" | "pending" | "none" | "trialing";
 
 export type Category = {
   id: string;
