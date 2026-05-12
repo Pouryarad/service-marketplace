@@ -20,11 +20,7 @@ const LANGUAGES = [
   "Vietnamese", "Portuguese", "Italian", "German", "Russian", "Other",
 ];
 
-const CATEGORIES = [
-  "Accountant", "Car Dealer", "Financial Advisor", "Immigration Consultant",
-  "Insurance Broker", "Lawyer", "Mortgage Broker", "Notary Public",
-  "Realtor", "Therapist", "Other",
-];
+// Categories now come from DB via props
 
 const COUNTRY_CODES = [
   { code: "+1", label: "🇨🇦 +1" },
@@ -125,11 +121,15 @@ function DeleteAccountModal({ onClose }: { onClose: () => void }) {
 export default function ProviderSetupForm({
   provider,
   userEmail,
+  categoriesJson = "[]",
 }: {
   provider: Provider | null;
   userEmail: string;
+  categoriesJson?: string;
 }) {
+  const categories: { slug: string; name: string }[] = JSON.parse(categoriesJson);
   const isFirstTime = !provider;
+  console.log("categories in form:", categories);
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -318,7 +318,7 @@ if (!isFirstTime) {
                   <div className="relative mt-2">
                     <select value={categoryValue} onChange={(e) => { if (e.target.value === "__custom__") { setShowCustomCategory(true); } else { setCategoryValue(e.target.value); } }} className="h-12 w-full appearance-none rounded-xl border border-black/10 bg-white px-4 pr-10 outline-none focus:border-[#2563eb] transition">
                       <option value="">Select a category</option>
-                      {CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+                      {categories.map((cat) => <option key={cat.slug} value={cat.name}>{cat.name}</option>)}
                       <option value="__custom__">+ Add my own category</option>
                     </select>
                     <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#9ca3af]" />
@@ -506,7 +506,7 @@ if (!isFirstTime) {
               <div className="relative mt-2">
                 <select value={categoryValue} onChange={(e) => { if (e.target.value === "__custom__") { setShowCustomCategory(true); } else { setCategoryValue(e.target.value); } }} className={`h-12 w-full appearance-none rounded-xl border bg-white px-4 pr-10 outline-none focus:border-[#2563eb] transition ${errors.category ? "border-red-400" : "border-black/10"}`}>
                   <option value="">Select a category</option>
-                  {CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+                  {categories.map((cat) => <option key={cat.slug} value={cat.name}>{cat.name}</option>)}
                   <option value="__custom__">+ Add my own category</option>
                 </select>
                 <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#9ca3af]" />

@@ -1,4 +1,4 @@
-import { getCurrentProviderProfile, getCurrentUser } from "@/lib/data";
+import { getCurrentProviderProfile, getCurrentUser, getAllCategories } from "@/lib/data";
 import ProviderSetupForm from "@/components/ProviderSetupForm";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -11,9 +11,10 @@ export default async function ProviderSetupPage({
   const { tab } = await searchParams;
   const activeTab = tab === "payment" ? "payment" : "profile";
 
-  const [provider, user] = await Promise.all([
+  const [provider, user, categories] = await Promise.all([
     getCurrentProviderProfile(),
     getCurrentUser(),
+    getAllCategories(),
   ]);
 
   const isFirstTime = !provider;
@@ -93,6 +94,8 @@ export default async function ProviderSetupPage({
             <ProviderSetupForm
               provider={provider}
               userEmail={user?.email ?? ""}
+              categories={categories}
+              categoriesJson={JSON.stringify(categories)}
             />
           ) : profileComplete ? (
             <PaymentTab provider={provider} />

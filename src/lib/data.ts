@@ -73,6 +73,7 @@ export async function getCurrentUser() {
   return data.user;
 }
 
+
 export async function getCategories(limit?: number): Promise<Category[]> {
   noStore();
   const supabase = await createSupabaseServerClient();
@@ -422,4 +423,19 @@ export async function getProviderInsights(providerId: number) {
     phoneReveals: get("reveal_phone"),
     contactRequests: get("contact_request_sent"),
   };
+}
+
+export async function getAllCategories(): Promise<{ slug: string; name: string }[]> {
+  noStore();
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("categories")
+    .select("slug, name")
+    .order("name");
+
+  console.log("getAllCategories:", data, error);
+  if (error || !data) return [];
+  return data;
 }
