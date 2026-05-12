@@ -156,6 +156,50 @@ export async function POST(req: Request) {
           });
         }
       }
+
+      // Handle referral confirmation
+      const { data: paidProvider } = await supabase
+        .from("providers")
+        .select("id, user_id, stripe_subscription_id")
+        .eq("stripe_customer_id", customerId)
+        .maybeSingle();
+
+      if (paidProvider) {
+        const { data: referral } = await supabase
+          .from("referrals")
+          .update({ status: "confirmed" })
+          .eq("referred_user_id", paidProvider.user_id)
+          .eq("status", "pending")
+          .select("referrer_id")
+          .maybeSingle();
+
+        if (referral) {
+          const { count } = await supabase
+            .from("referrals")
+            .select("id", { count: "exact" })
+            .eq("referrer_id", referral.referrer_id)
+            .eq("status", "confirmed");
+
+          const discountPct = Math.min((count ?? 1) * 20, 100);
+
+          const { data: referrer } = await supabase
+            .from("providers")
+            .select("stripe_subscription_id")
+            .eq("id", referral.referrer_id)
+            .maybeSingle();
+
+          if (referrer?.stripe_subscription_id) {
+            const coupon = await stripe.coupons.create({
+              percent_off: discountPct,
+              duration: "once",
+              name: `Referral Reward ${discountPct}%`,
+            });
+            await stripe.subscriptions.update(referrer.stripe_subscription_id, {
+              discounts: [{ coupon: coupon.id }],
+            });
+          }
+        }
+      }
       break;
     }
 

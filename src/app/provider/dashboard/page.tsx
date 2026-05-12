@@ -11,6 +11,7 @@ import DashboardRequests from "@/components/DashboardRequests";
 import RoleConflictModal from "@/components/RoleConflictModal";
 import { cookies } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import RefBtn from "@/components/ReferralButton";
 
 
 
@@ -84,6 +85,11 @@ const isImpersonating = !!impersonatingId && currentProfile?.role === "admin";
         <DashboardRefresh />
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          {provider.referralCode && (
+            <div className="flex justify-end sm:hidden">
+              <RefBtn code={provider.referralCode!} />
+            </div>
+          )}
           <div className="flex items-center gap-4">
             {provider.profilePhotoUrl ? (
               <Image
@@ -108,6 +114,11 @@ const isImpersonating = !!impersonatingId && currentProfile?.role === "admin";
               )}
             </div>
           </div>
+          {provider.referralCode && (
+            <div className="hidden sm:flex items-center">
+              <RefBtn code={provider.referralCode!} />
+            </div>
+          )}
         </div>
 
         {/* Stat bar */}

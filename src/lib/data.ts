@@ -61,6 +61,7 @@ function mapProvider(row: ProviderRow): Provider {
     pendingProfilePhotoUrl: (row as any).pending_profile_photo_url ?? null,
     adminGranted: (row as any).admin_granted ?? false,
     adminGrantedExpiresAt: (row as any).admin_granted_expires_at ?? null,
+    referralCode: (row as any).referral_code ?? null,
   };
 }
 

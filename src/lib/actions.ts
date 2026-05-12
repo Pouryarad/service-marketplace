@@ -298,7 +298,7 @@ export async function saveProviderProfile(formData: FormData) {
     revalidatePath("/provider/setup");
     revalidatePath("/provider/dashboard");
     revalidatePath("/providers/");
-  } else {
+ } else {
     await supabase.from("providers").upsert(
       { user_id: data.user.id, ...payload, ...(existing ? {} : { approved: false, subscription_status: "pending" }) },
       { onConflict: "user_id" }
@@ -308,6 +308,10 @@ export async function saveProviderProfile(formData: FormData) {
       subject: "Provider profile updated — needs review",
       html: `<p>${fullName} updated their profile. Please review pending items.</p>`,
     });
+    if (!existing) {
+      const refCode = "REF" + Math.random().toString(36).substring(2, 8).toUpperCase();
+      await supabase.from("providers").update({ referral_code: refCode }).eq("user_id", data.user.id);
+    }
   }
 
   return { success: true };
