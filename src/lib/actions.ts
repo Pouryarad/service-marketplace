@@ -10,6 +10,7 @@ import {
   sendAccountApprovedEmail,
   sendAccountRejectedEmail,
   sendAccountSuspendedEmail,
+  sendReferralInviteEmail
 } from "@/lib/email";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Stripe from "stripe";
@@ -584,4 +585,16 @@ export async function startImpersonation(formData: FormData) {
 export async function stopImpersonation() {
   "use server";
   redirect("/api/impersonate/stop");
+}
+
+export async function sendReferralInvite(formData: FormData) {
+  "use server";
+  const toEmail = String(formData.get("email") ?? "").trim();
+  const referrerName = String(formData.get("referrerName") ?? "").trim();
+  const referralCode = String(formData.get("referralCode") ?? "").trim();
+
+  if (!toEmail || !referralCode) return { error: "Missing fields" };
+
+  await sendReferralInviteEmail({ toEmail, referrerName, referralCode });
+  return { success: true };
 }

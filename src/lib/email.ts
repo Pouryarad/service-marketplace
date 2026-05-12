@@ -352,3 +352,25 @@ export async function sendEmailNotification({
 }) {
   await send({ to, subject, html });
 }
+
+export async function sendReferralInviteEmail({
+  toEmail,
+  referrerName,
+  referralCode,
+}: {
+  toEmail: string;
+  referrerName: string;
+  referralCode: string;
+}) {
+  await send({
+    to: toEmail,
+    subject: `${referrerName} invited you to join ProFindly`,
+    html: layout(`
+      ${h1("You've been invited!")}
+      ${p(`${referrerName} thinks you'd be a great fit for ProFindly — a marketplace connecting professional service providers with clients.`)}
+      ${p("Join today and get your profile listed in front of clients actively looking for your services.")}
+      ${badge("Exclusive Invite", "green")}
+      ${btn("Join ProFindly →", `${SITE_URL}/ref/${referralCode}`)}
+    `),
+  });
+}
