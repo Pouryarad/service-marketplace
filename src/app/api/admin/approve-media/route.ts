@@ -44,6 +44,14 @@ export async function POST(req: NextRequest) {
     updates.pending_category_slug = null;
     updates.category_approved = true;
     approvedItems.push(`Category: ${provider.pending_category_slug}`);
+
+    // Auto-insert into categories table if not already there
+    const slug = provider.pending_category_slug;
+    const name = slug.split("-").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+    const { data: existing } = await supabase.from("categories").select("id").eq("slug", slug).maybeSingle();
+    if (!existing) {
+      await supabase.from("categories").insert({ slug, name });
+    }
   }
 
   await supabase.from("providers").update(updates).eq("id", providerId);

@@ -94,7 +94,6 @@ export default async function ProviderSetupPage({
             <ProviderSetupForm
               provider={provider}
               userEmail={user?.email ?? ""}
-              categories={categories}
               categoriesJson={JSON.stringify(categories)}
             />
           ) : profileComplete ? (
