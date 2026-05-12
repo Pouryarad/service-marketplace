@@ -12,6 +12,7 @@ import {
   CreditCard,
   BarChart2,
   LogOut,
+  Gift,
 } from "lucide-react";
 // No BottomNav in admin — uses its own built-in nav
 
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
   { href: "/admin/categories", label: "Categories", icon: Tag },
   { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard },
   { href: "/admin/insights", label: "Insights", icon: BarChart2 },
+  { href: "/admin/referrals", label: "Referrals", icon: Gift },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -88,7 +90,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </header>
 
         {/* Mobile Bottom Nav */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0f1117] border-t border-white/5 flex overflow-x-auto scrollbar-none">
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0f1117] border-t border-white/5 flex justify-around overflow-x-auto scrollbar-none">
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
