@@ -16,7 +16,7 @@ export default async function AdminUsersPage({
   const supabase = await createSupabaseServerClient();
   const [providers, clientsRes] = await Promise.all([
     getProviders({ includeHidden: true }),
-    supabase!.from("profiles").select("id, full_name, email, created_at").eq("role", "client").order("created_at", { ascending: false }),
+    supabase!.from("profiles").select("id, full_name, email, phone, city, created_at").eq("role", "client").order("created_at", { ascending: false }),
   ]);
   const clients = clientsRes.data ?? [];
 
@@ -30,9 +30,15 @@ export default async function AdminUsersPage({
 
   return (
     <div className="space-y-5 max-w-4xl mx-auto">
-      <div>
-        <h1 className="text-2xl font-black text-[#0f1117]">Users</h1>
-        <p className="text-sm text-[#9ca3af] mt-0.5">Manage clients and providers</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-black text-[#0f1117]">Users</h1>
+          <p className="text-sm text-[#9ca3af] mt-0.5">Manage clients and providers</p>
+        </div>
+        <a href={`/api/admin/export?type=${activeTab === "providers" ? "providers" : "clients"}`}
+          className="flex items-center gap-1.5 rounded-full bg-[#0f1117] px-4 py-2 text-xs font-bold text-white hover:bg-[#1a1a2e] transition">
+          ↓ Export CSV
+        </a>
       </div>
 
       {/* Tabs */}

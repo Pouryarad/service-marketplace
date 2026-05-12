@@ -123,6 +123,7 @@ export async function saveAudienceChoice(formData: FormData) {
       id: data.user.id,
       full_name: data.user.user_metadata?.full_name ?? data.user.email,
       role: choice === "provider" ? "provider" : "client",
+      email: data.user.email,
     },
     { onConflict: "id" }
   );
