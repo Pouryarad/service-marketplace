@@ -22,7 +22,7 @@ export default function AuthModal({
 
   const handleGoogleLogin = async () => {
     const redirectNext = role === "provider"
-      ? "/provider/setup"
+      ? "/provider/dashboard"
       : window.location.pathname + window.location.search;
 
     localStorage.setItem("next", redirectNext);
