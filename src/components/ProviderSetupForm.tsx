@@ -129,7 +129,6 @@ export default function ProviderSetupForm({
 }) {
   const categories: { slug: string; name: string }[] = JSON.parse(categoriesJson);
   const isFirstTime = !provider;
-  console.log("categories in form:", categories);
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);

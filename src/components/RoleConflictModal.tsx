@@ -6,9 +6,7 @@ export default function RoleConflictModal({ actualRole }: { actualRole: "client"
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    console.log("modal mounted");
     const pending = localStorage.getItem("pendingRole");
-      console.log("pending:", pending, "actual:", actualRole)
 
     if (pending && pending !== actualRole) {
       setShow(true);

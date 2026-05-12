@@ -450,7 +450,6 @@ export async function getAllCategories(): Promise<{ slug: string; name: string }
     .select("slug, name")
     .order("name");
 
-  console.log("getAllCategories:", data, error);
   if (error || !data) return [];
   return data;
 }

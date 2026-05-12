@@ -32,7 +32,6 @@ export async function GET(request: NextRequest) {
     filename = "providers.csv";
   } else {
     const { data, error: clientError } = await service.from("profiles").select("full_name, email, phone, city, created_at").eq("role", "client").order("created_at", { ascending: false });
-    console.log("export clients:", data?.length, clientError);
     rows = (data ?? []).map((c) => ({
       Name: c.full_name ?? "—",
       Email: c.email ?? "—",

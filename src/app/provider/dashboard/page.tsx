@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Inbox, TrendingUp, UserCircle, BadgeCheck } from "lucide-react";
-import { markRequestContacted, subscribeProvider, checkAndRevokeExpiredAccess, stopImpersonation } from "@/lib/actions";
+import { checkAndRevokeExpiredAccess } from "@/lib/actions";
 import { getProviderRequests, getCurrentProviderProfile, getProviderInsights } from "@/lib/data";
 import { redirect } from "next/navigation";
 import InsightsChart from "@/components/InsightsChart";
@@ -41,7 +41,6 @@ const isImpersonating = !!impersonatingId && currentProfile?.role === "admin";
   const insights = await getProviderInsights(Number(provider.id));
 
   const openRequests = requests.filter((r) => r.status === "new");
-  const displayRequests = openRequests;
   const totalLeads = requests.length;
 
   const statusColor: Record<string, string> = {

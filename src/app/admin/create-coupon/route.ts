@@ -38,7 +38,6 @@ export async function POST(req: NextRequest) {
         ).toString(),
       });
       const promoJson = await promoRes.json();
-      console.log("Promo code creation result:", JSON.stringify(promoJson));
     }
 
     return NextResponse.json({ success: true, couponId: coupon.id });

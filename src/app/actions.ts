@@ -7,12 +7,11 @@ import { redirect } from "next/navigation";
 // CREATE CONTACT REQUEST
 // =======================
 export async function createContactRequest(formData: FormData) {
-  console.log("ACTION TRIGGERED");
 
   const supabase = await createSupabaseServerClient();
   if (!supabase) return;
 
-  // 🔐 Get user
+  // Get user
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -21,7 +20,7 @@ export async function createContactRequest(formData: FormData) {
     throw new Error("User not authenticated");
   }
 
-  // 📦 Get form data
+  // Get form data
   const providerId = Number(formData.get("providerId"));
   const message = String(formData.get("message") ?? "").trim();
 
@@ -64,7 +63,7 @@ const verifyData = await verifyRes.json();
 if (!verifyData.success) {
   throw new Error("Captcha failed");
 }
-  // 🧠 INSERT (FIXED)
+  // INSERT (FIXED)
   const { error } = await supabase.from("contact_requests").insert({
     provider_id: providerId,
     client_id: user.id,
@@ -80,7 +79,7 @@ if (!verifyData.success) {
     throw new Error("Failed to create contact request");
   }
 
-  // 📊 Track event
+  // Track event
   const { error: eventError } = await supabase
     .from("provider_events")
     .insert({
