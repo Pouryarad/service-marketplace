@@ -96,9 +96,23 @@ export async function getCategories(limit?: number): Promise<Category[]> {
 
   const activeSlugs = new Set((activeProviders ?? []).map((p) => p.category_slug));
 
+  // Count views per category from provider clicks
+  const { data: viewCounts } = await supabase
+    .from("providers")
+    .select("category_slug, clicks_month")
+    .eq("approved", true)
+    .eq("suspended", false)
+    .eq("subscription_status", "active");
+
+  const viewsByCategory: Record<string, number> = {};
+  (viewCounts ?? []).forEach((p) => {
+    viewsByCategory[p.category_slug] = (viewsByCategory[p.category_slug] ?? 0) + (p.clicks_month ?? 0);
+  });
+
   const filtered = data
     .filter((c) => activeSlugs.has(c.slug))
-    .map((c) => ({ id: c.id, slug: c.slug, name: c.name, imageUrl: c.image_url }));
+    .map((c) => ({ id: c.id, slug: c.slug, name: c.name, imageUrl: c.image_url, views: viewsByCategory[c.slug] ?? 0 }))
+    .sort((a, b) => b.views - a.views);
 
   return limit ? filtered.slice(0, limit) : filtered;
 }
