@@ -58,6 +58,10 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/provider/dashboard", url.origin));
     }
 
+    if (pathname.startsWith("/dashboard") && role === "admin") {
+      return NextResponse.redirect(new URL("/admin", url.origin));
+    }
+
     const isProviderRoute = pathname.startsWith("/provider/") && !pathname.startsWith("/providers/");
 
     if (isProviderRoute) {

@@ -8,7 +8,8 @@ export default function RoleConflictModal({ actualRole }: { actualRole: "client"
   useEffect(() => {
     const pending = localStorage.getItem("pendingRole");
 
-    if (pending && pending !== actualRole) {
+    const userRole = document.cookie.split(';').find(c => c.trim().startsWith('user-role='))?.split('=')[1];
+    if (pending && pending !== actualRole && userRole !== 'admin') {
       setShow(true);
     }
     localStorage.removeItem("pendingRole");
