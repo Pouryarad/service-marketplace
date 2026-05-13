@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
+    console.log("callback user id:", user.id, "profile:", profile);
 
   const res = NextResponse.redirect(new URL(
     profile?.role === "admin" ? "/admin" :
