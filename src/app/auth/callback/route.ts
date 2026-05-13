@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServerClient, createSupabaseServiceClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.redirect(new URL("/", url.origin));
 
-  const { data: profile } = await supabase
+  const service = createSupabaseServiceClient();
+  const { data: profile } = await service
     .from("profiles")
     .select("role")
     .eq("id", user.id)
