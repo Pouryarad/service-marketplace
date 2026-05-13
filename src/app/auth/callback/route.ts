@@ -17,12 +17,11 @@ export async function GET(request: NextRequest) {
 
   
   const service = createSupabaseServiceClient();
-  const { data: profile, error } = await service
+  const { data: profile } = await service
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
-    console.log("callback user id:", user.id, "profile:", profile, "service error:", error);
 
   const res = NextResponse.redirect(new URL(
     profile?.role === "admin" ? "/admin" :
