@@ -52,13 +52,7 @@ export async function proxy(request: NextRequest) {
   }
 
   if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    const role = profile?.role;
+    const role = request.cookies.get("user-role")?.value ?? null;
 
     if (pathname.startsWith("/dashboard") && role === "provider") {
       return NextResponse.redirect(new URL("/provider/dashboard", url.origin));
