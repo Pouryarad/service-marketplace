@@ -316,7 +316,7 @@ export async function saveProviderProfile(formData: FormData) {
 
   revalidatePath("/provider/setup");
   revalidatePath("/provider/dashboard");
-  return { success: true };
+  redirect(existing ? "/provider/dashboard?profile=saved" : "/provider/setup?tab=payment");
 }
 
 export async function updateProviderStatus(formData: FormData) {

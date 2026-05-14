@@ -58,16 +58,14 @@ function ProgressBar({ step, total }: { step: number; total: number }) {
       <div className="flex items-center justify-between mb-2">
         {STEPS.map((label, i) => (
           <div key={i} className="flex flex-col items-center gap-1">
-            <div className={`size-7 rounded-full flex items-center justify-center text-xs font-bold transition ${
-              i < step ? "bg-[#2563eb] text-white" :
-              i === step ? "bg-[#2563eb] text-white ring-4 ring-[#2563eb]/20" :
-              "bg-[#f3f5f9] text-[#9ca3af]"
-            }`}>
+            <div className={`size-7 rounded-full flex items-center justify-center text-xs font-bold transition ${i < step ? "bg-[#2563eb] text-white" :
+                i === step ? "bg-[#2563eb] text-white ring-4 ring-[#2563eb]/20" :
+                  "bg-[#f3f5f9] text-[#9ca3af]"
+              }`}>
               {i < step ? "✓" : i + 1}
             </div>
-            <span className={`text-[10px] font-medium hidden sm:block ${
-              i === step ? "text-[#2563eb]" : "text-[#9ca3af]"
-            }`}>{label}</span>
+            <span className={`text-[10px] font-medium hidden sm:block ${i === step ? "text-[#2563eb]" : "text-[#9ca3af]"
+              }`}>{label}</span>
           </div>
         ))}
       </div>
@@ -258,18 +256,15 @@ export default function ProviderSetupForm({
     if (idFile) formData.set("idDocument", idFile);
 
     try {
-  await saveProviderProfile(formData);
-  window.location.href = isFirstTime
-    ? "/provider/setup?tab=payment"
-    : "/provider/dashboard?profile=saved";
-} catch (err) {
-  console.error("Save failed:", err);
-  setSaving(false);
-  alert("Something went wrong. Please try again.");
-}
+      await saveProviderProfile(formData);
+    } catch (err) {
+      console.error("Save failed:", err);
+      setSaving(false);
+      alert("Something went wrong. Please try again.");
+    }
   };
 
-if (!isFirstTime) {
+  if (!isFirstTime) {
     return (
       <>
         {showDeleteModal && <DeleteAccountModal onClose={() => setShowDeleteModal(false)} />}
@@ -297,8 +292,8 @@ if (!isFirstTime) {
                   </label>
                 </div>
                 {provider?.pendingProfilePhotoUrl && (
-              <p className="mt-1 text-xs text-yellow-600">⏳ New photos require admin approval.</p>
-            )}
+                  <p className="mt-1 text-xs text-yellow-600">⏳ New photos require admin approval.</p>
+                )}
               </div>
 
               <div>
