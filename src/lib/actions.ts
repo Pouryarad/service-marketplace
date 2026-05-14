@@ -233,7 +233,7 @@ export async function saveProviderProfile(formData: FormData) {
 
   // Video approval
   const pendingVideoUrl = videoUrl && videoUrl !== existing?.video_url ? videoUrl : null;
-  const finalVideoUrl = existing?.video_url ?? videoUrl ?? null;
+  const finalVideoUrl = existing?.video_url ?? null;
 
   const baseSlug = fullName
     .toLowerCase()
@@ -298,7 +298,7 @@ export async function saveProviderProfile(formData: FormData) {
     revalidatePath("/provider/setup");
     revalidatePath("/provider/dashboard");
     revalidatePath("/providers/");
- } else {
+  } else {
     await supabase.from("providers").upsert(
       { user_id: data.user.id, ...payload, ...(existing ? {} : { approved: false, subscription_status: "pending" }) },
       { onConflict: "user_id" }
