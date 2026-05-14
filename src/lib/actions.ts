@@ -530,7 +530,8 @@ export async function grantAdminAccess(formData: FormData) {
   if (!supabase) return;
 
   const providerId = Number(formData.get("providerId"));
-  const expiresAt = formData.get("expiresAt") ? String(formData.get("expiresAt")) : null;
+  const rawDate = formData.get("expiresAt") ? String(formData.get("expiresAt")) : null;
+  const expiresAt = rawDate ? `${rawDate}T23:59:59Z` : null;
 
   await supabase
     .from("providers")

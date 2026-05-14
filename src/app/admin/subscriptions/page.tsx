@@ -94,9 +94,10 @@ export default async function AdminSubscriptionsPage() {
                     </button>
                   </form>
                 ) : (
-                  <form action={grantAdminAccess}>
+                  <form action={grantAdminAccess} className="flex items-center gap-2 shrink-0">
                     <input type="hidden" name="providerId" value={p.id} />
-                    <button className="shrink-0 rounded-full bg-purple-500 px-3 py-1.5 text-xs font-bold text-white active:scale-95 transition-all">
+                    <input type="date" name="expiresAt" className="rounded-lg border border-black/10 px-2 py-1 text-xs text-[#0f1117]" />
+                    <button className="rounded-full bg-purple-500 px-3 py-1.5 text-xs font-bold text-white active:scale-95 transition-all">
                       Grant Free
                     </button>
                   </form>
