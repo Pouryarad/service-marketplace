@@ -5,6 +5,8 @@ import { TopNav } from "@/components/nav";
 import { getCurrentUserRole, getProviderRequests } from "@/lib/data";
 import BottomNav from "@/components/BottomNav";
 import type { ProviderRequest } from "@/lib/types";
+import AuthRefresh from "@/components/AuthRefresh";
+
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const spaceGrotesk = Space_Grotesk({ variable: "--font-space-grotesk", subsets: ["latin"] });
@@ -43,6 +45,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           variant={role === "provider" ? "provider" : role === "admin" ? "admin" : role ? "dashboard" : "public"}
           providerRequests={providerRequests}
         />
+        <AuthRefresh />
         {children}
       </body>
     </html>
