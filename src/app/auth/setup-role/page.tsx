@@ -6,7 +6,6 @@ import { createBrowserClient } from "@supabase/ssr";
 export default function SetupRolePage() {
   const [conflict, setConflict] = useState<"client" | "provider" | null>(null);
 
-
   useEffect(() => {
     const run = async () => {
       const supabase = createBrowserClient(
@@ -15,26 +14,21 @@ export default function SetupRolePage() {
       );
 
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { window.location.href = "/"; return; }
+      if (!user) { window.location.replace("/"); return; }
 
       const pendingRole = localStorage.getItem("pendingRole") ?? "client";
 
-
-      // Check existing role
       const { data: existing } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", user.id)
         .maybeSingle();
 
-
-      // If they already have a conflicting role, show modal
       if (existing?.role && existing.role !== pendingRole && existing.role !== "admin") {
         setConflict(existing.role as "client" | "provider");
         return;
       }
 
-      // New user or same role — upsert and redirect
       await supabase.from("profiles").upsert({
         id: user.id,
         role: pendingRole,
@@ -42,10 +36,11 @@ export default function SetupRolePage() {
       }, { onConflict: "id" });
 
       if (pendingRole === "provider") {
-        window.location.href = "/provider/setup";
+        window.location.replace("/provider/setup");
       } else {
         const next = localStorage.getItem("next");
-        window.location.href = (next && next !== "/dashboard") ? next : "/dashboard";
+        localStorage.removeItem("next");
+        window.location.replace((next && next !== "/dashboard") ? next : "/dashboard");
       }
     };
 
@@ -62,12 +57,10 @@ export default function SetupRolePage() {
             This Google account is registered as a <strong>client</strong>. To become a provider, please sign up with a different account.
           </p>
           <div className="flex flex-col gap-2">
-            <a href="/dashboard"
-              className="w-full rounded-xl bg-[#0f1117] py-3 text-sm font-bold text-white text-center">
+            <a href="/dashboard" className="w-full rounded-xl bg-[#0f1117] py-3 text-sm font-bold text-white text-center">
               Go to Dashboard
             </a>
-            <a href="/"
-              className="w-full rounded-xl border border-black/10 py-3 text-sm font-bold text-[#6b7280] text-center">
+            <a href="/" className="w-full rounded-xl border border-black/10 py-3 text-sm font-bold text-[#6b7280] text-center">
               Home
             </a>
           </div>
@@ -85,8 +78,7 @@ export default function SetupRolePage() {
           <p className="text-sm text-[#6b7280] mb-6 leading-relaxed">
             This Google account is registered as a <strong>provider</strong>. Please use the provider login.
           </p>
-          <a href="/provider/dashboard"
-            className="w-full rounded-xl bg-[#0f1117] py-3 text-sm font-bold text-white text-center block">
+          <a href="/provider/dashboard" className="w-full rounded-xl bg-[#0f1117] py-3 text-sm font-bold text-white text-center block">
             Go to Dashboard
           </a>
         </div>
