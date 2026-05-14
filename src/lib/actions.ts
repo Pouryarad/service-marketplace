@@ -314,6 +314,8 @@ export async function saveProviderProfile(formData: FormData) {
     }
   }
 
+  revalidatePath("/provider/setup");
+  revalidatePath("/provider/dashboard");
   return { success: true };
 }
 
