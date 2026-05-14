@@ -14,6 +14,7 @@ export default function AuthModal({
   role?: "client" | "provider";
 }) {
   const [open, setOpen] = useState(false);
+  const [agreed, setAgreed] = useState(true);
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -57,9 +58,24 @@ export default function AuthModal({
                   ? "Create your provider profile and start getting clients."
                   : "Continue with Google to access your account."}
               </p>
+              <label className="flex items-start gap-2 mt-4 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={agreed}
+                  onChange={(e) => setAgreed(e.target.checked)}
+                  className="mt-0.5 shrink-0"
+                />
+                <span className="text-xs text-[#6b7280]">
+                  I agree to the{" "}
+                  <a href="/terms" target="_blank" className="underline text-[#0f1117]">Terms & Conditions</a>,{" "}
+                  <a href="/privacy" target="_blank" className="underline text-[#0f1117]">Privacy Policy</a>, and{" "}
+                  <a href="/cookies" target="_blank" className="underline text-[#0f1117]">Cookie Policy</a>.
+                </span>
+              </label>
               <button
                 onClick={handleGoogleLogin}
-                className="mt-5 w-full inline-flex items-center justify-center gap-3 rounded-full border border-black/10 bg-white px-5 py-3 font-semibold text-[#1f1f1f] hover:bg-gray-50 transition"
+                disabled={!agreed}
+                className="mt-5 w-full inline-flex items-center justify-center gap-3 rounded-full border border-black/10 bg-white px-5 py-3 font-semibold text-[#1f1f1f] hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <img
                   src="https://www.svgrepo.com/show/475656/google-color.svg"
