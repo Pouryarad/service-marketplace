@@ -253,7 +253,8 @@ export default function ProviderSetupForm({
 
     if (profilePhotoFile) formData.set("profilePhoto", profilePhotoFile);
     portfolioFiles.forEach((f) => formData.append("portfolioPhotos", f));
-    if (idFile) formData.set("idDocument", idFile);
+    console.log("ID file:", idFile?.name, idFile?.size);
+if (idFile) formData.set("idDocument", idFile);
 
     try {
       await saveProviderProfile(formData);
