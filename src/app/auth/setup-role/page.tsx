@@ -5,7 +5,7 @@ import { createBrowserClient } from "@supabase/ssr";
 
 export default function SetupRolePage() {
   const [conflict, setConflict] = useState<"client" | "provider" | null>(null);
-  
+
 
   useEffect(() => {
     const run = async () => {
@@ -44,7 +44,8 @@ export default function SetupRolePage() {
       if (pendingRole === "provider") {
         window.location.href = "/provider/setup";
       } else {
-        window.location.href = "/dashboard";
+        const next = localStorage.getItem("next");
+        window.location.href = (next && next !== "/dashboard") ? next : "/dashboard";
       }
     };
 
