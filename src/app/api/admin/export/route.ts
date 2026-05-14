@@ -31,15 +31,22 @@ export async function GET(request: NextRequest) {
     }));
     filename = "providers.csv";
   } else {
-    const { data, error: clientError } = await service.from("profiles").select("full_name, email, phone, city, created_at").eq("role", "client").order("created_at", { ascending: false });
-    rows = (data ?? []).map((c) => ({
-      Name: c.full_name ?? "",
-      Email: c.email ?? "",
-      Phone: c.phone ?? "",
-      City: c.city ?? "",
-      Joined: c.created_at ? new Date(c.created_at).toLocaleDateString("en-CA") : "",
-    }));
-    filename = "clients.csv";
+    const { data, error: clientError } = await service.from("profiles").select("id, full_name, phone, city, created_at").eq("role", "client").order("created_at", { ascending: false });
+
+const ids = (data ?? []).map((c) => c.id);
+const { data: { users } } = await service.auth.admin.listUsers({ perPage: 1000 });
+
+const emailMap: Record<string, string> = {};
+users.forEach((u) => { emailMap[u.id] = u.email ?? ""; });
+
+rows = (data ?? []).map((c) => ({
+  Name: c.full_name ?? "",
+  Email: emailMap[c.id] ?? "",
+  Phone: c.phone ?? "",
+  City: c.city ?? "",
+  Joined: c.created_at ? new Date(c.created_at).toLocaleDateString("en-CA") : "",
+}));
+filename = "clients.csv";
   }
 
   if (rows.length === 0) {
