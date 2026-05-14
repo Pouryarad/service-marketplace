@@ -2,31 +2,35 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="mt-auto border-t border-black/[0.06] bg-white px-4 py-8">
+    <footer className="mt-auto bg-[#0f1117] px-6 py-12">
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-10 sm:flex-row sm:justify-between">
           {/* Brand */}
-          <div>
-            <p className="font-black text-[#0f1117] tracking-tight">ProFindly</p>
-            <p className="mt-1 text-xs text-[#9ca3af]">Find the right service in your area.</p>
-            <p className="mt-1 text-xs text-[#9ca3af]">© {new Date().getFullYear()} ProFindly. All rights reserved.</p>
+          <div className="max-w-xs">
+            <p className="text-lg font-black text-white tracking-tight">ProFindly</p>
+            <p className="mt-2 text-sm text-[#6b7280] leading-relaxed">Find trusted local professionals in seconds.</p>
           </div>
 
           {/* Links */}
-          <div className="flex flex-wrap gap-x-8 gap-y-4 text-sm">
-            <div className="flex flex-col gap-2">
-              <p className="font-bold text-xs text-[#9ca3af] uppercase tracking-wider">Platform</p>
-              <Link href="/" className="text-[#374151] hover:text-[#0f1117] transition-colors">Home</Link>
-              <Link href="/provider/start" className="text-[#374151] hover:text-[#0f1117] transition-colors">Get Clients</Link>
+          <div className="flex gap-12 text-sm">
+            <div className="flex flex-col gap-3">
+              <p className="font-bold text-xs text-[#4b5563] uppercase tracking-widest">Platform</p>
+              <Link href="/" target="_blank" className="text-[#9ca3af] hover:text-white transition-colors">Home</Link>
+              <Link href="/provider/start" target="_blank" className="text-[#9ca3af] hover:text-white transition-colors">Get Clients</Link>
             </div>
-            <div className="flex flex-col gap-2">
-              <p className="font-bold text-xs text-[#9ca3af] uppercase tracking-wider">Legal</p>
-              <Link href="/terms" className="text-[#374151] hover:text-[#0f1117] transition-colors">Terms & Conditions</Link>
-              <Link href="/privacy" className="text-[#374151] hover:text-[#0f1117] transition-colors">Privacy Policy</Link>
-              <Link href="/refunds" className="text-[#374151] hover:text-[#0f1117] transition-colors">Refund Policy</Link>
-              <Link href="/cookies" className="text-[#374151] hover:text-[#0f1117] transition-colors">Cookie Policy</Link>
+            <div className="flex flex-col gap-3">
+              <p className="font-bold text-xs text-[#4b5563] uppercase tracking-widest">Legal</p>
+              <Link href="/terms" target="_blank" className="text-[#9ca3af] hover:text-white transition-colors">Terms & Conditions</Link>
+              <Link href="/privacy" target="_blank" className="text-[#9ca3af] hover:text-white transition-colors">Privacy Policy</Link>
+              <Link href="/refunds" target="_blank" className="text-[#9ca3af] hover:text-white transition-colors">Refund Policy</Link>
+              <Link href="/cookies" target="_blank" className="text-[#9ca3af] hover:text-white transition-colors">Cookie Policy</Link>
             </div>
           </div>
+        </div>
+
+        <div className="mt-10 border-t border-white/[0.06] pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <p className="text-xs text-[#4b5563]">© {new Date().getFullYear()} ProFindly. All rights reserved.</p>
+          <p className="text-xs text-[#4b5563]">British Columbia, Canada</p>
         </div>
       </div>
     </footer>
