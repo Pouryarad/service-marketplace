@@ -23,13 +23,13 @@ export async function GET(request: NextRequest) {
     .eq("id", user.id)
     .maybeSingle();
 
-  const nextParam = url.searchParams.get("next");
+  const nextParam = url.searchParams.get("next") ?? request.cookies.get("next")?.value ?? null;
 
 const redirectTo =
   profile?.role === "admin" ? "/admin" :
-  !profile?.role ? "/auth/setup-role" :
+  !profile?.role ? `/auth/setup-role${nextParam ? `?next=${encodeURIComponent(nextParam)}` : ""}` :
   profile?.role === "provider" ? "/provider/dashboard" :
-  nextParam ? nextParam : "/";
+  nextParam ? nextParam : "/dashboard";
 
 const res = NextResponse.redirect(new URL(redirectTo, url.origin));
 
