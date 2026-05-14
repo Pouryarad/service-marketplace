@@ -81,29 +81,6 @@ export default async function Home() {
         </div>
 
       </section>
-      {/* FOOTER */}
-      <footer className="border-t border-black/5 bg-white mt-auto">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-6 text-sm text-[#6b7280] sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4 text-center sm:text-left">
-            <Link href="/privacy" className="hover:text-black transition">
-              Privacy policy
-            </Link>
-
-            <a
-              href="mailto:contact@findly.example"
-              className="hover:text-black transition"
-            >
-              contact@findly.example
-            </a>
-          </div>
-
-          <p className="text-center sm:text-right">
-            Copyright {new Date().getFullYear()} Findly Services
-          </p>
-
-        </div>
-      </footer>
     </main>
   );
 }

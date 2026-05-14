@@ -28,7 +28,7 @@ export default function CookiesPage() {
           </div>
           <div>
             <h2 className="font-black text-[#0f1117] text-base mb-2">5. Contact</h2>
-            <p>For questions about our cookie use, contact privacy@profindly.com.</p>
+            <p>For questions about our cookie use, contact contact@profindly.com.</p>
           </div>
         </section>
       </div>

@@ -42,7 +42,7 @@ export default function PrivacyPage() {
 
           <div>
             <h2 className="font-black text-[#0f1117] text-base mb-2">7. Your Rights</h2>
-            <p>Under PIPA and PIPEDA, you have the right to: access your personal information; correct inaccurate data; withdraw consent for non-essential uses; and request deletion of your data. To exercise these rights, contact us at privacy@profindly.com.</p>
+            <p>Under PIPA and PIPEDA, you have the right to: access your personal information; correct inaccurate data; withdraw consent for non-essential uses; and request deletion of your data. To exercise these rights, contact us at contact@profindly.com.</p>
           </div>
 
           <div>
@@ -57,7 +57,7 @@ export default function PrivacyPage() {
 
           <div>
             <h2 className="font-black text-[#0f1117] text-base mb-2">10. Contact</h2>
-            <p>For privacy-related inquiries, contact our Privacy Officer at privacy@profindly.com.</p>
+            <p>For privacy-related inquiries, contact our Privacy Officer at contact@profindly.com.</p>
           </div>
         </section>
       </div>

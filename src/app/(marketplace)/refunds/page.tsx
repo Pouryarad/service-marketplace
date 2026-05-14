@@ -25,7 +25,7 @@ export default function RefundPage() {
 
           <div>
             <h2 className="font-black text-[#0f1117] text-base mb-2">4. Exceptions</h2>
-            <p>We may issue refunds in the following circumstances: duplicate charges caused by a billing error; charges made after a cancellation was confirmed; or as required by applicable Canadian consumer protection law. Refund requests must be submitted within 7 days of the charge to legal@profindly.com.</p>
+            <p>We may issue refunds in the following circumstances: duplicate charges caused by a billing error; charges made after a cancellation was confirmed; or as required by applicable Canadian consumer protection law. Refund requests must be submitted within 7 days of the charge to contact@profindly.com.</p>
           </div>
 
           <div>
@@ -35,7 +35,7 @@ export default function RefundPage() {
 
           <div>
             <h2 className="font-black text-[#0f1117] text-base mb-2">6. Contact</h2>
-            <p>For refund requests or billing questions, contact us at legal@profindly.com.</p>
+            <p>For refund requests or billing questions, contact us at contact@profindly.com.</p>
           </div>
         </section>
       </div>
