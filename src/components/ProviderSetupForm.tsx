@@ -257,8 +257,17 @@ export default function ProviderSetupForm({
 
     try {
       await saveProviderProfile(formData);
+      console.log("Profile saved successfully");
+      window.location.href = isFirstTime
+        ? "/provider/setup?tab=payment"
+        : "/provider/dashboard?profile=saved";
     } catch (err: any) {
-      if (err?.message === "NEXT_REDIRECT") throw err;
+      if (err?.digest?.startsWith("NEXT_REDIRECT")) {
+        window.location.href = isFirstTime
+          ? "/provider/setup?tab=payment"
+          : "/provider/dashboard?profile=saved";
+        return;
+      }
       console.error("Save failed:", err);
       setSaving(false);
       alert("Something went wrong. Please try again.");
