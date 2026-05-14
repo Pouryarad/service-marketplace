@@ -6,7 +6,7 @@ import { getCurrentUserRole, getProviderRequests } from "@/lib/data";
 import BottomNav from "@/components/BottomNav";
 import type { ProviderRequest } from "@/lib/types";
 import AuthRefresh from "@/components/AuthRefresh";
-
+export const dynamic = "force-dynamic";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const spaceGrotesk = Space_Grotesk({ variable: "--font-space-grotesk", subsets: ["latin"] });
