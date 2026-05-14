@@ -255,10 +255,12 @@ export async function saveProviderProfile(formData: FormData) {
   if (idDocument && idDocument.size > 0) {
     const ext = idDocument.name.split(".").pop();
     const path = `${data.user.id}/id-${Date.now()}.${ext}`;
-    const { error: idUploadError } = await supabase.storage
+    const serviceClient = createSupabaseServiceClient();
+    const { error: idUploadError } = await serviceClient.storage
       .from("provider-ids")
       .upload(path, idDocument, { upsert: true });
 
+    if (idUploadError) console.error("ID upload error:", idUploadError);
     if (!idUploadError) {
       const { data: urlData } = supabase.storage
         .from("provider-ids")
