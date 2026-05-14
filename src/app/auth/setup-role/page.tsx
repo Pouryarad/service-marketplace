@@ -35,6 +35,7 @@ export default function SetupRolePage() {
         full_name: user.user_metadata?.full_name ?? "",
       }, { onConflict: "id" });
 
+      document.cookie = `user-role=${pendingRole}; path=/; max-age=${60 * 60 * 24 * 30}`;
       if (pendingRole === "provider") {
         window.location.replace("/provider/setup");
       } else {
