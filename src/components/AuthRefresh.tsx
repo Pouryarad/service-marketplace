@@ -11,7 +11,8 @@ export default function AuthRefresh() {
     );
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN") {
+      if (event === "SIGNED_IN" && !sessionStorage.getItem("refreshed")) {
+        sessionStorage.setItem("refreshed", "1");
         window.location.reload();
       }
     });
