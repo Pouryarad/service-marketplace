@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     .eq("id", user.id)
     .maybeSingle();
 
-  const nextParam = url.searchParams.get("next") ?? request.cookies.get("next")?.value ?? null;
+  const nextParam = url.searchParams.get("next") ?? request.cookies.get("auth_next")?.value ?? null;
 
 const redirectTo =
   profile?.role === "admin" ? "/admin" :

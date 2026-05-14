@@ -27,8 +27,8 @@ export default function AuthModal({
 
     localStorage.setItem("next", redirectNext);
     localStorage.setItem("pendingRole", role === "provider" ? "provider" : "client");
-
-    // await supabase.auth.signOut();
+    document.cookie = `auth_next=${encodeURIComponent(redirectNext)}; path=/; max-age=300`;
+    document.cookie = `auth_pending_role=${role === "provider" ? "provider" : "client"}; path=/; max-age=300`;
 
     await supabase.auth.signInWithOAuth({
       provider: "google",
