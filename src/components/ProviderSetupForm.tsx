@@ -262,12 +262,13 @@ export default function ProviderSetupForm({
         ? "/provider/setup?tab=payment"
         : "/provider/dashboard?profile=saved";
     } catch (err: any) {
-      if (err?.digest?.startsWith("NEXT_REDIRECT")) {
-        window.location.href = isFirstTime
-          ? "/provider/setup?tab=payment"
-          : "/provider/dashboard?profile=saved";
-        return;
-      }
+  console.log("Caught error:", err?.digest, err?.message);
+  if (err?.digest?.startsWith("NEXT_REDIRECT")) {
+    window.location.href = isFirstTime
+      ? "/provider/setup?tab=payment"
+      : "/provider/dashboard?profile=saved";
+    return;
+  }
       console.error("Save failed:", err);
       setSaving(false);
       alert("Something went wrong. Please try again.");
