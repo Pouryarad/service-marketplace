@@ -87,9 +87,5 @@ export default function SetupRolePage() {
     );
   }
 
-  return (
-    <main className="min-h-screen bg-[#f3f5f9] flex items-center justify-center">
-      <p className="text-sm text-[#9ca3af]">Setting up your account...</p>
-    </main>
-  );
+  return null;
 }
