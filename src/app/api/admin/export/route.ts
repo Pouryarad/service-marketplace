@@ -33,11 +33,11 @@ export async function GET(request: NextRequest) {
   } else {
     const { data, error: clientError } = await service.from("profiles").select("full_name, email, phone, city, created_at").eq("role", "client").order("created_at", { ascending: false });
     rows = (data ?? []).map((c) => ({
-      Name: c.full_name ?? "—",
-      Email: c.email ?? "—",
-      Phone: c.phone ?? "—",
-      City: c.city ?? "—",
-      Joined: c.created_at ? new Date(c.created_at).toLocaleDateString("en-CA") : "—",
+      Name: c.full_name ?? "",
+      Email: c.email ?? "",
+      Phone: c.phone ?? "",
+      City: c.city ?? "",
+      Joined: c.created_at ? new Date(c.created_at).toLocaleDateString("en-CA") : "",
     }));
     filename = "clients.csv";
   }
@@ -54,9 +54,9 @@ export async function GET(request: NextRequest) {
     ),
   ].join("\n");
 
-  return new NextResponse(csv, {
+  return new NextResponse("\uFEFF" + csv, {
     headers: {
-      "Content-Type": "text/csv",
+      "Content-Type": "text/csv; charset=utf-8",
       "Content-Disposition": `attachment; filename="${filename}"`,
     },
   });
