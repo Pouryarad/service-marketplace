@@ -59,8 +59,8 @@ function ProgressBar({ step, total }: { step: number; total: number }) {
         {STEPS.map((label, i) => (
           <div key={i} className="flex flex-col items-center gap-1">
             <div className={`size-7 rounded-full flex items-center justify-center text-xs font-bold transition ${i < step ? "bg-[#2563eb] text-white" :
-                i === step ? "bg-[#2563eb] text-white ring-4 ring-[#2563eb]/20" :
-                  "bg-[#f3f5f9] text-[#9ca3af]"
+              i === step ? "bg-[#2563eb] text-white ring-4 ring-[#2563eb]/20" :
+                "bg-[#f3f5f9] text-[#9ca3af]"
               }`}>
               {i < step ? "✓" : i + 1}
             </div>
@@ -257,7 +257,8 @@ export default function ProviderSetupForm({
 
     try {
       await saveProviderProfile(formData);
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.message === "NEXT_REDIRECT") throw err;
       console.error("Save failed:", err);
       setSaving(false);
       alert("Something went wrong. Please try again.");
