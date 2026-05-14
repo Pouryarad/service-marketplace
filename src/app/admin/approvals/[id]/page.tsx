@@ -3,6 +3,7 @@ import { getProvider } from "@/lib/data";
 import { updateProviderStatus } from "@/lib/actions";
 import Image from "next/image";
 import Link from "next/link";
+import { createSupabaseServiceClient } from "@/lib/supabase/server";
 import { ArrowLeft, CheckCircle, XCircle, Mail, Phone, MapPin, Tag } from "lucide-react";
 
 export default async function ApprovalDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -20,7 +21,8 @@ export default async function ApprovalDetailPage({ params }: { params: Promise<{
   let signedIdUrl: string | undefined;
   if (raw?.id_document_url) {
     const path = raw.id_document_url.split("/provider-ids/")[1];
-    const { data: signed } = await supabase!.storage.from("provider-ids").createSignedUrl(path, 3600);
+    const service = createSupabaseServiceClient();
+    const { data: signed } = await service.storage.from("provider-ids").createSignedUrl(path, 3600);
     signedIdUrl = signed?.signedUrl ?? undefined;
   }
 
@@ -38,11 +40,10 @@ export default async function ApprovalDetailPage({ params }: { params: Promise<{
           <h1 className="text-xl font-black text-[#0f1117]">{provider.fullName}</h1>
           <p className="text-xs text-[#9ca3af]">Provider Review</p>
         </div>
-        <span className={`ml-auto rounded-full px-3 py-1 text-xs font-bold ${
-          provider.suspended ? "bg-red-100 text-red-700" :
-          provider.approved ? "bg-green-100 text-green-700" :
-          "bg-amber-100 text-amber-700"
-        }`}>
+        <span className={`ml-auto rounded-full px-3 py-1 text-xs font-bold ${provider.suspended ? "bg-red-100 text-red-700" :
+            provider.approved ? "bg-green-100 text-green-700" :
+              "bg-amber-100 text-amber-700"
+          }`}>
           {provider.suspended ? "Suspended" : provider.approved ? "Approved" : "Pending"}
         </span>
       </div>
@@ -146,27 +147,27 @@ export default async function ApprovalDetailPage({ params }: { params: Promise<{
           )}
 
           {raw.pending_portfolio_photo_urls?.length > 0 && (
-  <div className="border-t border-black/[0.04] pt-5">
-    <p className="text-xs font-bold text-[#9ca3af] uppercase tracking-wider mb-2">New Portfolio ({raw.pending_portfolio_photo_urls.length} photos)</p>
-    <p className="text-xs text-[#9ca3af] mb-3">Remove photos you don't want to approve, then click Approve All.</p>
-    <div className="grid grid-cols-3 gap-2">
-      {raw.pending_portfolio_photo_urls.map((url: string, i: number) => (
-        <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-[#f0f2f7]">
-          <Image src={url} alt="" width={150} height={150} className="w-full h-full object-cover" />
-          <form action="/api/admin/remove-pending-portfolio-photo" method="POST" className="absolute top-1 right-1">
-            <input type="hidden" name="providerId" value={id} />
-            <input type="hidden" name="photoUrl" value={url} />
-            <button className="size-6 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-500 transition text-xs font-bold">✕</button>
-          </form>
-        </div>
-      ))}
-    </div>
-    <div className="mt-3 flex gap-2">
-      <ApprovePendingButton providerId={id} field="portfolio" label="Approve All" />
-      <RejectPendingButton providerId={id} field="portfolio" label="Reject All" />
-    </div>
-  </div>
-)}
+            <div className="border-t border-black/[0.04] pt-5">
+              <p className="text-xs font-bold text-[#9ca3af] uppercase tracking-wider mb-2">New Portfolio ({raw.pending_portfolio_photo_urls.length} photos)</p>
+              <p className="text-xs text-[#9ca3af] mb-3">Remove photos you don't want to approve, then click Approve All.</p>
+              <div className="grid grid-cols-3 gap-2">
+                {raw.pending_portfolio_photo_urls.map((url: string, i: number) => (
+                  <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-[#f0f2f7]">
+                    <Image src={url} alt="" width={150} height={150} className="w-full h-full object-cover" />
+                    <form action="/api/admin/remove-pending-portfolio-photo" method="POST" className="absolute top-1 right-1">
+                      <input type="hidden" name="providerId" value={id} />
+                      <input type="hidden" name="photoUrl" value={url} />
+                      <button className="size-6 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-500 transition text-xs font-bold">✕</button>
+                    </form>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 flex gap-2">
+                <ApprovePendingButton providerId={id} field="portfolio" label="Approve All" />
+                <RejectPendingButton providerId={id} field="portfolio" label="Reject All" />
+              </div>
+            </div>
+          )}
         </div>
       )}
 
