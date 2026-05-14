@@ -485,6 +485,18 @@ export async function createStripeCheckout() {
 
   if (!provider) redirect("/provider/setup");
 
+  // Block if already has active subscription
+const { data: existingSub } = await supabase
+  .from("providers")
+  .select("subscription_status, stripe_subscription_id")
+  .eq("id", provider.id)
+  .maybeSingle();
+
+if (existingSub?.stripe_subscription_id && 
+    (existingSub.subscription_status === "active" || existingSub.subscription_status === "trialing")) {
+  redirect("/provider/dashboard?already-subscribed=true");
+}
+
   // Check if early bird (first 100 approved providers)
   const { count } = await supabase
     .from("providers")
