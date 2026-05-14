@@ -112,7 +112,7 @@ export default async function UserDashboardPage({
                 {favorites.map((fav) => (
                   <Link
                     key={fav.id}
-                    href={`/providers/${fav.id}`}
+                    href={`/providers/${fav.slug ?? fav.id}`}
                     className="min-w-[160px] sm:min-w-[200px] rounded-[12px] border border-black/10 bg-white p-3 hover:shadow transition"
                   >
                     {/* Image */}
@@ -232,7 +232,7 @@ export default async function UserDashboardPage({
                 {suggestions.map((p) => (
                   <Link
                     key={p.id}
-                    href={`/providers/${p.id}`}
+                    href={`/providers/${p.slug ?? p.id}`}
                     className="min-w-[160px] rounded-[10px] border border-black/10 bg-white p-3 shadow-sm opacity-70 hover:opacity-100 hover:shadow-md transition"
                   >
                     {/* IMAGE */}
