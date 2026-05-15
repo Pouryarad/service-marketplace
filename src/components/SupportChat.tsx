@@ -34,7 +34,7 @@ export default function SupportChat({
                     : "Hi! I'm here to help. What's your name?",
             }]);
         }
-    }, [open]);
+    }, [open, userName]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -110,8 +110,8 @@ export default function SupportChat({
                         {messages.map((msg, i) => (
                             <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                                 <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${msg.role === "user"
-                                        ? "bg-[#2563eb] text-white rounded-tr-sm"
-                                        : "bg-[#f3f5f9] text-[#0f1117] rounded-tl-sm"
+                                    ? "bg-[#2563eb] text-white rounded-tr-sm"
+                                    : "bg-[#f3f5f9] text-[#0f1117] rounded-tl-sm"
                                     }`}>
                                     {msg.content}
                                 </div>
