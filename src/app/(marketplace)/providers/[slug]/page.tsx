@@ -87,8 +87,9 @@ export default async function ProviderProfilePage({
       {(isOwnProfile || isAdmin) && (
         <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6">
           {isOwnProfile && (
-            <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700 font-medium">
-              👀 This is how clients see your profile.
+            <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-2.5 text-sm text-amber-700 font-medium flex items-center justify-between">
+              <span>👀 This is how clients see your profile.</span>
+              <Link href="/provider/dashboard" className="font-bold underline shrink-0 ml-3">Exit</Link>
             </div>
           )}
           {isAdmin && (

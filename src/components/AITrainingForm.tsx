@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Provider } from "@/lib/types";
 
 type QAItem = {
@@ -18,15 +18,34 @@ export default function AITrainingForm({
   provider: Provider;
   existingQA: QAItem[];
 }) {
+  const storageKey = `ai_training_${provider.id}`;
+  const answersKey = `ai_answers_${provider.id}`;
+
   const [questions, setQuestions] = useState<string[]>([]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [results, setResults] = useState<QAItem[]>(existingQA.filter(q => q.ai_approved));
-  const [rejected, setRejected] = useState<QAItem[]>(existingQA.filter(q => !q.ai_approved && q.ai_rejection_reason));
-  const [generated, setGenerated] = useState(existingQA.length > 0);
+  const [submitted, setSubmitted] = useState(false);
+  const [results] = useState<QAItem[]>(existingQA.filter(q => q.ai_approved));
+  const [rejected] = useState<QAItem[]>(existingQA.filter(q => !q.ai_approved && q.ai_rejection_reason));
 
-  const generateQuestions = async () => {
+  // Load saved questions and answers from localStorage
+  useEffect(() => {
+    const savedQuestions = localStorage.getItem(storageKey);
+    const savedAnswers = localStorage.getItem(answersKey);
+    if (savedQuestions) setQuestions(JSON.parse(savedQuestions));
+    if (savedAnswers) setAnswers(JSON.parse(savedAnswers));
+  }, []);
+
+  // Save answers to localStorage on change
+  useEffect(() => {
+    if (Object.keys(answers).length > 0) {
+      localStorage.setItem(answersKey, JSON.stringify(answers));
+    }
+  }, [answers]);
+
+  const generateQuestions = async (force = false) => {
+    if (!force && questions.length > 0) return;
     setLoadingQuestions(true);
     try {
       const res = await fetch("/api/ai/generate-questions", {
@@ -36,7 +55,9 @@ export default function AITrainingForm({
       });
       const data = await res.json();
       setQuestions(data.questions ?? []);
-      setGenerated(true);
+      localStorage.setItem(storageKey, JSON.stringify(data.questions ?? []));
+      setAnswers({});
+      localStorage.removeItem(answersKey);
     } catch (e) {
       console.error(e);
     } finally {
@@ -62,9 +83,9 @@ export default function AITrainingForm({
           qa: filled,
         }),
       });
-      const data = await res.json();
-      setResults(data.approved ?? []);
-      setRejected(data.rejected ?? []);
+      await res.json();
+      setSubmitted(true);
+      localStorage.removeItem(answersKey);
     } catch (e) {
       console.error(e);
     } finally {
@@ -72,13 +93,23 @@ export default function AITrainingForm({
     }
   };
 
+  if (submitted) {
+    return (
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-black/[0.04] text-center">
+        <p className="text-3xl mb-3">✅</p>
+        <p className="font-black text-[#0f1117] mb-1">Answers Submitted</p>
+        <p className="text-sm text-[#9ca3af]">Your AI profile has been updated.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
 
       {/* Existing approved answers */}
       {results.length > 0 && (
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-black/[0.04]">
-          <p className="text-xs font-bold text-[#9ca3af] uppercase tracking-widest mb-3">Your AI Profile</p>
+          <p className="text-xs font-bold text-[#9ca3af] uppercase tracking-widest mb-3">Your Current AI Profile</p>
           <div className="space-y-3">
             {results.map((qa, i) => (
               <div key={i} className="border-b border-black/[0.04] pb-3 last:border-0 last:pb-0">
@@ -106,7 +137,7 @@ export default function AITrainingForm({
       )}
 
       {/* Generate questions */}
-      {!generated && (
+      {questions.length === 0 && (
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-black/[0.04] text-center">
           <p className="text-4xl mb-3">🤖</p>
           <p className="font-black text-[#0f1117] mb-1">Generate Your Questions</p>
@@ -114,7 +145,7 @@ export default function AITrainingForm({
             We'll create {provider.categoryName}-specific questions to train the AI on your expertise.
           </p>
           <button
-            onClick={generateQuestions}
+            onClick={() => generateQuestions(false)}
             disabled={loadingQuestions}
             className="rounded-xl bg-[#2563eb] px-6 py-2.5 text-sm font-bold text-white hover:bg-blue-700 transition disabled:opacity-50"
           >
@@ -124,9 +155,18 @@ export default function AITrainingForm({
       )}
 
       {/* Questions form */}
-      {generated && questions.length > 0 && (
+      {questions.length > 0 && (
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-black/[0.04]">
-          <p className="text-xs font-bold text-[#9ca3af] uppercase tracking-widest mb-4">Answer the questions</p>
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-xs font-bold text-[#9ca3af] uppercase tracking-widest">Answer the questions</p>
+            <button
+              onClick={() => generateQuestions(true)}
+              disabled={loadingQuestions}
+              className="text-xs font-bold text-[#2563eb] hover:underline disabled:opacity-50"
+            >
+              {loadingQuestions ? "Generating..." : "Regenerate"}
+            </button>
+          </div>
           <div className="space-y-4">
             {questions.map((q, i) => (
               <div key={i}>
@@ -148,16 +188,6 @@ export default function AITrainingForm({
             {submitting ? "Screening with AI..." : "Submit Answers"}
           </button>
         </div>
-      )}
-
-      {/* Regenerate */}
-      {generated && questions.length === 0 && results.length > 0 && (
-        <button
-          onClick={() => { setGenerated(false); setQuestions([]); }}
-          className="w-full rounded-xl border border-black/10 py-2.5 text-sm font-bold text-[#6b7280] hover:bg-[#f3f5f9] transition"
-        >
-          Update Answers
-        </button>
       )}
     </div>
   );
