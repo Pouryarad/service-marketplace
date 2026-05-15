@@ -196,6 +196,25 @@ const isImpersonating = !!impersonatingId && currentProfile?.role === "admin";
                   <UserCircle size={18} className="text-[#ff8a00]" />
                   <span className="text-sm font-medium text-[#1f1f1f]">View Public Profile</span>
                 </Link>
+                <section className="rounded-2xl bg-white p-5 shadow-sm">
+              <h2 className="font-bold text-[#1f1f1f]">Quick Actions</h2>
+              <div className="mt-3 space-y-1">
+                <Link
+                  href="/provider/setup"
+                  className="flex items-center gap-3 rounded-xl p-3 hover:bg-[#f3f5f9] transition"
+                >
+                  <UserCircle size={18} className="text-[#2563eb]" />
+                  <span className="text-sm font-medium text-[#1f1f1f]">Edit Profile</span>
+                </Link>
+                <Link
+                  href={`/providers/${provider.slug}`}
+                  className="flex items-center gap-3 rounded-xl p-3 hover:bg-[#f3f5f9] transition"
+                >
+                  <UserCircle size={18} className="text-[#ff8a00]" />
+                  <span className="text-sm font-medium text-[#1f1f1f]">View Public Profile</span>
+                </Link>
+              </div>
+            </section>
               </div>
             </section>
           </div>
