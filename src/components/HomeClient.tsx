@@ -34,7 +34,13 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
-
+useEffect(() => {
+  if (chatMode) {
+    document.body.setAttribute("data-chat", "true");
+  } else {
+    document.body.removeAttribute("data-chat");
+  }
+}, [chatMode]);
 
   useEffect(() => {
     if (chatMode && messages.length === 0) {
@@ -150,7 +156,7 @@ useEffect(() => {
     </div>
   </section>
 ) : (
-  <section className="flex flex-col mx-auto w-full max-w-3xl px-4 sm:px-6" style={{ height: "calc(100dvh - 57px)", minHeight: 0, maxHeight: "calc(100dvh - 57px)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+  <section className="flex flex-col mx-auto w-full max-w-3xl px-4 sm:px-6" style={{ height: "calc(100dvh - 57px)", minHeight: 0 }}>
     {/* Chat header */}
     <div className="flex items-center gap-3 py-4 shrink-0">
       <button onClick={exitChatMode} className="size-9 rounded-full bg-white border border-black/[0.06] flex items-center justify-center hover:bg-[#f0f2f7] transition shadow-sm">
@@ -163,7 +169,7 @@ useEffect(() => {
     </div>
 
     {/* Messages */}
-    <div className="messages-container flex-1 overflow-y-auto space-y-4 pb-4 pr-1" style={{ minHeight: 0 }}>
+    <div className="messages-container flex-1 overflow-y-auto space-y-4 pb-4 pr-1" style={{ minHeight: 0, overscrollBehavior: "contain" }}>
       {messages.map((msg, i) => (
         <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
           <div className={`max-w-[85%] ${msg.role === "user"
