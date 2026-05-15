@@ -52,7 +52,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <AuthRefresh />
         {children}
         <FooterWrapper />
-                  <SupportChat userType="client" />
+                  
       </body>
     </html>
   );

@@ -26,15 +26,15 @@ export default function SupportChat({
     const bottomRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (open && messages.length === 0) {
-            setMessages([{
-                role: "assistant",
-                content: userName
-                    ? `Hi ${userName}! What can I help you with today?`
-                    : "Hi! I'm here to help. What's your name?",
-            }]);
-        }
-    }, [open, userName]);
+  if (open) {
+    setMessages([{
+      role: "assistant",
+      content: userName
+        ? `Hi ${userName}! What can I help you with today?`
+        : "Hi! I'm here to help. What's your name?",
+    }]);
+  }
+}, [open]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -74,7 +74,7 @@ export default function SupportChat({
     return (
         <>
             {/* Bubble button */}
-            <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+            <div className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-2">
                 {!open && (
                     <div className="bg-white rounded-2xl shadow-lg border border-black/[0.06] px-4 py-2.5 text-sm font-medium text-[#0f1117] whitespace-nowrap animate-bounce">
                         💬 Need help? Ask me!
@@ -95,7 +95,7 @@ export default function SupportChat({
 
             {/* Chat window */}
             {open && (
-                <div className="fixed bottom-24 right-6 z-50 w-[340px] sm:w-[380px] bg-white rounded-2xl shadow-2xl border border-black/[0.06] flex flex-col overflow-hidden" style={{ height: "460px" }}>
+                <div className="fixed bottom-36 right-4 sm:bottom-24 sm:right-6 z-50 w-[calc(100vw-32px)] sm:w-[380px] bg-white rounded-2xl shadow-2xl border border-black/[0.06] flex flex-col overflow-hidden" style={{ height: "460px" }}>
                     {/* Header */}
                     <div className="bg-[#2563eb] px-4 py-3 flex items-center gap-2 shrink-0">
                         <span className="size-8 rounded-full bg-white/20 flex items-center justify-center text-white font-black italic text-lg">i</span>
