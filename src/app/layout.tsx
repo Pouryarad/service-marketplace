@@ -7,6 +7,8 @@ import BottomNav from "@/components/BottomNav";
 import type { ProviderRequest } from "@/lib/types";
 import AuthRefresh from "@/components/AuthRefresh";
 import FooterWrapper from "@/components/FooterWrapper";
+import SupportChat from "@/components/SupportChat";
+
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
@@ -30,6 +32,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}>
         <body className="min-h-full flex flex-col bg-[#f0f2f7]">
           {children}
+
         </body>
       </html>
     );
@@ -49,6 +52,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <AuthRefresh />
         {children}
         <FooterWrapper />
+                  <SupportChat userType="client" />
       </body>
     </html>
   );

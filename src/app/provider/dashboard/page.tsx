@@ -12,6 +12,7 @@ import RoleConflictModal from "@/components/RoleConflictModal";
 import { cookies } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ReferralModal from "@/components/ReferralModal";
+import SupportChat from "@/components/SupportChat";
 
 
 
@@ -234,6 +235,7 @@ export default async function ProviderDashboardPage({
         </section>
 
       </section>
+      <SupportChat userType="provider" />
     </main>
   );
 }
