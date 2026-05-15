@@ -28,12 +28,12 @@ export default async function ProviderDashboardPage({
   ]);
 
   if (!provider) redirect("/provider/setup");
-const cookieStore = await cookies();
-const impersonatingId = cookieStore.get("impersonating_provider_id")?.value;
-const supabase = await createSupabaseServerClient();
-const { data: { user: currentUser } } = await supabase!.auth.getUser();
-const { data: currentProfile } = await supabase!.from("profiles").select("role").eq("id", currentUser?.id ?? "").single();
-const isImpersonating = !!impersonatingId && currentProfile?.role === "admin";
+  const cookieStore = await cookies();
+  const impersonatingId = cookieStore.get("impersonating_provider_id")?.value;
+  const supabase = await createSupabaseServerClient();
+  const { data: { user: currentUser } } = await supabase!.auth.getUser();
+  const { data: currentProfile } = await supabase!.from("profiles").select("role").eq("id", currentUser?.id ?? "").single();
+  const isImpersonating = !!impersonatingId && currentProfile?.role === "admin";
   if (provider.adminGranted && provider.adminGrantedExpiresAt) {
     await checkAndRevokeExpiredAccess(Number(provider.id));
   }
@@ -196,25 +196,13 @@ const isImpersonating = !!impersonatingId && currentProfile?.role === "admin";
                   <UserCircle size={18} className="text-[#ff8a00]" />
                   <span className="text-sm font-medium text-[#1f1f1f]">View Public Profile</span>
                 </Link>
-                <section className="rounded-2xl bg-white p-5 shadow-sm">
-              <h2 className="font-bold text-[#1f1f1f]">Quick Actions</h2>
-              <div className="mt-3 space-y-1">
                 <Link
-                  href="/provider/setup"
+                  href="/provider/ai-training"
                   className="flex items-center gap-3 rounded-xl p-3 hover:bg-[#f3f5f9] transition"
                 >
-                  <UserCircle size={18} className="text-[#2563eb]" />
-                  <span className="text-sm font-medium text-[#1f1f1f]">Edit Profile</span>
+                  <span className="text-lg">🤖</span>
+                  <span className="text-sm font-medium text-[#1f1f1f]">AI Training</span>
                 </Link>
-                <Link
-                  href={`/providers/${provider.slug}`}
-                  className="flex items-center gap-3 rounded-xl p-3 hover:bg-[#f3f5f9] transition"
-                >
-                  <UserCircle size={18} className="text-[#ff8a00]" />
-                  <span className="text-sm font-medium text-[#1f1f1f]">View Public Profile</span>
-                </Link>
-              </div>
-            </section>
               </div>
             </section>
           </div>
