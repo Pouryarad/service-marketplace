@@ -169,7 +169,7 @@ useEffect(() => {
     </div>
 
     {/* Messages */}
-    <div className="messages-container flex-1 overflow-y-auto space-y-4 pb-4 pr-1" style={{ minHeight: 0, overscrollBehavior: "contain" }}>
+    <div className="messages-container flex-1 overflow-y-auto space-y-4 pb-4 pr-1 flex flex-col justify-end" style={{ minHeight: 0, overscrollBehavior: "contain" }}>
       {messages.map((msg, i) => (
         <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
           <div className={`max-w-[85%] ${msg.role === "user"
