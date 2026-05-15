@@ -156,7 +156,7 @@ useEffect(() => {
     </div>
   </section>
 ) : (
-  <section className="flex flex-col mx-auto w-full max-w-3xl px-4 sm:px-6" style={{ height: "calc(100dvh - 57px)", minHeight: 0 }}>
+  <section className="flex flex-col mx-auto w-full max-w-3xl px-4 sm:px-6" style={{ height: "calc(100dvh - 57px)", minHeight: 0, overflow: "hidden" }}>
     {/* Chat header */}
     <div className="flex items-center gap-3 py-4 shrink-0">
       <button onClick={exitChatMode} className="size-9 rounded-full bg-white border border-black/[0.06] flex items-center justify-center hover:bg-[#f0f2f7] transition shadow-sm">
