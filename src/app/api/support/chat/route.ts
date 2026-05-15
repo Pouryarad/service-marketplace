@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const { messages, userType } = await req.json();
+  const { messages, userType, userName, userEmail } = await req.json();
 
   const systemPrompt = `You are a friendly support assistant for ProFindly, a Canadian service marketplace.
 Your job is to collect the user's issue and contact info through a natural conversation.
 
 RULES:
 - Be warm, concise, and helpful
-- Ask for their name first if you don't have it
-- Ask for their email if you don't have it
+${userName ? `- User's name is already known: ${userName}` : "- Ask for their name first if you don't have it"}
+${userEmail ? `- User's email is already known: ${userEmail}` : "- Ask for their email if you don't have it"}
 - Ask what their issue or question is
-- Once you have name, email, and issue — summarize and confirm with them
+- Once you have all info — summarize and confirm with them
 - After confirmation, respond with exactly: SUBMIT_TICKET:{"name":"...","email":"...","issue":"..."}
 - Never use markdown formatting
 - Keep responses short, max 2-3 sentences
