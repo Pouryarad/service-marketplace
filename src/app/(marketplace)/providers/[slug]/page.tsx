@@ -173,7 +173,7 @@ export default async function ProviderProfilePage({
                       <AuthModal
                         next={`/providers/${provider.slug}`}
                         trigger={
-                          <div className="flex items-center justify-center gap-2 rounded-xl bg-[#2563eb] px-4 py-3 text-sm font-bold text-white cursor-pointer hover:bg-blue-700 transition">
+                          <div className="flex items-center justify-center gap-2 rounded-xl bg-[#2563eb] px-4 py-2.5 text-sm font-bold text-white cursor-pointer hover:bg-blue-700 transition">
                             ✉ Sign in to Reveal Email
                           </div>
                         }
@@ -181,7 +181,7 @@ export default async function ProviderProfilePage({
                       <AuthModal
                         next={`/providers/${provider.slug}`}
                         trigger={
-                          <div className="flex items-center justify-center gap-2 rounded-xl bg-[#2563eb] px-4 py-3 text-sm font-bold text-white cursor-pointer hover:bg-blue-700 transition">
+                          <div className="flex items-center justify-center gap-2 rounded-xl bg-[#2563eb] px-4 py-2.5 text-sm font-bold text-white cursor-pointer hover:bg-blue-700 transition">
                             📞 Sign in to Reveal Phone
                           </div>
                         }

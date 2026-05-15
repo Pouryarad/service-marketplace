@@ -13,13 +13,13 @@ export default function PortfolioCarousel({ photos }: { photos: string[] }) {
   return (
     <div>
       {/* Main image */}
-      <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-[#f3f5f9]">
+      <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-[#0f1117]">
         <Image
           src={photos[current]}
           alt={`Portfolio ${current + 1}`}
           fill
           sizes="(max-width: 768px) 100vw, 600px"
-          className="object-cover"
+          className="object-contain"
         />
         {photos.length > 1 && (
           <>

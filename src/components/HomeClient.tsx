@@ -207,7 +207,7 @@ useEffect(() => {
     </div>
 
     {/* Input */}
-    <div className="shrink-0 pb-3 pt-2 mb-[20%]">
+    <div className="shrink-0 pb-3 pt-2 sm:mb-[20%]">
       <div className="flex items-center gap-2 bg-white rounded-2xl border border-black/[0.06] p-2 shadow-sm">
         <input
           ref={inputRef}

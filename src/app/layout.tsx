@@ -6,7 +6,7 @@ import { getCurrentUserRole, getProviderRequests } from "@/lib/data";
 import BottomNav from "@/components/BottomNav";
 import type { ProviderRequest } from "@/lib/types";
 import AuthRefresh from "@/components/AuthRefresh";
-import Footer from "@/components/Footer";
+import FooterWrapper from "@/components/FooterWrapper";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
@@ -48,7 +48,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         />
         <AuthRefresh />
         {children}
-        <Footer />
+        <FooterWrapper />
       </body>
     </html>
   );

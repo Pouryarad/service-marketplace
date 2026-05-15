@@ -77,8 +77,8 @@ export default async function UserDashboardPage({
       <RoleConflictModal actualRole="client" />
       <section className="mx-auto w-full max-w-7xl px-4 pt-6 pb-20 sm:px-6 sm:pt-8">
         {settings === "saved" && (
-  <FadeBanner message="✅ Settings saved successfully." type="green" />
-)}
+          <FadeBanner message="✅ Settings saved successfully." type="green" />
+        )}
         {/* Title */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">
@@ -97,54 +97,39 @@ export default async function UserDashboardPage({
         <div className="mt-6 space-y-6">
 
           {/* Favorites */}
-          <section className="rounded-[10px] bg-white p-4 sm:p-6">
-            <div className="flex items-center gap-2">
-              <Heart className="text-[#ff8a00]" size={18} />
-              <h2 className="font-display text-lg sm:text-xl md:text-2xl font-bold">
-                Favorites
-              </h2>
+          <section className="rounded-2xl bg-white p-4 sm:p-6 shadow-sm border border-black/[0.04]">
+            <div className="flex items-center gap-2 mb-4">
+              <Heart className="text-[#2563eb]" size={18} />
+              <h2 className="font-bold text-[#0f1117] text-lg">Favorites</h2>
             </div>
 
             {favorites.length === 0 ? (
-              <p className="mt-4 text-sm text-gray-500">No favorites yet</p>
+              <p className="text-sm text-[#9ca3af]">No favorites yet</p>
             ) : (
-              <div className="mt-4 flex gap-3 sm:gap-4 overflow-x-auto pb-2">
+              <div className="flex gap-3 overflow-x-auto pb-2">
                 {favorites.map((fav) => (
                   <Link
                     key={fav.id}
                     href={`/providers/${fav.slug ?? fav.id}`}
-                    className="min-w-[160px] sm:min-w-[200px] rounded-[12px] border border-black/10 bg-white p-3 hover:shadow transition"
+                    className="shrink-0 w-36 rounded-2xl border border-black/[0.04] bg-[#f3f5f9] overflow-hidden hover:shadow-md transition"
                   >
-                    {/* Image */}
-                    <div className="h-28 sm:h-32 w-full overflow-hidden rounded-[10px] bg-gray-100 relative">
+                    <div className="relative h-36 w-full bg-[#e8edf5]">
                       {fav.profile_photo_url ? (
                         <Image
                           src={fav.profile_photo_url}
-                          alt=""
+                          alt={fav.full_name}
                           fill
-                          sizes="(max-width: 640px) 160px, 200px"
-                          className="object-cover"
+                          sizes="144px"
+                          className="object-cover object-center"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-gray-400">
-                          👤
-                        </div>
+                        <div className="flex h-full w-full items-center justify-center text-2xl">👤</div>
                       )}
                     </div>
-
-                    {/* Info */}
-                    <div className="mt-3">
-                      <p className="font-semibold text-sm truncate">
-                        {fav.full_name}
-                      </p>
-
-                      <p className="text-xs text-gray-500 capitalize">
-                        {fav.category_slug}
-                      </p>
-
-                      <p className="text-xs text-gray-400">
-                        {fav.location}
-                      </p>
+                    <div className="p-2.5">
+                      <p className="font-bold text-xs text-[#0f1117] truncate">{fav.full_name}</p>
+                      <p className="text-xs text-[#6b7280] truncate capitalize mt-0.5">{fav.category_slug?.replace(/-/g, " ")}</p>
+                      <p className="text-xs text-[#9ca3af] truncate">{fav.location}</p>
                     </div>
                   </Link>
                 ))}
