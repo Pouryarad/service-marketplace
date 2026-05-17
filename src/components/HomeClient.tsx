@@ -28,7 +28,9 @@ type ProviderMatch = {
 
 export default function HomeClient({ categories }: { categories: Category[] }) {
   const [chatMode, setChatMode] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    try { return JSON.parse(sessionStorage.getItem("home_chat_messages") || "[]"); } catch { return []; }
+  });
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
@@ -52,6 +54,9 @@ useEffect(() => {
       }]);
     }
   }, [chatMode]);
+  useEffect(() => {
+    try { sessionStorage.setItem("home_chat_messages", JSON.stringify(messages)); } catch {}
+  }, [messages]);
 
 useEffect(() => {
   const el = document.querySelector(".messages-container");
@@ -66,7 +71,6 @@ useEffect(() => {
 
   const exitChatMode = () => {
     setChatMode(false);
-    setMessages([]);
     setInput("");
   };
 

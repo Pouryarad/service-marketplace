@@ -3,19 +3,27 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   const { messages, userType, userName, userEmail } = await req.json();
 
+  const userMessageCount = messages.filter((m: { role: string }) => m.role === "user").length;
   const systemPrompt = `You are a friendly support assistant for ProFindly, a Canadian service marketplace.
-Your job is to collect the user's issue and contact info through a natural conversation.
+Collect the user's name, email, and issue then submit a ticket. Max 5 user messages total.
 
-RULES:
-- Be warm, concise, and helpful
-${userName ? `- User's name is already known: ${userName}` : "- Ask for their name first if you don't have it"}
-${userEmail ? `- User's email is already known: ${userEmail}` : "- Ask for their email if you don't have it"}
-- Ask what their issue or question is
-- Once you have all info — summarize and confirm with them
-- After confirmation, respond with exactly: SUBMIT_TICKET:{"name":"...","email":"...","issue":"..."}
-- Never use markdown formatting
-- Keep responses short, max 2-3 sentences
-- User type is: ${userType}`;
+FLOW:
+${userName ? `- Name already known: ${userName}` : "- Step 1: Ask for their name"}
+${userEmail ? `- Email already known: ${userEmail}` : `- Step ${userName ? "1" : "2"}: Ask for their email`}
+- Ask what their issue is
+- If issue is unclear, ask ONE clarifying question (skip if clear)
+- Before submitting, always confirm with: "Got it! So [one sentence summary of their issue]. Just to confirm — your name is [name], email is [email], and your message is: "[issue]". Is that correct? (Yes / No)"You said: one more thing, the confirmation after the last msg didnt come
+- If user says Yes: submit the ticket then say only "Your message has been sent. We'll contact you shortly."
+- If user says No: say "Just write your message here and I'll send it exactly to our team."
+- The very next message after that, whatever they write, immediately submit SUBMIT_TICKET with their name, email, and that exact message as the issue. No further questions.
+- After that final message, say nothing more. Conversation is over.
+
+CURRENT USER MESSAGE COUNT: ${userMessageCount}/5
+${userMessageCount >= 4 ? "IMPORTANT: Last exchange — summarize what you have and submit now." : ""}
+
+After confirmation respond with exactly: SUBMIT_TICKET:{"name":"...","email":"...","issue":"..."}
+- No markdown, 1-2 sentences max
+- User type: ${userType}`;
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",

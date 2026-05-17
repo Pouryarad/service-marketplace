@@ -21,15 +21,44 @@ export default function SupportChat({
 }) {
     const [open, setOpen] = useState(false);
     const [dismissed, setDismissed] = useState(false);
-    const [messages, setMessages] = useState<Message[]>([]);
+const [messages, setMessages] = useState<Message[]>([]);
+
+    useEffect(() => {
+        try {
+            const saved = sessionStorage.getItem("support_chat_messages");
+            if (saved) setMessages(JSON.parse(saved));
+        } catch {}
+    }, []);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+
+    useEffect(() => {
+        try {
+            if (sessionStorage.getItem("support_chat_submitted") === "true") setSubmitted(true);
+        } catch {}
+    }, []);
     const inputRef = useRef<HTMLInputElement>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
 
+   const [loaded, setLoaded] = useState(false);
+
     useEffect(() => {
-        if (open) {
+        try {
+            const saved = sessionStorage.getItem("support_chat_messages");
+            const parsed = saved ? JSON.parse(saved) : [];
+            if (parsed.length > 0) {
+                setMessages(parsed);
+            } else {
+                sessionStorage.removeItem("support_chat_submitted");
+                setSubmitted(false);
+            }
+        } catch {}
+        setLoaded(true);
+    }, []);
+
+    useEffect(() => {
+        if (open && loaded && messages.length === 0) {
             setMessages([{
                 role: "assistant",
                 content: userName
@@ -37,7 +66,15 @@ export default function SupportChat({
                     : "Hi! I'm here to help. What's your name?",
             }]);
         }
-    }, [open]);
+    }, [open, loaded]);
+
+    useEffect(() => {
+        try { sessionStorage.setItem("support_chat_messages", JSON.stringify(messages)); } catch {}
+    }, [messages]);
+
+    useEffect(() => {
+        try { sessionStorage.setItem("support_chat_submitted", String(submitted)); } catch {}
+    }, [submitted]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
