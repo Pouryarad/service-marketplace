@@ -6,6 +6,8 @@ import Image from "next/image";
 import { Search, Send, Mic, ArrowLeft, ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/logo";
 import type { Category } from "@/lib/types";
+import SupportChat from "@/components/SupportChat";
+
 
 type Message = {
   role: "user" | "assistant";
@@ -120,6 +122,7 @@ useEffect(() => {
   };
 
   return (
+    <>
 <main className={`flex flex-col bg-[#f3f5f9] text-[#1f1f1f] overflow-x-hidden ${chatMode ? "overflow-hidden" : "min-h-screen"}`} style={chatMode ? { height: "100dvh" } : {}}>
 
       {/* HERO */}
@@ -264,6 +267,9 @@ useEffect(() => {
   </section>
 )}
     </main>
+          <SupportChat userType="client" hiddenByParent={chatMode} />
+</>
+    
   );
 }
 

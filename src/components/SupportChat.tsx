@@ -12,12 +12,15 @@ export default function SupportChat({
     userType = "client",
     userName,
     userEmail,
+    hiddenByParent = false,
 }: {
     userType?: "client" | "provider";
     userName?: string;
     userEmail?: string;
+    hiddenByParent?: boolean;
 }) {
     const [open, setOpen] = useState(false);
+    const [dismissed, setDismissed] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
@@ -26,15 +29,15 @@ export default function SupportChat({
     const bottomRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-  if (open) {
-    setMessages([{
-      role: "assistant",
-      content: userName
-        ? `Hi ${userName}! What can I help you with today?`
-        : "Hi! I'm here to help. What's your name?",
-    }]);
-  }
-}, [open]);
+        if (open) {
+            setMessages([{
+                role: "assistant",
+                content: userName
+                    ? `Hi ${userName}! What can I help you with today?`
+                    : "Hi! I'm here to help. What's your name?",
+            }]);
+        }
+    }, [open]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -43,6 +46,7 @@ export default function SupportChat({
     useEffect(() => {
         if (open) setTimeout(() => inputRef.current?.focus(), 300);
     }, [open]);
+    if (hiddenByParent) return null;
 
     const sendMessage = async () => {
         const content = input.trim();
@@ -75,9 +79,16 @@ export default function SupportChat({
         <>
             {/* Bubble button */}
             <div className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-2">
-                {!open && (
-                    <div className="bg-white rounded-2xl shadow-lg border border-black/[0.06] px-4 py-2.5 text-sm font-medium text-[#0f1117] whitespace-nowrap animate-bounce">
+                {!open && !dismissed && (
+                    <div className="relative bg-white rounded-2xl shadow-lg border border-black/[0.06] px-4 py-2.5 text-sm font-medium text-[#0f1117] whitespace-nowrap animate-bounce">
                         💬 Need help? Ask me!
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setDismissed(true); }}
+                            className="absolute -top-2 -right-2 size-5 rounded-full bg-[#9ca3af] hover:bg-[#6b7280] flex items-center justify-center transition"
+                            aria-label="Dismiss"
+                        >
+                            <X size={11} className="text-white" />
+                        </button>
                     </div>
                 )}
                 <button
