@@ -176,6 +176,9 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
               Connect with trusted local professionals near you.
             </p>
             <div className="mt-8 w-full max-w-xl">
+              <p className="text-xs text-[#2563eb] font-semibold mb-2 tracking-wide uppercase flex items-center justify-center gap-1">
+                <span>✦</span> AI-powered matching
+              </p>              
               <div
                 onClick={enterChatMode}
                 className="mx-auto flex w-full max-w-2xl items-center gap-2 rounded-full border border-black/10 bg-white p-2 shadow-sm cursor-text"
@@ -184,8 +187,8 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
                 <span className="h-12 flex-1 flex items-center text-base text-[#9ca3af]">
                   Search therapist, realtor, Persian lawyer...
                 </span>
-                <button className="rounded-full bg-[#2563eb] px-5 py-3 text-sm font-bold text-white hover:opacity-90 transition">
-                  Search
+                <button className="rounded-full bg-[#2563eb] px-5 py-3 text-sm font-bold text-white hover:opacity-90 transition flex items-center gap-1.5">
+                  <span className="text-xs">✦</span> Ask AI
                 </button>
               </div>
             </div>

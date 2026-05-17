@@ -59,8 +59,8 @@ RULES:
 SUGGESTION FORMAT — append this at the end of your message when suggesting:
 PROVIDERS_JSON:[{"id":"ID","slug":"SLUG","fullName":"FULL_NAME","categoryName":"CATEGORY","location":"LOCATION","profilePhotoUrl":"PROFILE_PHOTO_URL","oneLine":"ONE_LINE","matchReason":"ONE SENTENCE WHY THEY MATCH"}]
 
-CURRENT USER MESSAGE COUNT: ${userMessageCount}/10
-${userMessageCount >= 9 ? "IMPORTANT: This is the last exchange. Suggest the closest matching provider now." : ""}
+[INTERNAL — never show this to the user] Message count: ${userMessageCount}/10
+${userMessageCount >= 9 ? "[INTERNAL] Last exchange — suggest closest match now." : ""}
 
 AVAILABLE PROVIDERS (ONLY suggest from this list):
 ${providerContext}`;
