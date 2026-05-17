@@ -46,6 +46,7 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
+  const [placeholder, setPlaceholder] = useState("Search therapist, realtor, immigration lawyer...");
   const inputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -88,6 +89,50 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
     const el = document.querySelector(".messages-container");
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages]);
+
+  useEffect(() => {
+    const phrases = [
+      "Looking for an immigration consultant?",
+      "Need a realtor in Vancouver?",
+      "Find a family lawyer near you...",
+      "Looking for a Spanish-speaking accountant?",
+      "Need a mortgage broker today?",
+      "Find a therapist near you...",
+      "Looking for a car dealer in BC?",
+      "Need a financial advisor?",
+    ];
+    let phraseIndex = 0;
+    let charIndex = 0;
+    let deleting = false;
+    let timeout: ReturnType<typeof setTimeout>;
+
+    const type = () => {
+      const current = phrases[phraseIndex];
+      if (!deleting) {
+        setPlaceholder(current.slice(0, charIndex + 1));
+        charIndex++;
+        if (charIndex === current.length) {
+          deleting = true;
+          timeout = setTimeout(type, 1800);
+        } else {
+          timeout = setTimeout(type, 45);
+        }
+      } else {
+        setPlaceholder(current.slice(0, charIndex - 1));
+        charIndex--;
+        if (charIndex === 0) {
+          deleting = false;
+          phraseIndex = (phraseIndex + 1) % phrases.length;
+          timeout = setTimeout(type, 400);
+        } else {
+          timeout = setTimeout(type, 25);
+        }
+      }
+    };
+
+    timeout = setTimeout(type, 1000);
+    return () => clearTimeout(timeout);
+  }, []);
 
   const enterChatMode = () => {
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -176,16 +221,17 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
               Connect with local professionals near you.
             </p>
             <div className="mt-8 w-full max-w-xl">
-              <p className="text-xs text-[#2563eb] font-semibold mb-2 tracking-wide uppercase flex items-center justify-center gap-1">
-                <span>✦</span> AI-powered matching
-              </p>              
+              <p className="text-xs font-semibold mb-2 tracking-wide uppercase flex items-center justify-center gap-1 text-[#2563eb]">
+                <span style={{ animation: "colorshift 3s infinite", fontSize: "1.1rem" }}>✦</span> AI-powered matching
+                <style>{`@keyframes colorshift { 0%{color:#2563eb} 33%{color:#7c3aed} 66%{color:#0891b2} 100%{color:#2563eb} }`}</style>
+              </p>
               <div
                 onClick={enterChatMode}
                 className="mx-auto flex w-full max-w-2xl items-center gap-2 rounded-full border border-black/10 bg-white p-2 shadow-sm cursor-text"
               >
                 <Search className="ml-3 text-[#9ca3af]" size={21} />
                 <span className="h-12 flex-1 flex items-center text-base text-[#9ca3af]">
-                  Search therapist, realtor, Persian lawyer...
+                  {placeholder}
                 </span>
                 <button className="rounded-full bg-[#2563eb] px-5 py-3 text-sm font-bold text-white hover:opacity-90 transition flex items-center gap-1.5">
                   <span className="text-xs">✦</span> Ask AI
@@ -195,7 +241,7 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
             <div className="mt-6 flex justify-center">
               <p className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#4b5563] shadow-sm border border-black/5">
                 <ShieldCheck size={18} className="text-[#22c55e]" />
-        Platform-reviewed profiles
+                Platform-reviewed profiles
               </p>
             </div>
           </section>
