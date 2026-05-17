@@ -20,7 +20,7 @@ export default function TermsPage() {
 
           <div>
             <h2 className="font-black text-[#0f1117] text-base mb-2">3. Provider Accounts</h2>
-            <p>Service providers must submit accurate professional information and valid identification for verification. ProFindly reserves the right to approve, reject, or suspend any provider account at its sole discretion. Providers are responsible for the accuracy of their profiles and the quality of their services.</p>
+            <p>Service providers must submit accurate professional information. ProFindly reviews profiles for completeness but does not verify professional licenses, certifications, or credentials. ProFindly reserves the right to approve, reject, or suspend any provider account at its sole discretion. Providers are responsible for the accuracy of their profiles and the quality of their services.</p>
           </div>
 
           <div>
@@ -35,7 +35,7 @@ export default function TermsPage() {
 
           <div>
             <h2 className="font-black text-[#0f1117] text-base mb-2">6. Client Use</h2>
-            <p>Clients may browse and contact providers free of charge. Clients are responsible for independently verifying provider credentials and qualifications before engaging their services. ProFindly does not guarantee the quality, legality, or suitability of any service provider.</p>
+            <p>Clients may browse and contact providers free of charge. Clients are responsible for independently verifying provider credentials, licenses, and qualifications before engaging their services. ProFindly does not verify the professional licenses, certifications, or qualifications of any service provider listed on the platform, and does not guarantee the quality, legality, or suitability of any service provider.</p>
           </div>
 
           <div>

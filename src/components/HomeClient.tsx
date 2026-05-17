@@ -173,7 +173,7 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
               Find the right service in your area in seconds
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-relaxed text-[#6b7280] sm:text-base">
-              Connect with trusted local professionals near you.
+              Connect with local professionals near you.
             </p>
             <div className="mt-8 w-full max-w-xl">
               <p className="text-xs text-[#2563eb] font-semibold mb-2 tracking-wide uppercase flex items-center justify-center gap-1">
@@ -195,7 +195,7 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
             <div className="mt-6 flex justify-center">
               <p className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#4b5563] shadow-sm border border-black/5">
                 <ShieldCheck size={18} className="text-[#22c55e]" />
-                Verified providers
+        Platform-reviewed profiles
               </p>
             </div>
           </section>

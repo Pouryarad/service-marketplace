@@ -51,7 +51,7 @@ export default async function CategoryPage({
           </h1>
 
           <p className="mt-3 max-w-2xl text-sm leading-6 text-[#6b7280] sm:text-base">
-            Find trusted and verified providers near you.
+            Browse listed professionals near you.
           </p>
 
         </div>

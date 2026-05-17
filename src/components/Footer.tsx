@@ -8,7 +8,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="max-w-xs">
             <p className="text-lg font-black text-white tracking-tight">ProFindly</p>
-            <p className="mt-2 text-sm text-[#6b7280] leading-relaxed">Find trusted local professionals in seconds.</p>
+            <p className="mt-2 text-sm text-[#6b7280] leading-relaxed">Find local professionals in seconds.</p>
           </div>
 
           {/* Links */}
