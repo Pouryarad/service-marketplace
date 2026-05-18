@@ -345,7 +345,7 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
             </div>
 
             {/* Input */}
-            <div className="shrink-0 pb-3 pt-2 sm:mb-[20%]" style={{ position: "relative", zIndex: 1 }}>
+            <div className="shrink-0 pb-3 pt-2 sm:mb-[20%] w-full" style={{ position: "relative", zIndex: 1 }}>
               <div className="flex items-center gap-2 bg-white rounded-2xl border border-black/[0.06] p-2 shadow-sm">
                 <input
                   ref={inputRef}
@@ -354,18 +354,19 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
                   onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                   placeholder={messages.some(m => m.providers && m.providers.length > 0) ? "Chat ended — providers suggested above" : "Type your message..."}
                   disabled={messages.some(m => m.providers && m.providers.length > 0) || rateLimited}
-                  className={`size-9 rounded-xl flex items-center justify-center transition ${listening ? "bg-red-500 text-white" : "bg-[#f3f5f9] text-[#6b7280] hover:bg-[#e8edf5]"} disabled:opacity-40`}
+                  className="flex-1 px-3 py-2 text-sm bg-transparent outline-none text-[#0f1117] placeholder:text-[#9ca3af] disabled:opacity-50"
                 />
                 <button
                   onClick={startVoice}
-                  disabled={messages.some(m => m.providers && m.providers.length > 0)}
+                  disabled={messages.some(m => m.providers && m.providers.length > 0) || rateLimited}
                   className={`size-9 rounded-xl flex items-center justify-center transition ${listening ? "bg-red-500 text-white" : "bg-[#f3f5f9] text-[#6b7280] hover:bg-[#e8edf5]"} disabled:opacity-40`}
                 >
                   <Mic size={16} />
                 </button>
                 <button
                   onClick={() => sendMessage()}
-                  disabled={!input.trim() || loading || messages.some(m => m.providers && m.providers.length > 0) || rateLimited} className="size-9 rounded-xl bg-[#2563eb] flex items-center justify-center text-white hover:bg-blue-700 transition disabled:opacity-40"
+                  disabled={!input.trim() || loading || messages.some(m => m.providers && m.providers.length > 0) || rateLimited}
+                  className="size-9 rounded-xl bg-[#2563eb] flex items-center justify-center text-white hover:bg-blue-700 transition disabled:opacity-40"
                 >
                   <Send size={15} />
                 </button>
