@@ -46,6 +46,7 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
+  const [rateLimited, setRateLimited] = useState(false);
   const [placeholder, setPlaceholder] = useState("Search therapist, realtor, immigration lawyer...");
   const inputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -169,6 +170,8 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
         body: JSON.stringify({ messages: newMessages }),
       });
       const data = await res.json();
+      const [rateLimited, setRateLimited] = useState(false);
+      if (res.status === 429) setRateLimited(true);
       setMessages((prev) => [...prev, {
         role: "assistant",
         content: data.message,
@@ -350,8 +353,8 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                   placeholder={messages.some(m => m.providers && m.providers.length > 0) ? "Chat ended — providers suggested above" : "Type your message..."}
-                  disabled={messages.some(m => m.providers && m.providers.length > 0)}
-                  className="flex-1 px-3 py-2 text-sm bg-transparent outline-none text-[#0f1117] placeholder:text-[#9ca3af] disabled:opacity-50"
+                  disabled={messages.some(m => m.providers && m.providers.length > 0) || rateLimited}
+                  className={`size-9 rounded-xl flex items-center justify-center transition ${listening ? "bg-red-500 text-white" : "bg-[#f3f5f9] text-[#6b7280] hover:bg-[#e8edf5]"} disabled:opacity-40`}
                 />
                 <button
                   onClick={startVoice}
@@ -362,8 +365,7 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
                 </button>
                 <button
                   onClick={() => sendMessage()}
-                  disabled={!input.trim() || loading || messages.some(m => m.providers && m.providers.length > 0)}
-                  className="size-9 rounded-xl bg-[#2563eb] flex items-center justify-center text-white hover:bg-blue-700 transition disabled:opacity-40"
+                  disabled={!input.trim() || loading || messages.some(m => m.providers && m.providers.length > 0) || rateLimited} className="size-9 rounded-xl bg-[#2563eb] flex items-center justify-center text-white hover:bg-blue-700 transition disabled:opacity-40"
                 >
                   <Send size={15} />
                 </button>

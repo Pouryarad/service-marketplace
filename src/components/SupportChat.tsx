@@ -21,27 +21,27 @@ export default function SupportChat({
 }) {
     const [open, setOpen] = useState(false);
     const [dismissed, setDismissed] = useState(false);
-const [messages, setMessages] = useState<Message[]>([]);
+    const [messages, setMessages] = useState<Message[]>([]);
 
     useEffect(() => {
         try {
             const saved = sessionStorage.getItem("support_chat_messages");
             if (saved) setMessages(JSON.parse(saved));
-        } catch {}
+        } catch { }
     }, []);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
-
+    const [rateLimited, setRateLimited] = useState(false);
     useEffect(() => {
         try {
             if (sessionStorage.getItem("support_chat_submitted") === "true") setSubmitted(true);
-        } catch {}
+        } catch { }
     }, []);
     const inputRef = useRef<HTMLInputElement>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
 
-   const [loaded, setLoaded] = useState(false);
+    const [loaded, setLoaded] = useState(false);
 
     useEffect(() => {
         try {
@@ -53,7 +53,7 @@ const [messages, setMessages] = useState<Message[]>([]);
                 sessionStorage.removeItem("support_chat_submitted");
                 setSubmitted(false);
             }
-        } catch {}
+        } catch { }
         setLoaded(true);
     }, []);
 
@@ -69,11 +69,11 @@ const [messages, setMessages] = useState<Message[]>([]);
     }, [open, loaded]);
 
     useEffect(() => {
-        try { sessionStorage.setItem("support_chat_messages", JSON.stringify(messages)); } catch {}
+        try { sessionStorage.setItem("support_chat_messages", JSON.stringify(messages)); } catch { }
     }, [messages]);
 
     useEffect(() => {
-        try { sessionStorage.setItem("support_chat_submitted", String(submitted)); } catch {}
+        try { sessionStorage.setItem("support_chat_submitted", String(submitted)); } catch { }
     }, [submitted]);
 
     useEffect(() => {
@@ -96,22 +96,22 @@ const [messages, setMessages] = useState<Message[]>([]);
 
         try {
             const res = await fetch("/api/support/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ messages: newMessages, userType, userName, userEmail }),
-        });
-        const data = await res.json();
-        if (data.message) {
-            setMessages((prev) => [...prev, { role: "assistant", content: data.message }]);
-        }
-        if (res.status === 429) return;
-        if (data.submitted) setSubmitted(true);
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ messages: newMessages, userType, userName, userEmail }),
+            });
+            const data = await res.json();
+            if (data.message) {
+                setMessages((prev) => [...prev, { role: "assistant", content: data.message }]);
+            }
+            if (res.status === 429) { setRateLimited(true); return; }
+            if (data.submitted) setSubmitted(true);
         } catch (err: any) {
-      const msg = err?.status === 429
-        ? "You've reached the support chat limit for today. Please email us at contact@profindly.com."
-        : "Sorry, something went wrong. Please try again.";
-      setMessages((prev) => [...prev, { role: "assistant", content: msg }]);
-    } finally {
+            const msg = err?.status === 429
+                ? "You've reached the support chat limit for today. Please email us at contact@profindly.com."
+                : "Sorry, something went wrong. Please try again.";
+            setMessages((prev) => [...prev, { role: "assistant", content: msg }]);
+        } finally {
             setLoading(false);
         }
     };
@@ -185,11 +185,17 @@ const [messages, setMessages] = useState<Message[]>([]);
                                 <p className="text-xs text-[#9ca3af]">✅ Your message has been sent. We'll get back to you shortly.</p>
                             </div>
                         )}
+                        {rateLimited && (
+                            <div className="text-center py-2">
+                                <p className="text-xs text-[#9ca3af]">❌ You've reached the support chat limit for today. Please try again tomorrow.</p>
+                            </div>
+                        )}
                         <div ref={bottomRef} />
                     </div>
 
                     {/* Input */}
-                    {!submitted && (
+                    {!submitted && !rateLimited && (
+
                         <div className="p-3 border-t border-black/[0.04] shrink-0">
                             <div className="flex items-center gap-2 bg-[#f3f5f9] rounded-xl px-3 py-2">
                                 <input
