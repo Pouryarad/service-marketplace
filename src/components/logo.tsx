@@ -7,8 +7,8 @@ export function Logo({ centered, size = "sm" }: { centered?: boolean; size?: "sm
       <Image
         src="/logo.png"
         alt="ProFindly"
-        width={400}
-        height={120}
+        width={size === "lg" ? 240 : 120}
+        height={size === "lg" ? 72 : 36}
         className={`w-auto object-contain ${size === "lg" ? "h-20" : "h-10"}`}
         priority
       />
