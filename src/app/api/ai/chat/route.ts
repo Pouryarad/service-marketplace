@@ -1,36 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseServiceClient } from "@/lib/supabase/server";
+import { createSupabaseServiceClient, createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
   const { messages } = await req.json();
 
-  // Rate limiting
   const service = createSupabaseServiceClient();
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
 
-  // Check if user is logged in
-  const authHeader = req.headers.get("cookie") ?? "";
-  const { data: { user } } = await createSupabaseServiceClient().auth.getUser();
-  const identifier = user?.id ?? `ip:${ip}`;
+  // Rate limiting
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const userClient = await createSupabaseServerClient();
+  const { data: { user } } = await userClient!.auth.getUser();
+  const identifier = user?.id ? `user:${user.id}` : `ip:${ip}`;
   const limit = user?.id ? 20 : 10;
+  const today = new Date().toISOString().split("T")[0];
 
   const { data: usage } = await service
     .from("ai_rate_limits")
     .select("count")
     .eq("identifier", identifier)
-    .eq("date", new Date().toISOString().split("T")[0])
+    .eq("date", today)
     .single();
 
   if (usage && usage.count >= limit) {
-    return NextResponse.json(
-      { message: user?.id ? "You've reached your daily limit of 20 searches. Try again tomorrow." : "You've reached the free limit of 3 searches. Sign in for more.", providers: [] },
-      { status: 429 }
-    );
+    return NextResponse.json({
+      message: user?.id
+        ? "You've reached your daily limit of 20 searches. Try again tomorrow."
+        : "You've used your 10 free searches for today. Sign in for more.",
+      providers: [],
+    }, { status: 429 });
   }
 
   await service.from("ai_rate_limits").upsert({
     identifier,
-    date: new Date().toISOString().split("T")[0],
+    date: today,
     count: (usage?.count ?? 0) + 1,
   }, { onConflict: "identifier,date" });
 
@@ -47,7 +49,6 @@ export async function POST(req: NextRequest) {
     .select("provider_id, question, answer")
     .eq("ai_approved", true);
 
-  // Build provider context
   const providerContext = (providers ?? []).map((p) => {
     const qa = (qaData ?? [])
       .filter((q) => q.provider_id === p.id)
@@ -119,7 +120,6 @@ ${providerContext}`;
   const data = await response.json();
   const text = data.content?.[0]?.text ?? "";
 
-// Parse providers from response
   let message = text;
   let matchedProviders: any[] = [];
 
@@ -127,7 +127,6 @@ ${providerContext}`;
   if (jsonMatch) {
     try {
       const parsed = JSON.parse(jsonMatch[1]);
-      // Inject real data from DB to avoid AI hallucinating photo URLs
       matchedProviders = parsed.map((p: any) => {
         const real = (providers ?? []).find(
           (r) => String(r.id) === String(p.id) || r.slug === p.slug
