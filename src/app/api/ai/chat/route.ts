@@ -4,7 +4,35 @@ import { createSupabaseServiceClient } from "@/lib/supabase/server";
 export async function POST(req: NextRequest) {
   const { messages } = await req.json();
 
+  // Rate limiting
   const service = createSupabaseServiceClient();
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+
+  // Check if user is logged in
+  const authHeader = req.headers.get("cookie") ?? "";
+  const { data: { user } } = await createSupabaseServiceClient().auth.getUser();
+  const identifier = user?.id ?? `ip:${ip}`;
+  const limit = user?.id ? 20 : 3;
+
+  const { data: usage } = await service
+    .from("ai_rate_limits")
+    .select("count")
+    .eq("identifier", identifier)
+    .eq("date", new Date().toISOString().split("T")[0])
+    .single();
+
+  if (usage && usage.count >= limit) {
+    return NextResponse.json(
+      { message: user?.id ? "You've reached your daily limit of 20 searches. Try again tomorrow." : "You've reached the free limit of 3 searches. Sign in for more.", providers: [] },
+      { status: 429 }
+    );
+  }
+
+  await service.from("ai_rate_limits").upsert({
+    identifier,
+    date: new Date().toISOString().split("T")[0],
+    count: (usage?.count ?? 0) + 1,
+  }, { onConflict: "identifier,date" });
 
   // Fetch all active providers with their QA
   const { data: providers } = await service
