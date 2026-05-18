@@ -76,37 +76,22 @@ export async function getCurrentUser() {
 
 
 export async function getCategories(limit?: number): Promise<Category[]> {
-  noStore();
   const supabase = await createSupabaseServerClient();
   if (!supabase) return [];
 
-  const { data, error } = await supabase
-    .from("categories")
-    .select("id, slug, name, image_url")
-    .order("name");
+  const [{ data, error }, { data: providerData }] = await Promise.all([
+    supabase.from("categories").select("id, slug, name, image_url").order("name"),
+    supabase.from("providers").select("category_slug, clicks_month")
+      .eq("approved", true)
+      .eq("suspended", false)
+      .eq("subscription_status", "active"),
+  ]);
 
   if (error || !data) return [];
 
-  // Only show categories that have at least one active provider
-  const { data: activeProviders } = await supabase
-    .from("providers")
-    .select("category_slug")
-    .eq("approved", true)
-    .eq("suspended", false)
-    .eq("subscription_status", "active");
-
-  const activeSlugs = new Set((activeProviders ?? []).map((p) => p.category_slug));
-
-  // Count views per category from provider clicks
-  const { data: viewCounts } = await supabase
-    .from("providers")
-    .select("category_slug, clicks_month")
-    .eq("approved", true)
-    .eq("suspended", false)
-    .eq("subscription_status", "active");
-
+  const activeSlugs = new Set((providerData ?? []).map((p) => p.category_slug));
   const viewsByCategory: Record<string, number> = {};
-  (viewCounts ?? []).forEach((p) => {
+  (providerData ?? []).forEach((p) => {
     viewsByCategory[p.category_slug] = (viewsByCategory[p.category_slug] ?? 0) + (p.clicks_month ?? 0);
   });
 
@@ -147,7 +132,6 @@ export async function getProviders(options?: {
   sort?: string;
   includeHidden?: boolean;
 }): Promise<Provider[]> {
-  noStore();
   const supabase = await createSupabaseServerClient();
   if (!supabase) {
     return [];
