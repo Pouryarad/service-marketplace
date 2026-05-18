@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   const authHeader = req.headers.get("cookie") ?? "";
   const { data: { user } } = await createSupabaseServiceClient().auth.getUser();
   const identifier = user?.id ?? `ip:${ip}`;
-  const limit = user?.id ? 20 : 3;
+  const limit = user?.id ? 20 : 10;
 
   const { data: usage } = await service
     .from("ai_rate_limits")

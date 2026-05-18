@@ -96,18 +96,22 @@ const [messages, setMessages] = useState<Message[]>([]);
 
         try {
             const res = await fetch("/api/support/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ messages: newMessages, userType, userName, userEmail }),
-            });
-            const data = await res.json();
-            if (data.message) {
-                setMessages((prev) => [...prev, { role: "assistant", content: data.message }]);
-            }
-            if (data.submitted) setSubmitted(true);
-        } catch {
-            setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, something went wrong. Please try again." }]);
-        } finally {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ messages: newMessages, userType, userName, userEmail }),
+        });
+        const data = await res.json();
+        if (data.message) {
+            setMessages((prev) => [...prev, { role: "assistant", content: data.message }]);
+        }
+        if (res.status === 429) return;
+        if (data.submitted) setSubmitted(true);
+        } catch (err: any) {
+      const msg = err?.status === 429
+        ? "You've reached the support chat limit for today. Please email us at contact@profindly.com."
+        : "Sorry, something went wrong. Please try again.";
+      setMessages((prev) => [...prev, { role: "assistant", content: msg }]);
+    } finally {
             setLoading(false);
         }
     };
