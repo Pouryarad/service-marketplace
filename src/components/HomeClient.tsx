@@ -374,6 +374,10 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
             </div>
           </section>
         )}
+        <style>{`
+              .cat-img { filter: blur(2px) brightness(0.6) saturate(0.9); transform: scale(1.1); transition: all 0.5s ease; }
+              .cat-card:hover .cat-img { filter: blur(0px) brightness(0.75) saturate(1.1); transform: scale(1.0); }
+       `}</style>
         {/* CATEGORIES — hide in chat mode */}
         {!chatMode && (
           <section className="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
@@ -381,16 +385,43 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
               <h2 className="text-xl font-bold sm:text-2xl">Explore Categories</h2>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              {categories.map((category) => (
+              {categories.slice(0, 10).map((category) => (
                 <Link
                   key={category.id}
                   href={`/categories/${category.slug}`}
-                  className="group relative flex min-h-[120px] items-center justify-center overflow-hidden rounded-2xl border border-black/[0.04] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                  className="cat-card group relative flex min-h-[140px] items-end overflow-hidden rounded-2xl transition duration-500 hover:-translate-y-1"
+                  style={{
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.25), inset 0 1px 1px rgba(255,255,255,0.6), inset 0 -1px 1px rgba(0,0,0,0.3), inset 1px 0 1px rgba(255,255,255,0.4), inset -1px 0 1px rgba(0,0,0,0.15)",
+                    border: "1px solid rgba(255,255,255,0.35)",
+                    background: "rgba(255,255,255,0.08)",
+                  }}
                 >
-                  <div className="absolute inset-0 bg-[#eff6ff] opacity-0 group-hover:opacity-100 transition duration-300" />
-                  <div className="relative z-10 px-3 text-center">
-                    <p className="text-2xl mb-1">{getCategoryEmoji(category.slug)}</p>
-                    <p className="text-sm font-bold text-[#0f1117] group-hover:text-[#2563eb] transition">{category.name}</p>
+                  {category.imageUrl ? (
+                    <div
+                      className="absolute inset-0 cat-img"
+                      style={{
+                        backgroundImage: `url(${category.imageUrl})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }}
+                    />
+                  ) : (
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, #1e3a8a 0%, #0f1117 100%)" }} />
+                  )}
+                  <div className="absolute inset-x-0 top-0 h-[1px]" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)" }} />
+                  <div className="absolute inset-y-0 left-0 w-[1px]" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.3), transparent, rgba(255,255,255,0.1))" }} />
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(8,10,18,0.82) 0%, rgba(8,10,18,0.1) 50%, transparent 100%)" }} />
+                  <div
+                    className="relative z-10 w-full px-3 py-2.5"
+                    style={{
+                      background: "rgba(255,255,255,0.15)",
+                      backdropFilter: "blur(24px) saturate(2)",
+                      WebkitBackdropFilter: "blur(24px) saturate(2)",
+                      borderTop: "1px solid rgba(255,255,255,0.45)",
+                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    <p className="text-sm font-bold text-white" style={{ textShadow: "0 1px 6px rgba(0,0,0,0.6)", letterSpacing: "0.01em" }}>{category.name}</p>
                   </div>
                 </Link>
               ))}
@@ -402,30 +433,4 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
     </>
 
   );
-}
-
-function getCategoryEmoji(slug: string): string {
-  const map: Record<string, string> = {
-    "immigration-consultant": "🛂",
-    "realtor": "🏠",
-    "mortgage-broker": "🏦",
-    "lawyer": "⚖️",
-    "accountant": "📊",
-    "therapist": "🧠",
-    "insurance-broker": "🛡️",
-    "financial-advisor": "💰",
-    "car-dealer": "🚗",
-    "contractor": "🔨",
-    "dentist": "🦷",
-    "doctor": "👨‍⚕️",
-    "photographer": "📸",
-    "personal-trainer": "💪",
-    "tutor": "📚",
-    "cleaning-service": "🧹",
-    "electrician": "⚡",
-    "plumber": "🔧",
-    "moving-company": "📦",
-    "web-developer": "💻",
-  };
-  return map[slug] ?? "🔷";
 }
