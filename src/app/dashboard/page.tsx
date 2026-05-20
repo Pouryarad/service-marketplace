@@ -18,53 +18,12 @@ export default async function UserDashboardPage({
   const previewRequests = requests.slice(0, 4);
   const supabase = await createSupabaseServerClient();
   if (!supabase) return null;
-  let suggestions = [];
 
-  if (lastCategory) {
-    const requestedIds = requests
-      .map((r) => r.provider?.id)
-      .filter(Boolean);
-
-    const { data } = await supabase
-      .from("providers")
-      .select("*")
-      .eq("category_slug", lastCategory)
-      .not("id", "in", `(${requestedIds.join(",") || "0"})`)
-      .limit(6);
-
-    suggestions = data || [];
-  }
-
-
-if (lastCategory) {
-    const { data: categoryData } = await supabase
-      .from("categories")
-      .select("related_slugs")
-      .eq("slug", lastCategory)
-      .maybeSingle();
-
-    const relatedSlugs = (categoryData?.related_slugs as string[]) ?? [];
-
-    if (relatedSlugs.length > 0) {
-      const requestedIds = requests.map((r) => r.provider?.id).filter(Boolean);
-      const { data: relatedData } = await supabase
-        .from("providers")
-        .select("*")
-        .in("category_slug", relatedSlugs)
-        .not("id", "in", `(${requestedIds.join(",") || "0"})`)
-        .limit(4);
-
-      suggestions = [...suggestions, ...(relatedData || [])];
-    }
-  }
-
-  const {
-    data: { user },
-  } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
+  const { data: { user } } = await supabase.auth.getUser();
 
   let favorites: any[] = [];
 
-  if (supabase && user) {
+  if (user) {
     const { data: favs } = await supabase
       .from("favorites")
       .select("provider_id")
@@ -72,20 +31,46 @@ if (lastCategory) {
 
     if (favs && favs.length > 0) {
       const providerIds = favs.map((f) => f.provider_id);
-
-      const { data: providers, error } = await supabase
+      const { data: providers } = await supabase
         .from("providers")
         .select("*")
         .in("id", providerIds);
-
-      if (error) console.error("PROVIDER ERROR:", error);
-
       favorites = providers || [];
-      // Use favorites category for suggestions if available
-    if (favorites.length > 0 && favorites[0].category_slug) {
-      lastCategory = favorites[0].category_slug;
     }
-    }
+  }
+
+  // Use favorites category for suggestions if available, fallback to last request
+  if (favorites.length > 0 && favorites[0].category_slug) {
+    lastCategory = favorites[0].category_slug;
+  }
+
+  let suggestions: any[] = [];
+
+  if (lastCategory) {
+    const requestedIds = requests.map((r) => r.provider?.id).filter(Boolean);
+    const favoriteIds = favorites.map((f) => f.id).filter(Boolean);
+    const excludeIds = [...new Set([...requestedIds, ...favoriteIds])];
+
+    const { data: categoryData } = await supabase
+      .from("categories")
+      .select("related_slugs")
+      .eq("slug", lastCategory)
+      .maybeSingle();
+
+    const relatedSlugs = (categoryData?.related_slugs as string[]) ?? [];
+    const allSlugs = [lastCategory, ...relatedSlugs];
+
+    const { data } = await supabase
+      .from("providers")
+      .select("*")
+      .in("category_slug", allSlugs)
+      .eq("approved", true)
+      .eq("suspended", false)
+      .eq("subscription_status", "active")
+      .not("id", "in", `(${excludeIds.join(",") || "0"})`)
+      .limit(6);
+
+    suggestions = data || [];
   }
 
   return (
