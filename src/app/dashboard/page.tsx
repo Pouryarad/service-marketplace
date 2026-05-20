@@ -71,8 +71,6 @@ export default async function UserDashboardPage({
       .limit(6);
 
     suggestions = data || [];
-        console.log("lastCategory:", lastCategory, "suggestions:", suggestions.length);
-
   }
 
   return (
