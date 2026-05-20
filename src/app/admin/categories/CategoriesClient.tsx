@@ -39,6 +39,15 @@ export default function CategoriesClient({
                             <div className="min-w-0">
                                 <p className="font-bold text-[#1f1f1f] text-sm truncate">{cat.name}</p>
                                 <p className="text-xs text-[#9ca3af] font-mono truncate">{cat.slug}</p>
+                                {cat.related_slugs && cat.related_slugs.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                        {cat.related_slugs.map((slug) => (
+                                            <span key={slug} className="text-[10px] bg-[#eff6ff] text-[#2563eb] font-medium px-2 py-0.5 rounded-full">
+                                                {slug}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
