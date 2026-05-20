@@ -66,7 +66,7 @@ export default function SupportChat({
                     : "Hi! I'm here to help. What's your name?",
             }]);
         }
-    }, [open, loaded]);
+    }, [open, loaded, userName]);
 
     useEffect(() => {
         try { sessionStorage.setItem("support_chat_messages", JSON.stringify(messages)); } catch { }
