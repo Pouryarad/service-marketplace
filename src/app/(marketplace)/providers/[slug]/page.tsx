@@ -83,6 +83,9 @@ export default async function ProviderProfilePage({
       .neq("id", provider.id)
       .limit(4);
 
+    console.log("category:", category);
+    console.log("relatedSlugs:", relatedSlugs);
+    console.log("related:", related);
     relatedProviders = related ?? [];
   }
 
