@@ -59,7 +59,7 @@ export default async function ProviderProfilePage({
       event_type: "view_profile",
     });
   }
-  // Fetch related providers
+// Fetch related providers
   let relatedProviders: any[] = [];
   if (supabase && provider) {
     const { data: category } = await supabase
@@ -323,7 +323,6 @@ export default async function ProviderProfilePage({
           </div>
         </div>
       </section>
-      {/* Related Providers */}
       {relatedProviders.length > 0 && (
         <section className="mx-auto w-full max-w-5xl px-4 sm:px-6 pb-16">
           <h2 className="text-base font-black text-[#0f1117] mb-4">You might also like</h2>
