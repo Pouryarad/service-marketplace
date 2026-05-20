@@ -235,7 +235,7 @@ export default async function ProviderDashboardPage({
         </section>
 
       </section>
-      <SupportChat userType="provider" />
+      <SupportChat userType="provider" userName={provider.fullName} userEmail={provider.email ?? undefined} />
     </main>
   );
 }
