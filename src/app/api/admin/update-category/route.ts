@@ -41,7 +41,6 @@ export async function POST(req: NextRequest) {
     related_slugs: relatedSlugs,
   }).eq("id", id);
 
-  if (error) console.error("Update error:", error);
+   return NextResponse.json({ ok: true });
 
-  return NextResponse.json({ ok: true, error: error?.message });
 }
