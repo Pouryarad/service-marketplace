@@ -14,7 +14,7 @@ export default async function UserDashboardPage({
 }) {
   const { settings } = await searchParams;
   const requests = await getContactRequests();
-  const lastCategory = requests?.[0]?.provider?.category_slug;
+  let lastCategory = requests?.[0]?.provider?.category_slug;
   const previewRequests = requests.slice(0, 4);
   const supabase = await createSupabaseServerClient();
   if (!supabase) return null;
@@ -81,6 +81,10 @@ if (lastCategory) {
       if (error) console.error("PROVIDER ERROR:", error);
 
       favorites = providers || [];
+      // Use favorites category for suggestions if available
+    if (favorites.length > 0 && favorites[0].category_slug) {
+      lastCategory = favorites[0].category_slug;
+    }
     }
   }
 
