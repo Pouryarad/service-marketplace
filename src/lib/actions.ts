@@ -373,7 +373,7 @@ export async function markRequestContacted(formData: FormData) {
 
   await supabase
     .from("contact_requests")
-    .update({ status: "contacted" })
+    .update({ status: "contacted", is_read: true })
     .eq("id", String(formData.get("requestId") ?? ""));
 
   revalidatePath("/provider/dashboard");
