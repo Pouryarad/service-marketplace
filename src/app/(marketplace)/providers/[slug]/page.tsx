@@ -59,6 +59,32 @@ export default async function ProviderProfilePage({
       event_type: "view_profile",
     });
   }
+  // Fetch related providers
+  let relatedProviders: any[] = [];
+  if (supabase && provider) {
+    const { data: category } = await supabase
+      .from("categories")
+      .select("related_slugs")
+      .eq("slug", provider.categorySlug)
+      .maybeSingle();
+
+    const relatedSlugs: string[] = [
+      provider.categorySlug,
+      ...((category?.related_slugs as string[]) ?? []),
+    ];
+
+    const { data: related } = await supabase
+      .from("providers")
+      .select("id, full_name, slug, profile_photo_url, one_line, category_slug, location")
+      .in("category_slug", relatedSlugs)
+      .eq("approved", true)
+      .eq("suspended", false)
+      .eq("subscription_status", "active")
+      .neq("id", provider.id)
+      .limit(4);
+
+    relatedProviders = related ?? [];
+  }
 
   if (!provider) {
     return (
@@ -297,6 +323,31 @@ export default async function ProviderProfilePage({
           </div>
         </div>
       </section>
+      {/* Related Providers */}
+      {relatedProviders.length > 0 && (
+        <section className="mx-auto w-full max-w-5xl px-4 sm:px-6 pb-16">
+          <h2 className="text-base font-black text-[#0f1117] mb-4">You might also like</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {relatedProviders.map((p) => (
+              <Link key={p.id} href={`/providers/${p.slug}`}
+                className="bg-white rounded-2xl p-4 shadow-sm border border-black/[0.04] hover:shadow-md hover:-translate-y-0.5 transition duration-200">
+                <div className="relative size-12 rounded-xl overflow-hidden mb-3">
+                  {p.profile_photo_url ? (
+                    <Image src={p.profile_photo_url} alt={p.full_name} fill className="object-cover" sizes="48px" />
+                  ) : (
+                    <div className="size-full bg-[#eff6ff] flex items-center justify-center text-[#2563eb] font-black text-lg">
+                      {p.full_name?.[0]}
+                    </div>
+                  )}
+                </div>
+                <p className="font-bold text-sm text-[#0f1117] truncate">{p.full_name}</p>
+                <p className="text-xs text-[#9ca3af] truncate">{p.category_slug?.replace(/-/g, " ")}</p>
+                {p.one_line && <p className="text-xs text-[#6b7280] mt-1 line-clamp-2">{p.one_line}</p>}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }
