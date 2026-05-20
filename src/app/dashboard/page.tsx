@@ -36,14 +36,26 @@ export default async function UserDashboardPage({
   }
 
 
-  if (lastCategory === "realtor") {
-    const { data } = await supabase
-      .from("providers")
-      .select("*")
-      .eq("category_slug", "mortgage-broker")
-      .limit(3);
+if (lastCategory) {
+    const { data: categoryData } = await supabase
+      .from("categories")
+      .select("related_slugs")
+      .eq("slug", lastCategory)
+      .maybeSingle();
 
-    suggestions = [...suggestions, ...(data || [])];
+    const relatedSlugs = (categoryData?.related_slugs as string[]) ?? [];
+
+    if (relatedSlugs.length > 0) {
+      const requestedIds = requests.map((r) => r.provider?.id).filter(Boolean);
+      const { data: relatedData } = await supabase
+        .from("providers")
+        .select("*")
+        .in("category_slug", relatedSlugs)
+        .not("id", "in", `(${requestedIds.join(",") || "0"})`)
+        .limit(4);
+
+      suggestions = [...suggestions, ...(relatedData || [])];
+    }
   }
 
   const {

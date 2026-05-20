@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import CategoriesClient from "./CategoriesClient";
 
+
 async function addCategory(formData: FormData) {
   "use server";
   const supabase = await createSupabaseServerClient();
