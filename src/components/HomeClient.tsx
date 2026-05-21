@@ -170,7 +170,6 @@ export default function HomeClient({ categories }: { categories: Category[] }) {
         body: JSON.stringify({ messages: newMessages }),
       });
       const data = await res.json();
-      const [rateLimited, setRateLimited] = useState(false);
       if (res.status === 429) setRateLimited(true);
       setMessages((prev) => [...prev, {
         role: "assistant",
