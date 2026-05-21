@@ -251,20 +251,17 @@ export default function ProviderSetupForm({
       portfolioPreviews.filter((url) => url.startsWith("http") && !url.startsWith("blob:"))
     ));
 
-    if (profilePhotoFile) formData.set("profilePhoto", profilePhotoFile);
+   if (profilePhotoFile) formData.set("profilePhoto", profilePhotoFile);
     portfolioFiles.forEach((f) => formData.append("portfolioPhotos", f));
-    console.log("ID file:", idFile?.name, idFile?.size);
     if (idFile) formData.set("idDocument", idFile);
 
     try {
       await saveProviderProfile(formData);
-      console.log("Profile saved successfully");
       await new Promise(r => setTimeout(r, 3000));
       window.location.href = isFirstTime
         ? "/provider/setup?tab=payment"
         : "/provider/dashboard?profile=saved";
     } catch (err: any) {
-      console.log("Caught error:", err?.digest, err?.message);
       if (err?.digest?.startsWith("NEXT_REDIRECT")) {
         window.location.href = isFirstTime
           ? "/provider/setup?tab=payment"
