@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   // Rate limiting
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   const userClient = await createSupabaseServerClient();
-  const { data: { user } } = await userClient!.auth.getUser();
+  const user = userClient ? (await userClient.auth.getUser()).data.user : null;
   const identifier = user?.id ? `user:${user.id}` : `ip:${ip}`;
   const limit = user?.id ? 20 : 10;
   const today = new Date().toISOString().split("T")[0];
