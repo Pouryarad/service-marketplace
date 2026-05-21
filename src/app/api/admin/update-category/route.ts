@@ -16,7 +16,10 @@ export async function POST(req: NextRequest) {
   const id = Number(formData.get("id"));
   const name = String(formData.get("name") ?? "").trim();
   const imageUrl = String(formData.get("imageUrl") ?? "").trim();
-  const relatedSlugs = JSON.parse(String(formData.get("relatedSlugs") ?? "[]"));
+  const rawRelated = String(formData.get("relatedSlugs") ?? "[]");
+  console.log("relatedSlugs raw:", rawRelated);
+  const relatedSlugs = JSON.parse(rawRelated);
+  console.log("relatedSlugs parsed:", relatedSlugs);
   const imageFile = formData.get("imageFile") as File | null;
 
   let finalImageUrl = imageUrl;
