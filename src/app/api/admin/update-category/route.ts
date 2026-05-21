@@ -43,6 +43,8 @@ export async function POST(req: NextRequest) {
     image_url: finalImageUrl || null,
     related_slugs: relatedSlugs,
   }).eq("id", id);
+    if (error) console.error("Update error:", error);
+
 
    return NextResponse.json({ ok: true });
 
