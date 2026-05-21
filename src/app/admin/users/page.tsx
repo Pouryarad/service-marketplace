@@ -79,8 +79,7 @@ export default async function AdminUsersPage({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-[#0f1117] truncate">{client.full_name ?? "—"}</p>
-                  <p className="text-xs text-[#9ca3af] truncate">{client.email ?? "—"}</p>
-
+                  <p className="text-xs text-[#9ca3af] truncate">{emailMap[client.id] ?? "—"}</p>
                 </div>
                 <p className="text-xs text-[#c4c9d4] shrink-0">{new Date(client.created_at).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</p>
               </div>
