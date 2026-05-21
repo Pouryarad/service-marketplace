@@ -80,7 +80,7 @@ export async function getCategories(limit?: number): Promise<Category[]> {
   if (!supabase) return [];
 
   const [{ data, error }, { data: providerData }] = await Promise.all([
-    supabase.from("categories").select("id, slug, name, image_url").order("name"),
+    supabase.from("categories").select("id, slug, name, image_url, related_slugs").order("name"),
     supabase.from("providers").select("category_slug, clicks_month")
       .eq("approved", true)
       .eq("suspended", false)

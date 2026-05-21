@@ -1,9 +1,10 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServerClient, createSupabaseServiceClient } from "@/lib/supabase/server";
 import { getProviders } from "@/lib/data";
 import { updateProviderStatus } from "@/lib/actions";
 import Image from "next/image";
 import Link from "next/link";
 import { Search, ExternalLink, CheckCircle, XCircle, UserCheck } from "lucide-react";
+
 
 export default async function AdminUsersPage({
   searchParams,
@@ -14,9 +15,10 @@ export default async function AdminUsersPage({
   const activeTab = tab === "providers" ? "providers" : "clients";
 
   const supabase = await createSupabaseServerClient();
+  const service = createSupabaseServiceClient();
   const [providers, clientsRes] = await Promise.all([
     getProviders({ includeHidden: true }),
-    supabase!.from("profiles").select("id, full_name, email, phone, city, created_at").eq("role", "client").order("created_at", { ascending: false }),
+    service.from("profiles").select("id, full_name, email, phone, city, created_at").eq("role", "client").order("created_at", { ascending: false }),
   ]);
   const clients = clientsRes.data ?? [];
 
