@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServiceClient, createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
+  try {
   const { messages } = await req.json();
 
   const service = createSupabaseServiceClient();
@@ -147,4 +148,8 @@ if (!response.ok) {
   }
 
   return NextResponse.json({ message, providers: matchedProviders });
+  } catch (err: any) {
+    console.error("AI chat error:", err?.message ?? err);
+    return NextResponse.json({ message: "Sorry, something went wrong. Please try again.", providers: [] }, { status: 500 });
+  }
 }
