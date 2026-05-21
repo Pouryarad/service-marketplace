@@ -116,7 +116,10 @@ ${providerContext}`;
       })),
     }),
   });
-
+if (!response.ok) {
+    console.error("Anthropic error:", await response.text());
+    return NextResponse.json({ message: "Sorry, something went wrong. Please try again.", providers: [] }, { status: 500 });
+  }
   const data = await response.json();
   const text = data.content?.[0]?.text ?? "";
 
