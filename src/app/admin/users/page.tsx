@@ -16,10 +16,13 @@ export default async function AdminUsersPage({
 
   const supabase = await createSupabaseServerClient();
   const service = createSupabaseServiceClient();
-  const [providers, clientsRes] = await Promise.all([
+  const [providers, clientsRes, authUsersRes] = await Promise.all([
     getProviders({ includeHidden: true }),
     service.from("profiles").select("id, full_name, email, phone, city, created_at").eq("role", "client").order("created_at", { ascending: false }),
+    service.auth.admin.listUsers({ perPage: 1000 }),
   ]);
+  const emailMap: Record<string, string> = {};
+  (authUsersRes.data?.users ?? []).forEach((u) => { emailMap[u.id] = u.email ?? ""; });
   const clients = clientsRes.data ?? [];
 
   const filteredProviders = q
@@ -77,6 +80,7 @@ export default async function AdminUsersPage({
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-[#0f1117] truncate">{client.full_name ?? "—"}</p>
                   <p className="text-xs text-[#9ca3af] truncate">{client.email ?? "—"}</p>
+
                 </div>
                 <p className="text-xs text-[#c4c9d4] shrink-0">{new Date(client.created_at).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</p>
               </div>
