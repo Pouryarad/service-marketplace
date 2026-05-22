@@ -5,6 +5,27 @@ export async function POST(req: NextRequest) {
   const { providerId, category, qa } = await req.json();
   // qa: [{id, question, answer}]
 
+  // Pre-screen for obviously inappropriate content
+  const inappropriate = qa.some((item: any) => {
+    const text = item.answer.toLowerCase();
+    return /sex|porn|nude|naked|escort|prostitut|fuck|shit|ass|dick|pussy|rape/.test(text);
+  });
+
+  if (inappropriate) {
+    const service = createSupabaseServiceClient();
+    const now = new Date().toISOString();
+    for (const item of qa) {
+      await service.from("provider_qa").update({
+        answer: item.answer,
+        ai_approved: false,
+        ai_rejection_reason: "Answer contains inappropriate content.",
+        answered_at: now,
+      }).eq("id", item.id);
+    }
+    await service.from("providers").update({ ai_trained_at: now }).eq("id", Number(providerId));
+    return NextResponse.json({ ok: true, approved: 0, rejected: qa.length });
+  }
+
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
