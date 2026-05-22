@@ -69,8 +69,7 @@ Return ONLY a valid JSON array of exactly 8 strings. No explanation, no markdown
       answered_at: null,
     }));
 
-    const { error: insertError } = await service.from("provider_qa").insert(rows);
-    console.log("insert error:", insertError);
+    await service.from("provider_qa").insert(rows);
 
     return NextResponse.json({ questions, existing: [] });
   } catch {
