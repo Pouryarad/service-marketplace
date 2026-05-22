@@ -18,12 +18,19 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: "user",
-          content: `You are screening Q&A answers from a "${category}" service provider on a Canadian marketplace.
+          content: `You are strictly screening Q&A answers from a "${category}" service provider on a Canadian service marketplace.
 
-For each answer, determine if it is:
-- Appropriate and relevant to their profession
-- Not spam, fake, offensive, or misleading
-- Genuinely helpful for matching with clients
+REJECT an answer if ANY of these are true:
+- The answer does not directly address the question asked
+- The answer is irrelevant to ${category} or the provider's profession
+- Contains contact info (phone, email, website, social media)
+- Is too short or vague (e.g. "yes", "no", "ok", "good")
+- Contains spam, self-promotion unrelated to the question, or fake claims
+- Mentions competitors by name
+- Is offensive, inappropriate, or misleading
+- Does not make sense as a professional answer
+
+APPROVE only if the answer genuinely and directly answers the question in a professional, helpful way that would help a client decide if this provider is right for them.
 
 Here are the Q&A pairs:
 ${JSON.stringify(qa.map((q: any) => ({ question: q.question, answer: q.answer })))}
@@ -31,7 +38,7 @@ ${JSON.stringify(qa.map((q: any) => ({ question: q.question, answer: q.answer })
 Return ONLY valid JSON in this exact format:
 {
   "approved": [{"question": "..."}],
-  "rejected": [{"question": "...", "ai_rejection_reason": "Brief reason why"}]
+  "rejected": [{"question": "...", "ai_rejection_reason": "One sentence explaining why it was rejected"}]
 }`,
         },
       ],
