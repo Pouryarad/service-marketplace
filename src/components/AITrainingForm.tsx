@@ -6,10 +6,22 @@ import type { Provider } from "@/lib/types";
 type QAItem = {
   id?: number;
   question: string;
-  answer: string;
+  answer: string | null;
   ai_approved: boolean;
   ai_rejection_reason?: string | null;
+  answered_at?: string | null;
 };
+
+function isLocked(answeredAt?: string | null): boolean {
+  if (!answeredAt) return false;
+  return Date.now() - new Date(answeredAt).getTime() < 30 * 24 * 60 * 60 * 1000;
+}
+
+function daysUntilUnlock(answeredAt?: string | null): number {
+  if (!answeredAt) return 0;
+  const diff = 30 * 24 * 60 * 60 * 1000 - (Date.now() - new Date(answeredAt).getTime());
+  return Math.ceil(diff / (24 * 60 * 60 * 1000));
+}
 
 export default function AITrainingForm({
   provider,
@@ -18,61 +30,47 @@ export default function AITrainingForm({
   provider: Provider;
   existingQA: QAItem[];
 }) {
-  const storageKey = `ai_training_${provider.id}`;
-  const answersKey = `ai_answers_${provider.id}`;
-
-  const [questions, setQuestions] = useState<string[]>([]);
+  const [questions, setQuestions] = useState<QAItem[]>(existingQA);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [results] = useState<QAItem[]>(existingQA.filter(q => q.ai_approved));
-  const [rejected] = useState<QAItem[]>(existingQA.filter(q => !q.ai_approved && q.ai_rejection_reason));
+  const [error, setError] = useState<string | null>(null);
 
-  // Load saved questions and answers from localStorage
   useEffect(() => {
-    const savedQuestions = localStorage.getItem(storageKey);
-    const savedAnswers = localStorage.getItem(answersKey);
-    if (savedQuestions) setQuestions(JSON.parse(savedQuestions));
-    if (savedAnswers) setAnswers(JSON.parse(savedAnswers));
+    if (existingQA.length === 0) generateQuestions();
   }, []);
 
-  // Save answers to localStorage on change
-  useEffect(() => {
-    if (Object.keys(answers).length > 0) {
-      localStorage.setItem(answersKey, JSON.stringify(answers));
-    }
-  }, [answers]);
-
-  const generateQuestions = async (force = false) => {
-    if (!force && questions.length > 0) return;
+  const generateQuestions = async () => {
     setLoadingQuestions(true);
     try {
       const res = await fetch("/api/ai/generate-questions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ category: provider.categoryName }),
+        body: JSON.stringify({ category: provider.categoryName, providerId: provider.id }),
       });
       const data = await res.json();
-      setQuestions(data.questions ?? []);
-      localStorage.setItem(storageKey, JSON.stringify(data.questions ?? []));
-      setAnswers({});
-      localStorage.removeItem(answersKey);
-    } catch (e) {
-      console.error(e);
+      if (data.existing?.length > 0) {
+        setQuestions(data.existing);
+      } else {
+        window.location.reload();
+      }
+    } catch {
+      setError("Failed to generate questions. Please try again.");
     } finally {
       setLoadingQuestions(false);
     }
   };
 
   const handleSubmit = async () => {
-    const filled = questions
-      .map((q, i) => ({ question: q, answer: answers[i] ?? "" }))
-      .filter((qa) => qa.answer.trim().length > 0);
+    const toSubmit = questions
+      .filter((q) => !isLocked(q.answered_at) && answers[q.id!]?.trim())
+      .map((q) => ({ id: q.id, question: q.question, answer: answers[q.id!] }));
 
-    if (filled.length === 0) return;
+    if (toSubmit.length === 0) return;
 
     setSubmitting(true);
+    setError(null);
     try {
       const res = await fetch("/api/ai/screen-qa", {
         method: "POST",
@@ -80,14 +78,14 @@ export default function AITrainingForm({
         body: JSON.stringify({
           providerId: provider.id,
           category: provider.categoryName,
-          qa: filled,
+          qa: toSubmit,
         }),
       });
-      await res.json();
-      setSubmitted(true);
-      localStorage.removeItem(answersKey);
-    } catch (e) {
-      console.error(e);
+      const data = await res.json();
+      if (data.ok) setSubmitted(true);
+      else setError("Something went wrong. Please try again.");
+    } catch {
+      setError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -98,95 +96,90 @@ export default function AITrainingForm({
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-black/[0.04] text-center">
         <p className="text-3xl mb-3">✅</p>
         <p className="font-black text-[#0f1117] mb-1">Answers Submitted</p>
-        <p className="text-sm text-[#9ca3af]">Your AI profile has been updated.</p>
+        <p className="text-sm text-[#9ca3af] mb-4">Your answers have been screened and saved. They are now locked for 30 days.</p>
+        <a href="/provider/dashboard" className="inline-block rounded-xl bg-[#2563eb] px-6 py-2.5 text-sm font-bold text-white hover:bg-blue-700 transition">
+          Go to Dashboard
+        </a>
       </div>
     );
   }
 
+  if (loadingQuestions) {
+    return (
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-black/[0.04] text-center">
+        <p className="text-3xl mb-3">🤖</p>
+        <p className="font-black text-[#0f1117] mb-1">Generating your questions...</p>
+        <p className="text-sm text-[#9ca3af]">This only happens once. Please wait.</p>
+      </div>
+    );
+  }
+
+  const hasUnlocked = questions.some((q) => !isLocked(q.answered_at));
+
   return (
     <div className="space-y-4">
+      <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3">
+        <p className="text-sm font-bold text-amber-700">⚠️ Read before answering</p>
+        <p className="text-xs text-amber-600 mt-1">Each answer locks for 30 days after saving. Make sure your answers are accurate, professional, and helpful for clients searching for your services.</p>
+      </div>
 
-      {/* Existing approved answers */}
-      {results.length > 0 && (
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-black/[0.04]">
-          <p className="text-xs font-bold text-[#9ca3af] uppercase tracking-widest mb-3">Your Current AI Profile</p>
-          <div className="space-y-3">
-            {results.map((qa, i) => (
-              <div key={i} className="border-b border-black/[0.04] pb-3 last:border-0 last:pb-0">
-                <p className="text-xs font-bold text-[#6b7280]">{qa.question}</p>
-                <p className="text-sm text-[#0f1117] mt-1">{qa.answer}</p>
-              </div>
-            ))}
-          </div>
+      {error && (
+        <div className="bg-red-50 border border-red-100 rounded-2xl px-4 py-3">
+          <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
 
-      {/* Rejected answers */}
-      {rejected.length > 0 && (
-        <div className="bg-red-50 rounded-2xl p-5 border border-red-100">
-          <p className="text-xs font-bold text-red-400 uppercase tracking-widest mb-3">Not Approved</p>
-          <div className="space-y-3">
-            {rejected.map((qa, i) => (
-              <div key={i} className="border-b border-red-100 pb-3 last:border-0 last:pb-0">
-                <p className="text-xs font-bold text-[#6b7280]">{qa.question}</p>
-                <p className="text-sm text-red-600 mt-1">{qa.ai_rejection_reason}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Generate questions */}
-      {questions.length === 0 && (
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-black/[0.04] text-center">
-          <p className="text-4xl mb-3">🤖</p>
-          <p className="font-black text-[#0f1117] mb-1">Generate Your Questions</p>
-          <p className="text-sm text-[#9ca3af] mb-4">
-            We'll create {provider.categoryName}-specific questions to train the AI on your expertise.
-          </p>
-          <button
-            onClick={() => generateQuestions(false)}
-            disabled={loadingQuestions}
-            className="rounded-xl bg-[#2563eb] px-6 py-2.5 text-sm font-bold text-white hover:bg-blue-700 transition disabled:opacity-50"
-          >
-            {loadingQuestions ? "Generating..." : "Generate Questions →"}
-          </button>
-        </div>
-      )}
-
-      {/* Questions form */}
       {questions.length > 0 && (
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-black/[0.04]">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-bold text-[#9ca3af] uppercase tracking-widest">Answer the questions</p>
-            <button
-              onClick={() => generateQuestions(true)}
-              disabled={loadingQuestions}
-              className="text-xs font-bold text-[#2563eb] hover:underline disabled:opacity-50"
-            >
-              {loadingQuestions ? "Generating..." : "Regenerate"}
-            </button>
-          </div>
-          <div className="space-y-4">
-            {questions.map((q, i) => (
-              <div key={i}>
-                <label className="text-sm font-bold text-[#0f1117] block mb-1.5">{q}</label>
-                <textarea
-                  value={answers[i] ?? ""}
-                  onChange={(e) => setAnswers((prev) => ({ ...prev, [i]: e.target.value }))}
-                  placeholder="Your answer (optional)"
-                  className="w-full rounded-xl border border-black/10 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] transition resize-none min-h-20"
-                />
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-black/[0.04] space-y-5">
+          {questions.map((q, i) => {
+            const locked = isLocked(q.answered_at);
+            const days = daysUntilUnlock(q.answered_at);
+            return (
+              <div key={q.id ?? i} className={`${i < questions.length - 1 ? "border-b border-black/[0.04] pb-5" : ""}`}>
+                <div className="flex items-start justify-between gap-2 mb-1.5">
+                  <label className="text-sm font-bold text-[#0f1117]">{q.question}</label>
+                  {locked && (
+                    <span className="shrink-0 text-xs bg-[#f3f5f9] text-[#9ca3af] px-2 py-0.5 rounded-full font-medium">
+                      🔒 {days}d
+                    </span>
+                  )}
+                </div>
+                {locked ? (
+                  <div className="w-full rounded-xl border border-black/[0.06] bg-[#f9f9f9] p-3 text-sm text-[#6b7280]">
+                    {q.answer ?? "—"}
+                  </div>
+                ) : (
+                  <>
+                    <textarea
+                      value={answers[q.id!] ?? q.answer ?? ""}
+                      onChange={(e) => setAnswers((prev) => ({ ...prev, [q.id!]: e.target.value }))}
+                      placeholder="Your answer..."
+                      className="w-full rounded-xl border border-black/10 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] transition resize-none min-h-20"
+                    />
+                    {q.ai_rejection_reason && (
+                      <p className="text-xs text-red-500 mt-1">⚠️ Previous answer rejected: {q.ai_rejection_reason}</p>
+                    )}
+                  </>
+                )}
               </div>
-            ))}
-          </div>
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="mt-4 w-full rounded-xl bg-[#2563eb] py-3 text-sm font-bold text-white hover:bg-blue-700 transition disabled:opacity-50"
-          >
-            {submitting ? "Screening with AI..." : "Submit Answers"}
-          </button>
+            );
+          })}
+
+          {hasUnlocked && (
+            <button
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="w-full rounded-xl bg-[#2563eb] py-3 text-sm font-bold text-white hover:bg-blue-700 transition disabled:opacity-50"
+            >
+              {submitting ? "Screening with AI..." : "Save Answers"}
+            </button>
+          )}
+
+          {!hasUnlocked && (
+            <p className="text-center text-sm text-[#9ca3af]">
+              All answers are locked. Come back in {Math.min(...questions.map(q => daysUntilUnlock(q.answered_at)))} days to update.
+            </p>
+          )}
         </div>
       )}
     </div>

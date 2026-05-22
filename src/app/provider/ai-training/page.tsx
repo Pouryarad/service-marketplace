@@ -10,7 +10,7 @@ export default async function AITrainingPage() {
   const supabase = await createSupabaseServerClient();
   const { data: existingQA } = await supabase!
     .from("provider_qa")
-    .select("*")
+    .select("id, question, answer, ai_approved, ai_rejection_reason, answered_at")
     .eq("provider_id", Number(provider.id))
     .order("created_at", { ascending: true });
 

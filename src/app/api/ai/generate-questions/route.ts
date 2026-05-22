@@ -1,7 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createSupabaseServiceClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
-  const { category } = await req.json();
+  const { category, providerId } = await req.json();
+
+  const service = createSupabaseServiceClient();
+
+  // Return existing questions if already generated
+  const { data: existing } = await service
+    .from("provider_qa")
+    .select("id, question, answer, answered_at, ai_approved, ai_rejection_reason")
+    .eq("provider_id", Number(providerId))
+    .order("created_at", { ascending: true });
+
+  if (existing && existing.length > 0) {
+    return NextResponse.json({ questions: existing.map(q => q.question), existing });
+  }
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -16,12 +30,26 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: "user",
-          content: `You are helping build an AI training profile for a service provider in the "${category}" category on a Canadian service marketplace.
+          content: `You are generating AI training questions for a "${category}" provider on ProFindly, a Canadian service marketplace.
 
-Generate exactly 12 specific, practical questions that will help an AI assistant better match this provider with the right clients. Questions should be about their services, specializations, pricing range, typical clients, languages, availability, and unique strengths.
+These questions train a search AI to match clients with the right provider. Think about every possible way a client might search for this type of provider.
 
-Return ONLY a valid JSON array of strings. No explanation, no markdown, no preamble.
-Example: ["Question 1?", "Question 2?"]`,
+Generate exactly 8 questions covering:
+- Specific specializations within ${category}
+- Types of clients or cases they handle best
+- Their approach or process (what makes them different)
+- Pricing style (hourly, flat fee, packages, free consultation)
+- Availability (in-person, online, both, weekends)
+- Certifications, credentials, or years of experience
+- Specific situations or problems they solve best
+- Any niche expertise within ${category}
+
+RULES:
+- Do NOT ask about location, language, or category name — already in profile
+- Questions must be specific to ${category}, not generic
+- Keep questions short and conversational
+
+Return ONLY a valid JSON array of exactly 8 strings. No explanation, no markdown.`,
         },
       ],
     }),
@@ -32,8 +60,19 @@ Example: ["Question 1?", "Question 2?"]`,
 
   try {
     const questions = JSON.parse(text.replace(/```json|```/g, "").trim());
-    return NextResponse.json({ questions });
+
+    const rows = questions.map((q: string) => ({
+      provider_id: Number(providerId),
+      question: q,
+      answer: null,
+      ai_approved: false,
+      answered_at: null,
+    }));
+
+    await service.from("provider_qa").insert(rows);
+
+    return NextResponse.json({ questions, existing: [] });
   } catch {
-    return NextResponse.json({ questions: [] });
+    return NextResponse.json({ questions: [], existing: [] });
   }
 }
