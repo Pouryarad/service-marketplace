@@ -27,6 +27,7 @@ export default function AuthModal({
       : window.location.pathname + window.location.search;
 
     localStorage.setItem("next", redirectNext);
+    localStorage.setItem("next_time", String(Date.now()));
     localStorage.setItem("pendingRole", role === "provider" ? "provider" : "client");
     document.cookie = `auth_next=${encodeURIComponent(redirectNext)}; path=/; max-age=300`;
     document.cookie = `auth_pending_role=${role === "provider" ? "provider" : "client"}; path=/; max-age=300`;

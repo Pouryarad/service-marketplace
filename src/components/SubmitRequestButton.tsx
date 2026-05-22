@@ -9,7 +9,7 @@ export default function SubmitRequestButton({ isSuccess }: { isSuccess?: boolean
     <button
       type="submit"
       disabled={pending || isSuccess}
-      className="w-full rounded-full bg-[#ff8a00] px-5 py-3 font-bold text-white disabled:opacity-60 disabled:cursor-not-allowed"
+      className="w-full rounded-full bg-[#ff8a00] px-5 py-3 font-bold text-white hover:bg-orange-600 transition disabled:opacity-60 disabled:cursor-not-allowed"
     >
       {isSuccess
         ? "Request Sent"

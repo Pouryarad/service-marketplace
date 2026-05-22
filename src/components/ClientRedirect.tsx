@@ -11,8 +11,15 @@ export default function ClientRedirect() {
     const run = async () => {
       const next = localStorage.getItem("next");
       if (!next) return;
-
+      // Only redirect if recently set (within last 5 minutes)
+      const nextTime = localStorage.getItem("next_time");
+      if (!nextTime || Date.now() - Number(nextTime) > 5 * 60 * 1000) {
+        localStorage.removeItem("next");
+        localStorage.removeItem("next_time");
+        return;
+      }
       localStorage.removeItem("next");
+      localStorage.removeItem("next_time");
 
       const supabase = createSupabaseBrowserClient();
       const { data: { user } } = await supabase.auth.getUser();
