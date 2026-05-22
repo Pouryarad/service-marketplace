@@ -12,8 +12,8 @@ type QAItem = {
   answered_at?: string | null;
 };
 
-function isLocked(answeredAt?: string | null): boolean {
-  if (!answeredAt) return false;
+function isLocked(answeredAt?: string | null, aiApproved?: boolean): boolean {
+  if (!answeredAt || !aiApproved) return false;
   return Date.now() - new Date(answeredAt).getTime() < 30 * 24 * 60 * 60 * 1000;
 }
 
@@ -64,7 +64,7 @@ export default function AITrainingForm({
 
   const handleSubmit = async () => {
     const toSubmit = questions
-      .filter((q) => !isLocked(q.answered_at) && answers[q.id!]?.trim())
+      .filter((q) => !isLocked(q.answered_at, q.ai_approved) && answers[q.id!]?.trim())
       .map((q) => ({ id: q.id, question: q.question, answer: answers[q.id!] }));
 
     if (toSubmit.length === 0) return;
@@ -82,7 +82,7 @@ export default function AITrainingForm({
         }),
       });
       const data = await res.json();
-      if (data.ok) setSubmitted(true);
+      if (data.ok) window.location.reload();
       else setError("Something went wrong. Please try again.");
     } catch {
       setError("Something went wrong. Please try again.");
@@ -114,7 +114,7 @@ export default function AITrainingForm({
     );
   }
 
-  const hasUnlocked = questions.some((q) => !isLocked(q.answered_at));
+  const hasUnlocked = questions.some((q) => !isLocked(q.answered_at, q.ai_approved));
 
   return (
     <div className="space-y-4">
@@ -132,7 +132,7 @@ export default function AITrainingForm({
       {questions.length > 0 && (
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-black/[0.04] space-y-5">
           {questions.map((q, i) => {
-            const locked = isLocked(q.answered_at);
+            const locked = isLocked(q.answered_at, q.ai_approved);
             const days = daysUntilUnlock(q.answered_at);
             return (
               <div key={q.id ?? i} className={`${i < questions.length - 1 ? "border-b border-black/[0.04] pb-5" : ""}`}>
@@ -156,8 +156,8 @@ export default function AITrainingForm({
                       placeholder="Your answer..."
                       className="w-full rounded-xl border border-black/10 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] transition resize-none min-h-20"
                     />
-                    {q.ai_rejection_reason && (
-                      <p className="text-xs text-red-500 mt-1">⚠️ Previous answer rejected: {q.ai_rejection_reason}</p>
+                    {q.answered_at && !q.ai_approved && (
+                      <p className="text-xs text-red-500 mt-1">⚠️ Your previous answer didn't pass our quality check. Please try again with a more relevant and professional response.</p>
                     )}
                   </>
                 )}
