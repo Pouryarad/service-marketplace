@@ -12,7 +12,6 @@ import RoleConflictModal from "@/components/RoleConflictModal";
 import { cookies } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ReferralModal from "@/components/ReferralModal";
-import BioWriterModal from "@/components/BioWriterModal";
 import SupportChat from "@/components/SupportChat";
 
 
@@ -205,7 +204,6 @@ export default async function ProviderDashboardPage({
                   <span className="text-lg">🤖</span>
                   <span className="text-sm font-medium text-[#1f1f1f]">AI Training</span>
                 </Link>
-                <BioWriterModal />
               </div>
             </section>
           </div>

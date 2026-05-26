@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { saveProviderProfile } from "@/lib/actions";
-import { X, Plus, ChevronDown, ChevronRight, ChevronLeft } from "lucide-react";
+import { X, Plus, ChevronDown, ChevronRight, ChevronLeft, Sparkles } from "lucide-react";
 import type { Provider } from "@/lib/types";
 import Image from "next/image";
 
@@ -157,6 +157,55 @@ export default function ProviderSetupForm({
   // Step 3 state
   const [oneLine, setOneLine] = useState(provider?.oneLine ?? "");
   const [bio, setBio] = useState(provider?.bio ?? "");
+  const [bioWriterOpen, setBioWriterOpen] = useState(false);
+  const [bioQuestions, setBioQuestions] = useState<string[]>([]);
+  const [bioAnswers, setBioAnswers] = useState<string[]>(["", ""]);
+  const [bioLoading, setBioLoading] = useState(false);
+  const [bioGenerated, setBioGenerated] = useState("");
+  const [bioError, setBioError] = useState("");
+
+  async function openBioWriter() {
+    setBioWriterOpen(true);
+    setBioGenerated("");
+    setBioError("");
+    setBioLoading(true);
+    try {
+      const res = await fetch("/api/ai/write-bio", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
+      const data = await res.json();
+      if (data.questions) {
+        setBioQuestions(data.questions);
+        setBioAnswers(["", ""]);
+      } else {
+        setBioError("Could not load questions. Try again.");
+      }
+    } catch {
+      setBioError("Something went wrong.");
+    } finally {
+      setBioLoading(false);
+    }
+  }
+
+  async function generateBio() {
+    setBioLoading(true);
+    setBioError("");
+    try {
+      const answers = bioQuestions.map((q, i) => ({ question: q, answer: bioAnswers[i] }));
+      const res = await fetch("/api/ai/write-bio", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ answers }) });
+      const data = await res.json();
+      if (data.bio) setBioGenerated(data.bio);
+      else setBioError("Could not generate bio. Try again.");
+    } catch {
+      setBioError("Something went wrong.");
+    } finally {
+      setBioLoading(false);
+    }
+  }
+
+  function useBio() {
+    setBio(bioGenerated.slice(0, 600));
+    setBioWriterOpen(false);
+    setBioGenerated("");
+  }
   const [videoUrl, setVideoUrl] = useState((provider as any)?.videoUrl ?? "");
 
   // Step 4 state
@@ -400,8 +449,68 @@ export default function ProviderSetupForm({
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-[#1f1f1f]">Bio <span className="font-normal text-[#9ca3af]">(optional)</span></label>
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-semibold text-[#1f1f1f]">Bio <span className="font-normal text-[#9ca3af]">(optional)</span></label>
+                  {provider?.subscriptionStatus === "active" && (
+                    <button type="button" onClick={openBioWriter} className="flex items-center gap-1 text-xs font-medium text-[#2563eb] hover:underline">
+                      <Sparkles size={13} /> Write with AI
+                    </button>
+                  )}
+                </div>
                 <p className="mt-0.5 text-xs text-[#9ca3af]">Shows on your profile page. Max 600 chars.</p>
+
+                {bioWriterOpen && (
+                  <div className="mt-2 rounded-xl border border-[#2563eb]/20 bg-blue-50 p-4 space-y-3">
+                    {bioLoading && !bioQuestions.length && (
+                      <p className="text-xs text-[#9ca3af]">Loading questions…</p>
+                    )}
+                    {bioQuestions.length > 0 && !bioGenerated && (
+                      <>
+                        {bioQuestions.map((q, i) => (
+                          <div key={i}>
+                            <p className="text-xs font-medium text-[#1f1f1f] mb-1">{q}</p>
+                            <textarea
+                              value={bioAnswers[i]}
+                              onChange={(e) => {
+                                const updated = [...bioAnswers];
+                                updated[i] = e.target.value;
+                                setBioAnswers(updated);
+                              }}
+                              rows={2}
+                              placeholder="Your answer…"
+                              className="w-full rounded-lg border border-black/10 px-3 py-2 text-xs outline-none focus:border-[#2563eb] resize-none bg-white"
+                            />
+                          </div>
+                        ))}
+                        <div className="flex gap-2">
+                          <button type="button" onClick={() => setBioWriterOpen(false)} className="text-xs text-[#9ca3af] hover:text-[#1f1f1f]">Cancel</button>
+                          <button
+                            type="button"
+                            onClick={generateBio}
+                            disabled={bioLoading || bioAnswers.some(a => !a.trim())}
+                            className="rounded-lg bg-[#2563eb] px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700 transition disabled:opacity-50"
+                          >
+                            {bioLoading ? "Generating…" : "Generate Bio"}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                    {bioGenerated && (
+                      <>
+                        <p className="text-xs font-medium text-[#1f1f1f]">Here's your bio:</p>
+                        <p className="text-xs text-[#1f1f1f] leading-relaxed whitespace-pre-wrap">{bioGenerated}</p>
+                        <div className="flex gap-2">
+                          <button type="button" onClick={generateBio} className="text-xs text-[#9ca3af] hover:text-[#1f1f1f]">Regenerate</button>
+                          <button type="button" onClick={useBio} className="rounded-lg bg-[#2563eb] px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700 transition">
+                            Use this bio
+                          </button>
+                        </div>
+                      </>
+                    )}
+                    {bioError && <p className="text-xs text-red-500">{bioError}</p>}
+                  </div>
+                )}
+
                 <textarea value={bio} onChange={(e) => setBio(stripLinks(e.target.value).slice(0, 600))} placeholder="Tell clients about your background..." rows={5} className="mt-2 w-full rounded-xl border border-black/10 px-4 py-3 outline-none focus:border-[#2563eb] transition resize-none" />
                 <p className="mt-1 text-right text-xs text-[#9ca3af]">{bio.length}/600</p>
               </div>
@@ -592,10 +701,70 @@ export default function ProviderSetupForm({
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-[#1f1f1f]">Bio <span className="font-normal text-[#9ca3af]">(optional)</span></label>
-            <p className="mt-0.5 text-xs text-[#9ca3af]">Shows on your profile page. Max 600 chars.</p>
-            <textarea value={bio} onChange={(e) => setBio(stripLinks(e.target.value).slice(0, 600))} placeholder="Tell clients about your background..." rows={5} className="mt-2 w-full rounded-xl border border-black/10 px-4 py-3 outline-none focus:border-[#2563eb] transition resize-none" />
-            <p className="mt-1 text-right text-xs text-[#9ca3af]">{bio.length}/600</p>
+            <div className="flex items-center justify-between">
+                  <label className="block text-sm font-semibold text-[#1f1f1f]">Bio <span className="font-normal text-[#9ca3af]">(optional)</span></label>
+                  {(provider as any)?.subscriptionStatus === "active" && (
+                    <button type="button" onClick={openBioWriter} className="flex items-center gap-1 text-xs font-medium text-[#2563eb] hover:underline">
+                      <Sparkles size={13} /> Write with AI
+                    </button>
+                  )}
+                </div>
+                <p className="mt-0.5 text-xs text-[#9ca3af]">Shows on your profile page. Max 600 chars.</p>
+
+                {bioWriterOpen && (
+                  <div className="mt-2 rounded-xl border border-[#2563eb]/20 bg-blue-50 p-4 space-y-3">
+                    {bioLoading && !bioQuestions.length && (
+                      <p className="text-xs text-[#9ca3af]">Loading questions…</p>
+                    )}
+                    {bioQuestions.length > 0 && !bioGenerated && (
+                      <>
+                        {bioQuestions.map((q, i) => (
+                          <div key={i}>
+                            <p className="text-xs font-medium text-[#1f1f1f] mb-1">{q}</p>
+                            <textarea
+                              value={bioAnswers[i]}
+                              onChange={(e) => {
+                                const updated = [...bioAnswers];
+                                updated[i] = e.target.value;
+                                setBioAnswers(updated);
+                              }}
+                              rows={2}
+                              placeholder="Your answer…"
+                              className="w-full rounded-lg border border-black/10 px-3 py-2 text-xs outline-none focus:border-[#2563eb] resize-none bg-white"
+                            />
+                          </div>
+                        ))}
+                        <div className="flex gap-2">
+                          <button type="button" onClick={() => setBioWriterOpen(false)} className="text-xs text-[#9ca3af] hover:text-[#1f1f1f]">Cancel</button>
+                          <button
+                            type="button"
+                            onClick={generateBio}
+                            disabled={bioLoading || bioAnswers.some(a => !a.trim())}
+                            className="rounded-lg bg-[#2563eb] px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700 transition disabled:opacity-50"
+                          >
+                            {bioLoading ? "Generating…" : "Generate Bio"}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                    {bioGenerated && (
+                      <>
+                        <p className="text-xs font-medium text-[#1f1f1f]">Here's your bio:</p>
+                        <p className="text-xs text-[#1f1f1f] leading-relaxed whitespace-pre-wrap">{bioGenerated}</p>
+                        <div className="flex gap-2">
+                          <button type="button" onClick={generateBio} className="text-xs text-[#9ca3af] hover:text-[#1f1f1f]">Regenerate</button>
+                          <button type="button" onClick={useBio} className="rounded-lg bg-[#2563eb] px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700 transition">
+                            Use this bio
+                          </button>
+                        </div>
+                      </>
+                    )}
+                    {bioError && <p className="text-xs text-red-500">{bioError}</p>}
+                  </div>
+                )}
+
+                <textarea value={bio} onChange={(e) => setBio(stripLinks(e.target.value).slice(0, 600))} placeholder="Tell clients about your background..." rows={5} className="mt-2 w-full rounded-xl border border-black/10 px-4 py-3 outline-none focus:border-[#2563eb] transition resize-none" />
+                <p className="mt-1 text-right text-xs text-[#9ca3af]">{bio.length}/600</p>
           </div>
 
           <div>
