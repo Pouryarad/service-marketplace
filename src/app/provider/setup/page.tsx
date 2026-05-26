@@ -106,8 +106,9 @@ export default async function ProviderSetupPage({
   );
 }
 
-function PaymentTab({ provider }: { provider: { subscriptionStatus: string; adminGranted?: boolean; adminGrantedExpiresAt?: string | null } | null }) {
-  const isSubscribed = provider?.subscriptionStatus === "active";
+function PaymentTab({ provider }: { provider: { subscriptionStatus: string; adminGranted?: boolean; adminGrantedExpiresAt?: string | null; trialEndsAt?: string | null } | null }) {
+  const isSubscribed = provider?.subscriptionStatus === "active" || provider?.subscriptionStatus === "trialing";
+  const isTrialing = provider?.subscriptionStatus === "trialing";
   const isAdminGranted = provider?.adminGranted;
 
   if (isAdminGranted) {
@@ -133,8 +134,12 @@ function PaymentTab({ provider }: { provider: { subscriptionStatus: string; admi
     return (
       <div className="text-center py-8">
         <p className="text-2xl">✅</p>
-        <h2 className="mt-2 text-lg font-bold text-[#1f1f1f]">{"You're subscribed"}</h2>
-        <p className="mt-1 text-sm text-[#6b7280]">Your subscription is active.</p>
+        <h2 className="mt-2 text-lg font-bold text-[#1f1f1f]">{isTrialing ? "Free Trial Active" : "You're subscribed"}</h2>
+        <p className="mt-1 text-sm text-[#6b7280]">
+          {isTrialing && provider?.trialEndsAt
+            ? `Your free trial ends on ${new Date(provider.trialEndsAt).toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" })}.`
+            : "Your subscription is active and renews monthly."}
+        </p>
         <Link
           href="/api/stripe/portal"
           className="mt-4 inline-flex rounded-full border border-black/10 px-5 py-2.5 text-sm font-bold text-[#1f1f1f] hover:bg-[#f3f5f9] transition"

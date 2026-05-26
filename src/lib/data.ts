@@ -26,6 +26,7 @@ type ProviderRow = {
   portfolio_photo_urls: string[] | null;
   slug: string | null;
   admin_granted: boolean | null;
+  trialEndsAt?: string | null;
 };
 
 function mapProvider(row: ProviderRow): Provider {
@@ -61,6 +62,7 @@ function mapProvider(row: ProviderRow): Provider {
     pendingProfilePhotoUrl: (row as any).pending_profile_photo_url ?? null,
     adminGranted: (row as any).admin_granted ?? false,
     adminGrantedExpiresAt: (row as any).admin_granted_expires_at ?? null,
+    trialEndsAt: (row as any).trial_ends_at ?? null,
     referralCode: (row as any).referral_code ?? null,
   };
 }

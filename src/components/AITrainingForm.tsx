@@ -52,8 +52,11 @@ export default function AITrainingForm({
       const data = await res.json();
       if (data.existing?.length > 0) {
         setQuestions(data.existing);
-      } else {
+      } else if (data.questions?.length > 0) {
+        // Questions were just inserted, reload once to get IDs from DB
         window.location.reload();
+      } else {
+        setError("Failed to generate questions. Please refresh the page.");
       }
     } catch {
       setError("Failed to generate questions. Please try again.");

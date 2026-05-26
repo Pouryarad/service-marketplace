@@ -47,6 +47,7 @@ export type Provider = {
   pendingProfilePhotoUrl?: string | null;
   adminGranted?: boolean;
   adminGrantedExpiresAt?: string | null;
+  trialEndsAt?: string | null;
   referralCode?: string | null;
 };
 
