@@ -12,6 +12,7 @@ import RoleConflictModal from "@/components/RoleConflictModal";
 import { cookies } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ReferralModal from "@/components/ReferralModal";
+import ProfileScore from "@/components/ProfileScore";
 import SupportChat from "@/components/SupportChat";
 
 
@@ -178,6 +179,8 @@ export default async function ProviderDashboardPage({
                 Visible when approved, active, and subscribed.
               </p>
             </section>
+
+            <ProfileScore provider={provider} />
 
             {/* Quick actions */}
             <section className="rounded-2xl bg-white p-5 shadow-sm">

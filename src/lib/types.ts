@@ -49,6 +49,7 @@ export type Provider = {
   adminGrantedExpiresAt?: string | null;
   trialEndsAt?: string | null;
   referralCode?: string | null;
+  aiTrainedAt?: string | null;
 };
 
 export type ContactRequest = {

@@ -64,6 +64,8 @@ function mapProvider(row: ProviderRow): Provider {
     adminGrantedExpiresAt: (row as any).admin_granted_expires_at ?? null,
     trialEndsAt: (row as any).trial_ends_at ?? null,
     referralCode: (row as any).referral_code ?? null,
+    aiTrainedAt: (row as any).ai_trained_at ?? null,
+
   };
 }
 
