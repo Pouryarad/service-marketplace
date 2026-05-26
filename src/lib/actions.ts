@@ -11,6 +11,7 @@ import {
   sendAccountRejectedEmail,
   sendAccountSuspendedEmail,
   sendReferralInviteEmail,
+  sendWelcomeEmail,
 } from "@/lib/email";
 import Stripe from "stripe";
 
@@ -288,6 +289,7 @@ export async function saveProviderProfile(formData: FormData) {
   if (!existing) {
     const refCode = "REF" + Math.random().toString(36).substring(2, 8).toUpperCase();
     await supabase.from("providers").update({ referral_code: refCode }).eq("user_id", data.user.id);
+    await sendWelcomeEmail({ providerEmail: email, providerName: fullName });
   }
 
   revalidatePath("/provider/setup");

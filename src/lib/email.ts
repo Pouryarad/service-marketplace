@@ -1,5 +1,5 @@
 const SITE_NAME = "ProFindly";
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://service-marketplace-ivory.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.profindly.com";
 
 async function send({
   to,
@@ -257,29 +257,6 @@ export async function sendTrialStartedEmail({
   });
 }
 
-export async function sendTrialEndingSoonEmail({
-  providerEmail,
-  providerName,
-  trialEndsAt,
-}: {
-  providerEmail: string;
-  providerName: string;
-  trialEndsAt: Date;
-}) {
-  const dateStr = trialEndsAt.toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" });
-  await send({
-    to: providerEmail,
-    subject: "Your free trial ends in 3 days",
-    html: layout(`
-      ${h1("Trial ending soon")}
-      ${p(`Hi ${providerName}, your free trial ends on <strong>${dateStr}</strong>.`)}
-      ${p("After that, your subscription will continue automatically. Make sure your payment method is up to date.")}
-      ${badge("3 Days Left", "yellow")}
-      ${btn("Manage Subscription", `${SITE_URL}/provider/dashboard`)}
-    `),
-  });
-}
-
 export async function sendSubscriptionActiveEmail({
   providerEmail,
   providerName,
@@ -351,6 +328,31 @@ export async function sendEmailNotification({
   html: string;
 }) {
   await send({ to, subject, html });
+}
+
+export async function sendWelcomeEmail({
+  providerEmail,
+  providerName,
+}: {
+  providerEmail: string;
+  providerName: string;
+}) {
+  await send({
+    to: providerEmail,
+    subject: `Welcome to ProFindly, ${providerName}!`,
+    html: layout(`
+      ${h1(`Welcome, ${providerName}!`)}
+      ${p(`You've successfully created your provider profile on ${SITE_NAME}. Here's what happens next:`)}
+      <ol style="margin:16px 0;padding-left:20px;">
+        <li style="margin:8px 0;font-size:15px;line-height:1.6;color:#374151;">Our team will review your profile within 24 hours</li>
+        <li style="margin:8px 0;font-size:15px;line-height:1.6;color:#374151;">Once approved, activate your 14-day free trial</li>
+        <li style="margin:8px 0;font-size:15px;line-height:1.6;color:#374151;">Your profile goes live and clients can find you</li>
+      </ol>
+      ${p("In the meantime, complete your profile to improve your visibility — add a bio, portfolio photos, and an intro video.")}
+      ${badge("Profile Under Review", "yellow")}
+      ${btn("Go to Dashboard →", `${SITE_URL}/provider/dashboard`)}
+    `),
+  });
 }
 
 export async function sendReferralInviteEmail({
