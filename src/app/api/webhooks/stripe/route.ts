@@ -52,7 +52,6 @@ export async function POST(req: Request) {
         .update({ trial_used: true })
         .eq("stripe_customer_id", customerId);
 
-      // If trialing, send trial started email
       if (subscription.status === "trialing" && subscription.trial_end) {
         const provider = await getProvider(customerId);
         if (provider?.email) {
@@ -64,9 +63,7 @@ export async function POST(req: Request) {
         }
       }
 
-      // fall through to update subscription status
-      const status = subscription.status;
-      const isActive = status === "active" || status === "trialing";
+      const isActive = subscription.status === "active" || subscription.status === "trialing";
       await supabase
         .from("providers")
         .update({
@@ -83,8 +80,7 @@ export async function POST(req: Request) {
     case "customer.subscription.updated": {
       const subscription = event.data.object as Stripe.Subscription;
       const customerId = subscription.customer as string;
-      const status = subscription.status;
-      const isActive = status === "active" || status === "trialing";
+      const isActive = subscription.status === "active" || subscription.status === "trialing";
 
       await supabase
         .from("providers")
@@ -118,24 +114,6 @@ export async function POST(req: Request) {
       break;
     }
 
-    case "customer.subscription.trial_will_end": {
-      // Stripe fires this 3 days before trial ends
-      const subscription = event.data.object as Stripe.Subscription;
-      const customerId = subscription.customer as string;
-
-      if (subscription.trial_end) {
-        const provider = await getProvider(customerId);
-        if (provider?.email) {
-          await sendTrialEndingSoonEmail({
-            providerEmail: provider.email,
-            providerName: provider.full_name,
-            trialEndsAt: new Date(subscription.trial_end * 1000),
-          });
-        }
-      }
-      break;
-    }
-
     case "invoice.payment_succeeded": {
       const invoice = event.data.object as Stripe.Invoice;
       const customerId = invoice.customer as string;
@@ -145,7 +123,6 @@ export async function POST(req: Request) {
         .update({ subscription_status: "active" })
         .eq("stripe_customer_id", customerId);
 
-      // Only email on recurring payments (not the first trial invoice)
       if (invoice.billing_reason === "subscription_cycle") {
         const provider = await getProvider(customerId);
         if (provider?.email) {
@@ -156,7 +133,6 @@ export async function POST(req: Request) {
         }
       }
 
-      // Handle referral confirmation
       const { data: paidProvider } = await supabase
         .from("providers")
         .select("id, user_id, stripe_subscription_id")
