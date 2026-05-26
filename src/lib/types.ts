@@ -50,6 +50,8 @@ export type Provider = {
   trialEndsAt?: string | null;
   referralCode?: string | null;
   aiTrainedAt?: string | null;
+  profileScore?: number | null;
+  profileFeedback?: any[] | null;
 };
 
 export type ContactRequest = {

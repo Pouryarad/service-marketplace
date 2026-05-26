@@ -65,6 +65,8 @@ function mapProvider(row: ProviderRow): Provider {
     trialEndsAt: (row as any).trial_ends_at ?? null,
     referralCode: (row as any).referral_code ?? null,
     aiTrainedAt: (row as any).ai_trained_at ?? null,
+    profileScore: (row as any).profile_score ?? 0,
+    profileFeedback: (row as any).profile_feedback ?? [],
 
   };
 }
