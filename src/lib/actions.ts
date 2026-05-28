@@ -12,6 +12,7 @@ import {
   sendAccountSuspendedEmail,
   sendReferralInviteEmail,
   sendWelcomeEmail,
+  sendAdminNotificationEmail,
 } from "@/lib/email";
 import Stripe from "stripe";
 
@@ -277,16 +278,33 @@ export async function saveProviderProfile(formData: FormData) {
     { onConflict: "user_id" }
   );
 
-  await sendEmailNotification({
-    to: "admin@findly.example",
-    subject: "Provider profile updated — needs review",
-    html: `<p>${fullName} updated their profile. Please review pending items.</p>`,
-  });
-
   if (!existing) {
     const refCode = "REF" + Math.random().toString(36).substring(2, 8).toUpperCase();
     await supabase.from("providers").update({ referral_code: refCode }).eq("user_id", data.user.id);
     await sendWelcomeEmail({ providerEmail: email, providerName: fullName });
+    await sendAdminNotificationEmail({
+      subject: `New provider signed up — ${fullName}`,
+      title: "New Provider Signup",
+      body: `${fullName} (${email}) just created their provider profile as a ${categorySlug.replace(/-/g, " ")} in ${location}. Their account is pending your approval.`,
+      actionUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/admin/approvals`,
+      actionLabel: "Review Provider →",
+    });
+  } else {
+    const pendingItems = [
+      pendingProfilePhotoUrl && "profile photo",
+      pendingPortfolioUrls && "portfolio photos",
+      pendingVideoUrl && "intro video",
+      pendingCategorySlug && `new category: ${pendingCategorySlug}`,
+    ].filter(Boolean);
+    if (pendingItems.length > 0) {
+      await sendAdminNotificationEmail({
+        subject: `Provider update needs review — ${fullName}`,
+        title: "Provider Update Pending Review",
+        body: `${fullName} (${email}) submitted changes that need your approval: ${pendingItems.join(", ")}.`,
+        actionUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/admin/approvals`,
+        actionLabel: "Review Now →",
+      });
+    }
   }
 
   revalidatePath("/provider/setup");
@@ -304,7 +322,7 @@ export async function saveProviderProfile(formData: FormData) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ providerId: savedProvider.id }),
-    }).catch(() => {});
+    }).catch(() => { });
   }
 
   redirect(existing ? "/provider/dashboard?profile=saved" : "/provider/setup?tab=payment");

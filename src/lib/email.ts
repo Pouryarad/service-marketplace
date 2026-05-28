@@ -355,6 +355,30 @@ export async function sendWelcomeEmail({
   });
 }
 
+export async function sendAdminNotificationEmail({
+  subject,
+  title,
+  body,
+  actionUrl,
+  actionLabel,
+}: {
+  subject: string;
+  title: string;
+  body: string;
+  actionUrl?: string;
+  actionLabel?: string;
+}) {
+  await send({
+    to: "info@profindly.com",
+    subject,
+    html: layout(`
+      ${h1(title)}
+      ${p(body)}
+      ${actionUrl ? btn(actionLabel ?? "View in Admin →", actionUrl) : ""}
+    `),
+  });
+}
+
 export async function sendReferralInviteEmail({
   toEmail,
   referrerName,
