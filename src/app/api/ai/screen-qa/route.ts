@@ -45,14 +45,13 @@ REJECT an answer if ANY of these are true:
 - The answer does not directly address the question asked
 - The answer is irrelevant to ${category} or the provider's profession
 - Contains contact info (phone, email, website, social media)
-- Is too short or vague (e.g. "yes", "no", "ok", "good")
+- Is a single word with no context (e.g. just "yes" or just "no" with nothing else)
 - Contains spam, self-promotion unrelated to the question, or fake claims
 - Mentions competitors by name
 - Is offensive, inappropriate, or misleading
 - Does not make sense as a professional answer
 
-APPROVE only if the answer genuinely and directly answers the question in a professional, helpful way that would help a client decide if this provider is right for them.
-
+APPROVE if the answer genuinely addresses the question. Short direct answers are fine as long as they actually answer what was asked. Not every answer needs to be long — a simple question deserves a simple answer.
 Here are the Q&A pairs:
 ${JSON.stringify(qa.map((q: any) => ({ question: q.question, answer: q.answer })))}
 

@@ -73,13 +73,15 @@ export async function POST(req: NextRequest) {
 
 Bio: "${provider.bio}"
 
-Score it from 0 to 20 based on:
-- Relevance to ${category} (is it actually about their work?)
-- Specificity (does it say something meaningful or is it generic?)
-- Length (too short = under 100 chars, too long = over 580 chars, ideal = 200-500 chars)
-- Professionalism
+Score it from 0 to 20. Be generous — a professional, readable bio that mentions their work deserves 16-20. Only score below 10 if the bio is completely irrelevant, empty-sounding, or pure gibberish.
 
-Also provide ONE short improvement tip (max 15 words) if score is under 20. If score is 20, tip is null.
+Scoring guide:
+- 18-20: Professional, relevant, specific, good length (100-580 chars)
+- 14-17: Good but could be more specific or slightly too short/long
+- 10-13: Somewhat relevant but generic or very short
+- 0-9: Irrelevant, gibberish, or placeholder text
+
+Only provide a tip if score is under 16. Tip must be under 15 words and actionable. If score is 16+, tip is null.
 
 Return only valid JSON: {"score": number, "tip": string | null}`,
         }],
