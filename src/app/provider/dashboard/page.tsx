@@ -13,6 +13,7 @@ import { cookies } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ReferralModal from "@/components/ReferralModal";
 import ProfileScore from "@/components/ProfileScore";
+import ProfileScoreTrigger from "@/components/ProfileScoreTrigger";
 import SupportChat from "@/components/SupportChat";
 
 
@@ -181,6 +182,7 @@ export default async function ProviderDashboardPage({
             </section>
 
             <ProfileScore provider={provider} />
+            <ProfileScoreTrigger providerId={Number(provider.id)} />
 
             {/* Quick actions */}
             <section className="rounded-2xl bg-white p-5 shadow-sm">

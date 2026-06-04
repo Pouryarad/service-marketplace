@@ -316,19 +316,19 @@ export async function saveProviderProfile(formData: FormData) {
   revalidatePath("/provider/dashboard");
 
   // Trigger profile score analysis in background
-  const { data: savedProvider } = await supabase
-    .from("providers")
-    .select("id")
-    .eq("user_id", data.user.id)
-    .maybeSingle();
+  // const { data: savedProvider } = await supabase
+  //   .from("providers")
+  //   .select("id")
+  //   .eq("user_id", data.user.id)
+  //   .maybeSingle();
 
-  if (savedProvider?.id) {
-    fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/ai/analyze-profile`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ providerId: savedProvider.id }),
-    }).catch(() => { });
-  }
+  // if (savedProvider?.id) {
+  //   fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/ai/analyze-profile`, {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({ providerId: savedProvider.id }),
+  //   }).catch(() => { });
+  // }
 
   redirect(existing ? "/provider/dashboard?profile=saved" : "/provider/setup?tab=payment");
 }
