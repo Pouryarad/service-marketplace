@@ -16,7 +16,9 @@ export default function SetupRolePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { window.location.replace("/"); return; }
 
-      const pendingRole = localStorage.getItem("pendingRole") ?? "client";
+      const pendingRole = localStorage.getItem("pendingRole") 
+        ?? document.cookie.match(/auth_pending_role=([^;]+)/)?.[1] 
+        ?? "client";
 
       const { data: existing } = await supabase
         .from("profiles")
