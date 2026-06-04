@@ -313,7 +313,7 @@ export default function ProviderSetupForm({
       }
       console.error("Save failed:", err, err?.digest, err?.message);
       setSaving(false);
-      alert(String(err) + " | " + (err?.digest ?? "") + " | " + (err?.message ?? ""));
+      alert("Something went wrong. Please try again.");
     }
   };
 

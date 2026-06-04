@@ -281,14 +281,14 @@ export async function saveProviderProfile(formData: FormData) {
   if (!existing) {
     const refCode = "REF" + Math.random().toString(36).substring(2, 8).toUpperCase();
     await supabase.from("providers").update({ referral_code: refCode }).eq("user_id", data.user.id);
-    await sendWelcomeEmail({ providerEmail: email, providerName: fullName });
-    await sendAdminNotificationEmail({
+    sendWelcomeEmail({ providerEmail: email, providerName: fullName }).catch(e => console.error("Welcome email failed:", e));
+    sendAdminNotificationEmail({
       subject: `New provider signed up — ${fullName}`,
       title: "New Provider Signup",
       body: `${fullName} (${email}) just created their provider profile as a ${categorySlug.replace(/-/g, " ")} in ${location}. Their account is pending your approval.`,
       actionUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/admin/approvals`,
       actionLabel: "Review Provider →",
-    });
+    }).catch(e => console.error("Admin notification failed:", e));
   } else {
     const pendingItems = [
       pendingProfilePhotoUrl && "profile photo",
@@ -297,13 +297,13 @@ export async function saveProviderProfile(formData: FormData) {
       pendingCategorySlug && `new category: ${pendingCategorySlug}`,
     ].filter(Boolean);
     if (pendingItems.length > 0) {
-      await sendAdminNotificationEmail({
+      sendAdminNotificationEmail({
         subject: `Provider update needs review — ${fullName}`,
         title: "Provider Update Pending Review",
         body: `${fullName} (${email}) submitted changes that need your approval: ${pendingItems.join(", ")}.`,
         actionUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/admin/approvals`,
         actionLabel: "Review Now →",
-      });
+      }).catch(e => console.error("Admin notification failed:", e));
     }
   }
 
