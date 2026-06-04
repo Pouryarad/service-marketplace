@@ -39,6 +39,25 @@ const COUNTRY_CODES = [
   { code: "+7", label: "🇷🇺 +7" },
 ];
 
+async function resizeImage(file: File, maxWidth = 1200, quality = 0.82): Promise<File> {
+  return new Promise((resolve) => {
+    const img = document.createElement("img") as HTMLImageElement;
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, maxWidth / img.width);
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((blob) => {
+        resolve(new File([blob!], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" }));
+      }, "image/jpeg", quality);
+    };
+    img.src = url;
+  });
+}
+
 function stripLinks(value: string) {
   return value
     .replace(/https?:\/\/\S+/gi, "")
@@ -234,12 +253,13 @@ export default function ProviderSetupForm({
     setProfilePhotoPreview(URL.createObjectURL(file));
   };
 
-  const handlePortfolioPhotos = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePortfolioPhotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     const remaining = 10 - portfolioPreviews.length;
     const toAdd = files.slice(0, remaining);
-    setPortfolioFiles((prev) => [...prev, ...toAdd]);
-    setPortfolioPreviews((prev) => [...prev, ...toAdd.map((f) => URL.createObjectURL(f))]);
+    const resized = await Promise.all(toAdd.map((f) => resizeImage(f)));
+    setPortfolioFiles((prev) => [...prev, ...resized]);
+    setPortfolioPreviews((prev) => [...prev, ...resized.map((f) => URL.createObjectURL(f))]);
   };
 
   const removePortfolioPhoto = (index: number) => {
@@ -300,9 +320,11 @@ export default function ProviderSetupForm({
       portfolioPreviews.filter((url) => url.startsWith("http") && !url.startsWith("blob:"))
     ));
 
-    if (profilePhotoFile) formData.set("profilePhoto", profilePhotoFile);
+    const resizedProfile = profilePhotoFile ? await resizeImage(profilePhotoFile) : null;
+    const resizedId = idFile ? await resizeImage(idFile, 1600, 0.88) : null;
+    if (resizedProfile) formData.set("profilePhoto", resizedProfile);
     portfolioFiles.forEach((f) => formData.append("portfolioPhotos", f));
-    if (idFile) formData.set("idDocument", idFile);
+    if (resizedId) formData.set("idDocument", resizedId);
 
     try {
       await saveProviderProfile(formData);
