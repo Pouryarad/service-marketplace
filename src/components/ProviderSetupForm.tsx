@@ -311,7 +311,7 @@ export default function ProviderSetupForm({
         ? "/provider/setup?tab=payment"
         : "/provider/dashboard?profile=saved";
     } catch (err: any) {
-      if (err?.digest?.startsWith("NEXT_REDIRECT")) {
+      if (err?.digest?.startsWith("NEXT_REDIRECT") || err?.message?.includes("NEXT_REDIRECT") || String(err).includes("NEXT_REDIRECT")) {
         window.location.href = isFirstTime
           ? "/provider/setup?tab=payment"
           : "/provider/dashboard?profile=saved";
