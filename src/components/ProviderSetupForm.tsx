@@ -306,22 +306,14 @@ export default function ProviderSetupForm({
 
     try {
       await saveProviderProfile(formData);
-      await new Promise(r => setTimeout(r, 3000));
-      window.location.href = isFirstTime
-        ? "/provider/setup?tab=payment"
-        : "/provider/dashboard?profile=saved";
     } catch (err: any) {
-      if (err?.digest?.startsWith("NEXT_REDIRECT") || err?.message?.includes("NEXT_REDIRECT") || String(err).includes("NEXT_REDIRECT")) {
-        window.location.href = isFirstTime
-          ? "/provider/setup?tab=payment"
-          : "/provider/dashboard?profile=saved";
+      const errStr = String(err) + (err?.digest ?? "") + (err?.message ?? "");
+      if (errStr.includes("NEXT_REDIRECT")) {
         return;
       }
-      if (!String(err).includes("NEXT_REDIRECT")) {
-        console.error("Save failed:", err);
-        setSaving(false);
-        alert("Something went wrong. Please try again.");
-      }
+      console.error("Save failed:", err);
+      setSaving(false);
+      alert("Something went wrong. Please try again.");
     }
   };
 
