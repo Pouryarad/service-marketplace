@@ -256,6 +256,11 @@ export default function ProviderSetupForm({
 
   const handlePortfolioPhotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
+    const oversized = files.filter(f => f.size > 8 * 1024 * 1024);
+    if (oversized.length > 0) {
+      alert(`${oversized.length} photo(s) are over 8MB. Please use smaller images.`);
+      return;
+    }
     const remaining = 10 - portfolioPreviews.length;
     const toAdd = files.slice(0, remaining);
     const resized = await Promise.all(toAdd.map((f) => resizeImage(f)));
@@ -867,6 +872,10 @@ export default function ProviderSetupForm({
                   <input type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
+                    if (file.size > 5 * 1024 * 1024) {
+                      alert("Document must be under 5MB. Please compress or crop the image and try again.");
+                      return;
+                    }
                     setIdFile(file);
                     if (file.type.startsWith("image/")) setIdPreview(URL.createObjectURL(file));
                   }} />
