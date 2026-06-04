@@ -151,56 +151,26 @@ export async function saveProviderProfile(formData: FormData) {
 
   const storageClient = isImpersonating ? createSupabaseServiceClient() : supabase;
 
-  // Profile photo
-  const profilePhotoFile = formData.get("profilePhoto");
+// Photos are uploaded client-side — just read the URLs
   let profilePhotoUrl = String(formData.get("existingProfilePhotoUrl") ?? "");
   let pendingProfilePhotoUrl: string | null = null;
+  const uploadedProfilePhotoUrl = formData.get("uploadedProfilePhotoUrl") as string | null;
 
-  if (profilePhotoFile instanceof File && profilePhotoFile.size > 0) {
-    const uploadUserId = isImpersonating
-      ? (existing as any)?.user_id ?? impersonatingId
-      : data.user.id;
-    const path = `${uploadUserId}/profile-${Date.now()}-${profilePhotoFile.name}`;
-    const { error: uploadError } = await storageClient.storage
-      .from("provider-media")
-      .upload(path, profilePhotoFile, { upsert: true, contentType: profilePhotoFile.type });
-
-    if (!uploadError) {
-      const url = storageClient.storage.from("provider-media").getPublicUrl(path).data.publicUrl;
-      if (isImpersonating) {
-        profilePhotoUrl = url;
-      } else if (existing?.profile_photo_url) {
-        pendingProfilePhotoUrl = url;
-      } else {
-        profilePhotoUrl = url;
-      }
+  if (uploadedProfilePhotoUrl) {
+    if (isImpersonating) {
+      profilePhotoUrl = uploadedProfilePhotoUrl;
+    } else if (existing?.profile_photo_url) {
+      pendingProfilePhotoUrl = uploadedProfilePhotoUrl;
+    } else {
+      profilePhotoUrl = uploadedProfilePhotoUrl;
     }
   }
 
-  // Portfolio photos
-  const portfolioFiles = formData.getAll("portfolioPhotos");
   const existingPortfolioUrls: string[] = JSON.parse(
     String(formData.get("existingPortfolioUrls") ?? "[]")
   );
-
-  const newPortfolioUrls: string[] = (
-    await Promise.all(
-      portfolioFiles.map(async (file) => {
-        if (!(file instanceof File) || file.size === 0) return null;
-        const uploadUserId = isImpersonating
-          ? (existing as any)?.user_id ?? impersonatingId
-          : data.user.id;
-        const path = `${uploadUserId}/portfolio-${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
-        const { error } = await storageClient.storage
-          .from("provider-media")
-          .upload(path, file, { upsert: true, contentType: file.type });
-        if (error) return null;
-        return storageClient.storage.from("provider-media").getPublicUrl(path).data.publicUrl;
-      })
-    )
-  ).filter(Boolean) as string[];
-
-  const pendingPortfolioUrls = newPortfolioUrls.length > 0 ? newPortfolioUrls : null;
+  const uploadedPortfolioUrls = formData.getAll("uploadedPortfolioUrls") as string[];
+  const pendingPortfolioUrls = uploadedPortfolioUrls.length > 0 ? uploadedPortfolioUrls : null;
 
   // Category approval
   const isNewCategory = false; // For simplicity, we're not treating category changes as new for now. Adjust as needed.
@@ -222,24 +192,7 @@ export async function saveProviderProfile(formData: FormData) {
   const slug = existingSlug?.slug ?? `${baseSlug}-${data.user.id.slice(0, 8)}`;
 
   // ID document
-  const idDocument = formData.get("idDocument") as File | null;
-  let idDocumentUrl: string | undefined;
-
-  if (idDocument && idDocument.size > 0) {
-    const ext = idDocument.name.split(".").pop();
-    const path = `${data.user.id}/id-${Date.now()}.${ext}`;
-    const serviceClient = createSupabaseServiceClient();
-    const { error: idUploadError } = await serviceClient.storage
-      .from("provider-ids")
-      .upload(path, idDocument, { upsert: true });
-
-    if (idUploadError) {
-      console.error("ID upload error:", idUploadError);
-    } else {
-      const { data: urlData } = supabase.storage.from("provider-ids").getPublicUrl(path);
-      idDocumentUrl = urlData.publicUrl;
-    }
-  }
+const idDocumentUrl = formData.get("uploadedIdUrl") as string | undefined ?? undefined;
 
   const payload = {
     slug,

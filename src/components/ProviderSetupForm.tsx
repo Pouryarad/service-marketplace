@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { saveProviderProfile } from "@/lib/actions";
+import { uploadFileDirect } from "@/lib/uploadFile";
 import { X, Plus, ChevronDown, ChevronRight, ChevronLeft, Sparkles } from "lucide-react";
 import type { Provider } from "@/lib/types";
 import Image from "next/image";
@@ -301,8 +302,33 @@ export default function ProviderSetupForm({
   const handleBack = () => setStep((s) => s - 1);
 
   const handleSubmit = async () => {
-    if (!validateStep(3)) return;
+    if (!validateStep(step)) return;
     setSaving(true);
+
+    // Upload files directly to Supabase Storage
+    const supabase = (await import("@supabase/ssr")).createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id ?? "";
+
+    let uploadedProfilePhotoUrl: string | null = null;
+    let uploadedIdUrl: string | null = null;
+    const uploadedPortfolioUrls: string[] = [];
+
+    if (profilePhotoFile) {
+      uploadedProfilePhotoUrl = await uploadFileDirect(profilePhotoFile, "provider-media", userId, "profile");
+    }
+
+    if (idFile) {
+      uploadedIdUrl = await uploadFileDirect(idFile, "provider-ids", userId, "id");
+    }
+
+    for (const f of portfolioFiles) {
+      const url = await uploadFileDirect(f, "provider-media", userId, "portfolio");
+      if (url) uploadedPortfolioUrls.push(url);
+    }
 
     const formData = new FormData();
     formData.set("fullName", fullName);
@@ -320,11 +346,9 @@ export default function ProviderSetupForm({
       portfolioPreviews.filter((url) => url.startsWith("http") && !url.startsWith("blob:"))
     ));
 
-    const resizedProfile = profilePhotoFile ? await resizeImage(profilePhotoFile) : null;
-    const resizedId = idFile ? await resizeImage(idFile, 1600, 0.88) : null;
-    if (resizedProfile) formData.set("profilePhoto", resizedProfile);
-    portfolioFiles.forEach((f) => formData.append("portfolioPhotos", f));
-    if (resizedId) formData.set("idDocument", resizedId);
+    if (uploadedProfilePhotoUrl) formData.set("uploadedProfilePhotoUrl", uploadedProfilePhotoUrl);
+    if (uploadedIdUrl) formData.set("uploadedIdUrl", uploadedIdUrl);
+    uploadedPortfolioUrls.forEach((url) => formData.append("uploadedPortfolioUrls", url));
 
     try {
       await saveProviderProfile(formData);
