@@ -317,9 +317,11 @@ export default function ProviderSetupForm({
           : "/provider/dashboard?profile=saved";
         return;
       }
-      console.error("Save failed:", err);
-      setSaving(false);
-      alert("Something went wrong. Please try again.");
+      if (!String(err).includes("NEXT_REDIRECT")) {
+        console.error("Save failed:", err);
+        setSaving(false);
+        alert("Something went wrong. Please try again.");
+      }
     }
   };
 
