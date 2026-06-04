@@ -335,7 +335,12 @@ export default function ProviderSetupForm({
       }
       console.error("Save failed:", err, err?.digest, err?.message);
       setSaving(false);
-      alert("Something went wrong. Please try again.");
+      const msg = err?.message ?? String(err);
+      if (msg.includes("body exceeded") || msg.includes("too large") || msg.includes("413")) {
+        alert("Your file is too large. Please use a smaller photo and try again.");
+      } else {
+        alert("Something went wrong. Please try again.");
+      }
     }
   };
 
