@@ -311,9 +311,9 @@ export default function ProviderSetupForm({
       if (errStr.includes("NEXT_REDIRECT")) {
         return;
       }
-      console.error("Save failed:", err);
+      console.error("Save failed:", err, err?.digest, err?.message);
       setSaving(false);
-      alert("Something went wrong. Please try again.");
+      alert(String(err) + " | " + (err?.digest ?? "") + " | " + (err?.message ?? ""));
     }
   };
 
