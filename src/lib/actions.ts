@@ -273,10 +273,15 @@ export async function saveProviderProfile(formData: FormData) {
     redirect("/provider/dashboard?profile=saved");
   }
 
-  await supabase.from("providers").upsert(
+  const { error: upsertError } = await supabase.from("providers").upsert(
     { user_id: data.user.id, ...payload, ...(existing ? {} : { approved: false, subscription_status: "pending" }) },
     { onConflict: "user_id" }
   );
+
+  if (upsertError) {
+    console.error("UPSERT FAILED:", JSON.stringify(upsertError));
+    throw new Error("Upsert failed: " + upsertError.message);
+  }
 
   if (!existing) {
     const refCode = "REF" + Math.random().toString(36).substring(2, 8).toUpperCase();
