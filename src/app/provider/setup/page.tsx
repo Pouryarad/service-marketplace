@@ -97,7 +97,7 @@ export default async function ProviderSetupPage({
               categoriesJson={JSON.stringify(categories)}
             />
           ) : profileComplete ? (
-            <PaymentTab provider={provider} />
+            <PaymentTab provider={provider ? { ...provider, approved: (provider as any).approved } : null} />
           ) : null}
         </div>
 
@@ -106,7 +106,7 @@ export default async function ProviderSetupPage({
   );
 }
 
-function PaymentTab({ provider }: { provider: { subscriptionStatus: string; adminGranted?: boolean; adminGrantedExpiresAt?: string | null; trialEndsAt?: string | null } | null }) {
+function PaymentTab({ provider }: { provider: { subscriptionStatus: string; adminGranted?: boolean; adminGrantedExpiresAt?: string | null; trialEndsAt?: string | null; approved?: boolean } | null }) {
   const isSubscribed = provider?.subscriptionStatus === "active" || provider?.subscriptionStatus === "trialing";
   const isTrialing = provider?.subscriptionStatus === "trialing";
   const isAdminGranted = provider?.adminGranted;
@@ -129,7 +129,18 @@ function PaymentTab({ provider }: { provider: { subscriptionStatus: string; admi
       </div>
     );
   }
-
+  if (!provider?.approved && !isAdminGranted) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-2xl">⏳</p>
+        <h2 className="mt-2 text-lg font-bold text-[#1f1f1f]">Pending Approval</h2>
+        <p className="mt-2 text-sm text-[#6b7280] max-w-sm mx-auto">
+          Your profile is under review. Once approved by our team, you'll be able to activate your subscription and go live.
+        </p>
+        <p className="mt-3 text-xs text-[#9ca3af]">This usually takes less than 24 hours.</p>
+      </div>
+    );
+  }
   if (isSubscribed) {
     return (
       <div className="text-center py-8">
@@ -159,10 +170,10 @@ function PaymentTab({ provider }: { provider: { subscriptionStatus: string; admi
         <div className="flex items-center justify-between">
           <div>
             <p className="font-bold text-[#1f1f1f]">ProFindly Early Bird</p>
-            <p className="text-xs text-[#6b7280] mt-0.5">First 100 providers — locked in forever</p>
-          </div>
+            <p className="text-xs text-[#6b7280] mt-0.5">Early Bird — locked in forever</p>
+         </div>
           <div className="text-right">
-            <p className="text-2xl font-bold text-[#2563eb]">$10.99</p>
+            <p className="text-2xl font-bold text-[#2563eb]">$24.99</p>
             <p className="text-xs text-[#9ca3af]">CAD / month</p>
           </div>
         </div>
