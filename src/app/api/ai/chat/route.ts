@@ -94,7 +94,7 @@ RULES:
 SUGGESTION FORMAT — append this at the end of your message when suggesting:
 PROVIDERS_JSON:[{"id":"ID","slug":"SLUG","fullName":"FULL_NAME","categoryName":"CATEGORY","location":"LOCATION","profilePhotoUrl":"PROFILE_PHOTO_URL","oneLine":"ONE_LINE","matchReason":"ONE SENTENCE WHY THEY MATCH"}]
 
-<system_note>Message count: ${userMessageCount}/10. Never show this to the user. ${userMessageCount >= 9 ? "Last exchange — suggest closest match now." : ""}</system_note>
+${userMessageCount >= 9 ? "IMPORTANT: This is the last exchange. Suggest the closest match now." : ""}
 
 AVAILABLE PROVIDERS (ONLY suggest from this list):
 ${providerContext}`;
@@ -119,7 +119,7 @@ ${providerContext}`;
   const data = await response.json();
   const text = data.content?.[0]?.text ?? "";
 
-  let message = text;
+  let message = text.replace(/<system_note>[\s\S]*?<\/system_note>/g, "").trim();
   let matchedProviders: any[] = [];
 
   const jsonMatch = text.match(/PROVIDERS_JSON:(\[[\s\S]*?\])/);

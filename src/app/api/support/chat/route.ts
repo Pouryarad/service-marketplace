@@ -77,6 +77,8 @@ After confirmation respond with exactly: SUBMIT_TICKET:{"name":"...","email":"..
   const data = await response.json();
   const text = data.content?.[0]?.text ?? "";
 
+  const cleanText = text.replace(/<system_note>[\s\S]*?<\/system_note>/g, "").trim();
+
   const ticketMatch = text.match(/SUBMIT_TICKET:(\{.*\})/);
   if (ticketMatch) {
     try {
