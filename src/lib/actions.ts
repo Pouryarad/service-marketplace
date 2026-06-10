@@ -369,15 +369,18 @@ export async function requestAccountDelete() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
+  const cookieStore = await cookies();
+  const role = cookieStore.get("user-role")?.value;
+
   await sendEmailNotification({
     to: "info@profindly.com",
     subject: "Account Deletion Request",
-    html: `<p>User requested account deletion:</p><p>Email: ${user.email}</p><p>User ID: ${user.id}</p>`,
+    html: `<p>User requested account deletion:</p><p>Email: ${user.email}</p><p>User ID: ${user.id}</p><p>Role: ${role ?? "unknown"}</p>`,
   });
 
-  const cookieStore = await cookies();
-  const role = cookieStore.get("user-role")?.value;
-  redirect(role === "provider" ? "/provider/setup?delete=requested" : "/dashboard/settings?delete=requested");
+  await supabase.auth.signOut();
+
+  redirect("/?deleted=requested");
 }
 
 export async function createStripeCheckout() {
