@@ -375,7 +375,9 @@ export async function requestAccountDelete() {
     html: `<p>User requested account deletion:</p><p>Email: ${user.email}</p><p>User ID: ${user.id}</p>`,
   });
 
-  redirect("/dashboard/settings?delete=requested");
+  const cookieStore = await cookies();
+  const role = cookieStore.get("user-role")?.value;
+  redirect(role === "provider" ? "/provider/setup?delete=requested" : "/dashboard/settings?delete=requested");
 }
 
 export async function createStripeCheckout() {

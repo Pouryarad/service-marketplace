@@ -6,9 +6,9 @@ import { ArrowLeft } from "lucide-react";
 export default async function ProviderSetupPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; delete?: string }>;
 }) {
-  const { tab } = await searchParams;
+  const { tab, delete: deleteStatus } = await searchParams;
   const activeTab = tab === "payment" ? "payment" : "profile";
 
   const [provider, user, categories] = await Promise.all([
@@ -19,7 +19,6 @@ export default async function ProviderSetupPage({
 
   const isFirstTime = !provider;
 
-  // Check if profile is complete enough to unlock payment tab
   const profileComplete = !!(
     provider?.fullName &&
     provider?.categorySlug &&
@@ -34,6 +33,12 @@ export default async function ProviderSetupPage({
   return (
     <main className="min-h-screen bg-[#f3f5f9] overflow-x-hidden">
       <section className="mx-auto w-full max-w-2xl px-4 pb-20 pt-6 sm:px-6">
+
+        {deleteStatus === "requested" && (
+          <div className="mb-4 rounded-xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
+            ✅ Your deletion request has been sent. We'll process it within 48 hours.
+          </div>
+        )}
 
         {/* Header */}
         <div className="flex items-center gap-3">
@@ -61,22 +66,24 @@ export default async function ProviderSetupPage({
         <div className="mt-6 flex gap-1 rounded-full bg-white p-1 shadow-sm w-fit">
           <Link
             href="/provider/setup?tab=profile"
-            className={`px-5 py-2 rounded-full text-sm font-bold transition ${activeTab === "profile"
-              ? "bg-[#2563eb] text-white"
-              : "text-[#6b7280] hover:text-[#1f1f1f]"
-              }`}
+            className={`px-5 py-2 rounded-full text-sm font-bold transition ${
+              activeTab === "profile"
+                ? "bg-[#2563eb] text-white"
+                : "text-[#6b7280] hover:text-[#1f1f1f]"
+            }`}
           >
             Edit Profile
           </Link>
           <div className={`relative ${!profileComplete ? "cursor-not-allowed" : ""}`}>
             <Link
               href={profileComplete ? "/provider/setup?tab=payment" : "#"}
-              className={`px-5 py-2 rounded-full text-sm font-bold transition flex items-center gap-2 ${activeTab === "payment"
-                ? "bg-[#2563eb] text-white"
-                : profileComplete
+              className={`px-5 py-2 rounded-full text-sm font-bold transition flex items-center gap-2 ${
+                activeTab === "payment"
+                  ? "bg-[#2563eb] text-white"
+                  : profileComplete
                   ? "text-[#6b7280] hover:text-[#1f1f1f]"
                   : "text-[#d1d5db] pointer-events-none"
-                }`}
+              }`}
             >
               Payment
               {!profileComplete && (
@@ -106,7 +113,15 @@ export default async function ProviderSetupPage({
   );
 }
 
-function PaymentTab({ provider }: { provider: { subscriptionStatus: string; adminGranted?: boolean; adminGrantedExpiresAt?: string | null; trialEndsAt?: string | null; approved?: boolean } | null }) {
+function PaymentTab({ provider }: {
+  provider: {
+    subscriptionStatus: string;
+    adminGranted?: boolean;
+    adminGrantedExpiresAt?: string | null;
+    trialEndsAt?: string | null;
+    approved?: boolean;
+  } | null
+}) {
   const isSubscribed = provider?.subscriptionStatus === "active" || provider?.subscriptionStatus === "trialing";
   const isTrialing = provider?.subscriptionStatus === "trialing";
   const isAdminGranted = provider?.adminGranted;
@@ -129,6 +144,7 @@ function PaymentTab({ provider }: { provider: { subscriptionStatus: string; admi
       </div>
     );
   }
+
   if (!provider?.approved && !isAdminGranted) {
     return (
       <div className="text-center py-8">
@@ -141,11 +157,14 @@ function PaymentTab({ provider }: { provider: { subscriptionStatus: string; admi
       </div>
     );
   }
+
   if (isSubscribed) {
     return (
       <div className="text-center py-8">
         <p className="text-2xl">✅</p>
-        <h2 className="mt-2 text-lg font-bold text-[#1f1f1f]">{isTrialing ? "Free Trial Active" : "You're subscribed"}</h2>
+        <h2 className="mt-2 text-lg font-bold text-[#1f1f1f]">
+          {isTrialing ? "Free Trial Active" : "You're subscribed"}
+        </h2>
         <p className="mt-1 text-sm text-[#6b7280]">
           {isTrialing && provider?.trialEndsAt
             ? `Your free trial ends on ${new Date(provider.trialEndsAt).toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" })}.`
@@ -171,7 +190,7 @@ function PaymentTab({ provider }: { provider: { subscriptionStatus: string; admi
           <div>
             <p className="font-bold text-[#1f1f1f]">ProFindly Early Bird</p>
             <p className="text-xs text-[#6b7280] mt-0.5">Early Bird — locked in forever</p>
-         </div>
+          </div>
           <div className="text-right">
             <p className="text-2xl font-bold text-[#2563eb]">$24.99</p>
             <p className="text-xs text-[#9ca3af]">CAD / month</p>

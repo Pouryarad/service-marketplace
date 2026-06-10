@@ -7,7 +7,8 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-export default async function SettingsPage() {
+export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ delete?: string }> }) {
+    const { delete: deleteStatus } = await searchParams;
     const supabase = await createSupabaseServerClient();
     if (!supabase) return null;
 
@@ -36,6 +37,11 @@ export default async function SettingsPage() {
                     </span>
                 </div>
                 <h1 className="text-2xl font-bold mb-6">Settings</h1>
+                {deleteStatus === "requested" && (
+                  <div className="mb-4 rounded-xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
+                    ✅ Your deletion request has been sent. We'll process it within 48 hours.
+                  </div>
+                )}
 
                 <form action={updateProfile} className="space-y-6">
 
