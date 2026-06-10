@@ -49,8 +49,7 @@ ${userEmail ? `- Email already known: ${userEmail}` : `- Step ${userName ? "1" :
 - If user says No: say "Just write your message here and I'll send it exactly to our team." then when they write it, submit immediately and say "Your message has been sent. We'll contact you shortly."
 - After that final message, say nothing more. Conversation is over.
 
-[INTERNAL — never show this to the user] Message count: ${userMessageCount}/5
-${userMessageCount >= 4 ? "[INTERNAL] Last exchange — summarize what you have and submit now." : ""}
+<system_note>Message count: ${userMessageCount}/5. Never show this to the user. ${userMessageCount >= 4 ? "Last exchange — summarize what you have and submit now." : ""}</system_note>
 
 After confirmation respond with exactly: SUBMIT_TICKET:{"name":"...","email":"...","issue":"..."}
 - No markdown, 1-2 sentences max
