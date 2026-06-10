@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { saveProviderProfile } from "@/lib/actions";
+import { saveProviderProfile, requestAccountDelete } from "@/lib/actions";
 import { uploadFileDirect } from "@/lib/uploadFile";
 import { X, Plus, ChevronDown, ChevronRight, ChevronLeft, Sparkles } from "lucide-react";
 import type { Provider } from "@/lib/types";
@@ -376,7 +376,22 @@ export default function ProviderSetupForm({
   if (!isFirstTime) {
     return (
       <>
-        {showDeleteModal && <DeleteAccountModal onClose={() => setShowDeleteModal(false)} />}
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-[12px] p-6 w-full max-w-sm space-y-4">
+              <h2 className="text-lg font-bold">Delete Account</h2>
+              <p className="text-sm text-gray-600">Are you sure you want to delete your account and data?</p>
+              <form action={requestAccountDelete} className="space-y-3">
+                <button type="submit" className="w-full rounded-full bg-red-600 text-white py-2 font-semibold">
+                  Request Account Deletion
+                </button>
+                <button type="button" onClick={() => setShowDeleteModal(false)} className="w-full rounded-full bg-[#2563eb] text-white py-2">
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-8">
 
