@@ -102,15 +102,10 @@ export default function BottomNav({
                                 </div>
                             }
                         />
-                        <AuthModal
-                            role="provider"
-                            trigger={
-                                <div className="flex flex-col items-center text-xs text-[#ff8a00] font-semibold">
-                                    <LayoutDashboard size={20} />
-                                    Provider
-                                </div>
-                            }
-                        />
+                        <Link href="/provider/start" className="flex flex-col items-center text-xs text-[#ff8a00] font-semibold">
+                            <LayoutDashboard size={20} />
+                            Get Clients
+                        </Link>
                     </>
                 ) : (
                     <form action="/auth/logout" method="post" onSubmit={() => localStorage.clear()} className="flex flex-col items-center text-xs text-gray-400">
