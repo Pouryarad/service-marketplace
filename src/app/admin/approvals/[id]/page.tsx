@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getProvider } from "@/lib/data";
-import { updateProviderStatus } from "@/lib/actions";
+import { updateProviderStatus, approvePendingMedia } from "@/lib/actions";
 import Image from "next/image";
 import Link from "next/link";
 import { createSupabaseServiceClient } from "@/lib/supabase/server";
@@ -219,7 +219,7 @@ export default async function ApprovalDetailPage({ params }: { params: Promise<{
 
 function ApprovePendingButton({ providerId, field, label }: { providerId: string; field: string; label: string }) {
   return (
-    <form action="/api/admin/approve-media" method="POST">
+    <form action={approvePendingMedia}>
       <input type="hidden" name="providerId" value={providerId} />
       <input type="hidden" name="field" value={field} />
       <button className="flex items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-bold text-white active:scale-95 transition-all">

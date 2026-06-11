@@ -13,6 +13,7 @@ import {
   sendReferralInviteEmail,
   sendWelcomeEmail,
   sendAdminNotificationEmail,
+  sendMediaApprovedEmail,
 } from "@/lib/email";
 import Stripe from "stripe";
 
@@ -524,4 +525,67 @@ export async function sendReferralInvite(formData: FormData) {
 
   await sendReferralInviteEmail({ toEmail, referrerName, referralCode });
   return { success: true };
+}
+
+export async function approvePendingMedia(formData: FormData) {
+  "use server";
+  const service = createSupabaseServiceClient();
+  const providerId = Number(formData.get("providerId"));
+  const field = String(formData.get("field"));
+
+  const { data: provider } = await service
+    .from("providers")
+    .select("email, full_name, pending_profile_photo_url, pending_portfolio_photo_urls, pending_video_url, pending_category_slug")
+    .eq("id", providerId)
+    .maybeSingle();
+
+  if (!provider) return;
+
+  const updates: Record<string, unknown> = {};
+  const approvedItems: string[] = [];
+
+  if (field === "profile_photo" && provider.pending_profile_photo_url) {
+    updates.profile_photo_url = provider.pending_profile_photo_url;
+    updates.pending_profile_photo_url = null;
+    approvedItems.push("Profile photo");
+  }
+
+  if (field === "portfolio" && provider.pending_portfolio_photo_urls) {
+    updates.portfolio_photo_urls = provider.pending_portfolio_photo_urls;
+    updates.pending_portfolio_photo_urls = null;
+    approvedItems.push("Portfolio photos");
+  }
+
+  if (field === "video" && provider.pending_video_url) {
+    updates.video_url = provider.pending_video_url;
+    updates.pending_video_url = null;
+    approvedItems.push("Intro video");
+  }
+
+  if (field === "category" && provider.pending_category_slug) {
+    updates.category_slug = provider.pending_category_slug;
+    updates.pending_category_slug = null;
+    updates.category_approved = true;
+    approvedItems.push(`Category: ${provider.pending_category_slug}`);
+
+    const slug = provider.pending_category_slug;
+    const name = slug.split("-").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+    const { data: existing } = await service.from("categories").select("id").eq("slug", slug).maybeSingle();
+    if (!existing) {
+      await service.from("categories").insert({ slug, name });
+    }
+  }
+
+  await service.from("providers").update(updates).eq("id", providerId);
+
+  if (provider.email && approvedItems.length > 0) {
+    await sendMediaApprovedEmail({
+      providerEmail: provider.email,
+      providerName: provider.full_name,
+      items: approvedItems,
+    });
+  }
+
+  revalidatePath(`/admin/approvals/${providerId}`);
+  redirect(`/admin/approvals/${providerId}`);
 }
