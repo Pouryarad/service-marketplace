@@ -26,8 +26,9 @@ export default function SetupRolePage() {
         .eq("id", user.id)
         .maybeSingle();
 
-      if (existing?.role && existing.role !== pendingRole && existing.role !== "admin") {
-        setConflict(existing.role as "client" | "provider");
+      if (existing?.role && existing.role !== "admin") {
+        document.cookie = `user-role=${existing.role}; path=/; max-age=${60 * 60 * 24 * 30}`;
+        window.location.replace(existing.role === "provider" ? "/provider/dashboard" : "/dashboard");
         return;
       }
 
