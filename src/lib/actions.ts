@@ -139,7 +139,11 @@ export async function saveProviderProfile(formData: FormData) {
   const videoUrl = String(formData.get("videoUrl") ?? "").trim() || null;
   const businessName = String(formData.get("businessName") ?? "").trim() || null;
 
-  if (!fullName || !categorySlug || !email || !phone || !location || !oneLine) {
+  const uploadedProfilePhotoUrl2 = String(formData.get("uploadedProfilePhotoUrl") ?? "");
+  const existingProfilePhotoUrl2 = String(formData.get("existingProfilePhotoUrl") ?? "");
+  const hasPhoto = !!uploadedProfilePhotoUrl2 || !!existingProfilePhotoUrl2;
+
+  if (!fullName || !categorySlug || !email || !phone || !location || !oneLine || !hasPhoto) {
     redirect("/provider/setup?error=missing-required");
   }
 
@@ -151,7 +155,7 @@ export async function saveProviderProfile(formData: FormData) {
 
   const storageClient = isImpersonating ? createSupabaseServiceClient() : supabase;
 
-// Photos are uploaded client-side — just read the URLs
+  // Photos are uploaded client-side — just read the URLs
   let profilePhotoUrl = String(formData.get("existingProfilePhotoUrl") ?? "");
   let pendingProfilePhotoUrl: string | null = null;
   const uploadedProfilePhotoUrl = formData.get("uploadedProfilePhotoUrl") as string | null;
@@ -192,7 +196,7 @@ export async function saveProviderProfile(formData: FormData) {
   const slug = existingSlug?.slug ?? `${baseSlug}-${data.user.id.slice(0, 8)}`;
 
   // ID document
-const idDocumentUrl = formData.get("uploadedIdUrl") as string | undefined ?? undefined;
+  const idDocumentUrl = formData.get("uploadedIdUrl") as string | undefined ?? undefined;
 
   const payload = {
     slug,
