@@ -355,11 +355,16 @@ export default function ProviderSetupForm({
     if (uploadedIdUrl) formData.set("uploadedIdUrl", uploadedIdUrl);
     uploadedPortfolioUrls.forEach((url) => formData.append("uploadedPortfolioUrls", url));
 
-    try {
+try {
       await saveProviderProfile(formData);
     } catch (err: any) {
-      const errStr = String(err) + (err?.digest ?? "") + (err?.message ?? "");
-      if (errStr.includes("NEXT_REDIRECT")) {
+      const errStr = String(err) + (err?.digest ?? "") + (err?.message ?? "") + JSON.stringify(err);
+      if (
+        errStr.includes("NEXT_REDIRECT") ||
+        errStr.includes("redirect") ||
+        err?.digest?.startsWith("NEXT") ||
+        (typeof err === "object" && err !== null && "$$typeof" in err)
+      ) {
         return;
       }
       console.error("Save failed:", err, err?.digest, err?.message);
