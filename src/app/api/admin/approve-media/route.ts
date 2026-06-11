@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
     approvedItems.push("Intro video");
   }
 
+  console.log("APPROVE MEDIA FIELD:", field, "PENDING CATEGORY:", provider.pending_category_slug);
   if (field === "category" && provider.pending_category_slug) {
     updates.category_slug = provider.pending_category_slug;
     updates.pending_category_slug = null;
