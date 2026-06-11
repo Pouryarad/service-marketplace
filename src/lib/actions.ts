@@ -129,7 +129,7 @@ export async function saveProviderProfile(formData: FormData) {
 
   const fullName = String(formData.get("fullName") ?? "").trim();
   const rawCategory = String(formData.get("categorySlug") ?? "").trim();
-  const categorySlug = rawCategory.toLowerCase().replace(/\s+/g, "-");
+  const categorySlug = rawCategory.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const email = String(formData.get("email") ?? data.user.email ?? "");
   const phone = String(formData.get("phone") ?? "");
   const location = String(formData.get("location") ?? "");
