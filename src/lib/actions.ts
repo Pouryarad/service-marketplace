@@ -143,8 +143,18 @@ export async function saveProviderProfile(formData: FormData) {
   const existingProfilePhotoUrl2 = String(formData.get("existingProfilePhotoUrl") ?? "");
   const hasPhoto = !!uploadedProfilePhotoUrl2 || !!existingProfilePhotoUrl2;
 
-  if (!fullName || !categorySlug || !email || !phone || !location || !oneLine || !hasPhoto) {
-    redirect("/provider/setup?error=missing-required");
+  const missingFields = [];
+  if (!fullName) missingFields.push("fullName");
+  if (!categorySlug) missingFields.push("categorySlug");
+  if (!email) missingFields.push("email");
+  if (!phone) missingFields.push("phone");
+  if (!location) missingFields.push("location");
+  if (!oneLine) missingFields.push("oneLine");
+  if (!hasPhoto) missingFields.push("photo");
+
+  if (missingFields.length > 0) {
+    console.error("MISSING FIELDS:", missingFields.join(", "));
+    redirect(`/provider/setup?error=missing-required&missing=${missingFields.join(",")}`);
   }
 
   const { data: existing } = await supabase
