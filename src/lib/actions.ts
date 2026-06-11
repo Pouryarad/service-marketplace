@@ -188,7 +188,8 @@ export async function saveProviderProfile(formData: FormData) {
   const pendingPortfolioUrls = uploadedPortfolioUrls.length > 0 ? uploadedPortfolioUrls : null;
 
   // Category approval
-  const isNewCategory = false; // For simplicity, we're not treating category changes as new for now. Adjust as needed.
+  const knownCategories = ["accountant", "car-dealer", "immigration-consultant", "insurance-broker", "lawyer", "mortgage-broker", "realtor", "therapist"];
+  const isNewCategory = !knownCategories.includes(categorySlug);
 
   const pendingCategorySlug = isNewCategory ? categorySlug : null;
   const finalCategorySlug = isNewCategory ? (existing?.category_slug ?? categorySlug) : categorySlug;
