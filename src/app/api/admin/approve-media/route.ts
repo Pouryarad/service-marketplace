@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServerClient, createSupabaseServiceClient } from "@/lib/supabase/server";
 import { sendMediaApprovedEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
@@ -48,9 +48,10 @@ export async function POST(req: NextRequest) {
     // Auto-insert into categories table if not already there
     const slug = provider.pending_category_slug;
     const name = slug.split("-").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-    const { data: existing } = await supabase.from("categories").select("id").eq("slug", slug).maybeSingle();
+    const service = createSupabaseServiceClient();
+    const { data: existing } = await service.from("categories").select("id").eq("slug", slug).maybeSingle();
     if (!existing) {
-      await supabase.from("categories").insert({ slug, name });
+      await service.from("categories").insert({ slug, name });
     }
   }
 
